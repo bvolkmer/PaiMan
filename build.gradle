@@ -2,22 +2,29 @@ group 'de.x4fyr'
 version '0.1'
 
 buildscript {
-    ext.kotlin_version = '1.1.0-beta-22'
-
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
-apply plugin: 'kotlin'
 
-repositories {
-    mavenCentral()
-}
+ext.gitVersioner = [
+        defaultBranch           : "master",  // default "master"
+        stableBranches          : [], // default [], the feature branch postfix (-dm4(6)) will not be appended on stable branches, all commits are included into the version number calculation
+        yearFactor              : 1000,       // default "1000", increasing every 8.57h
+        snapshotEnabled         : true,      // default true, the "-SNAPSHOT" postfix
+        localChangesCountEnabled: false,       // default true, the (<commitCount>) before -SNAPSHOT
+        shortName: { gitVersion ->            // optional closure to build a short name
+            // allows you to add your own short name logic
+            // All properties from gitVersion are available
+            // can be used for CI `System.getenv("BUILD_NUMBER")`
 
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-}
+            // i.e. use short sha1
+            return gitVersion.branchName// .commit.subSequence(0, 7)
+        }
+]
+apply from: './versioner.gradle'
+project.version += ".$gitVersionName"
+println("version: $project.version")

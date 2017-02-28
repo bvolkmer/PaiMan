@@ -1,0 +1,43 @@
+apply plugin: 'kotlin'
+apply plugin: 'idea'
+
+group parent.project.group
+version parent.project.version
+
+buildscript {
+    ext.kotlin_version = '1.1.0-rc-93'
+    repositories {
+        mavenCentral()
+        maven {
+            url  "http://dl.bintray.com/kotlin/kotlin-eap-1.1"
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+    test.java.srcDirs += 'src/test/kotlin'
+    api
+    api.java.srcDirs += 'src/api/kotlin'
+    domain
+    domain.java.srcDirs += 'src/domain/kotlin'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url  "http://dl.bintray.com/kotlin/kotlin-eap-1.1"
+    }
+}
+
+dependencies {
+    compile sourceSets.api.output
+    compile sourceSets.domain.output
+    apiCompile sourceSets.domain.output
+    apiCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    domainCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}

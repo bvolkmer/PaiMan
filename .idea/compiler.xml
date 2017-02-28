@@ -18,5 +18,11 @@
         <processorPath useClasspath="true" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="libpaiman_api" target="1.8" />
+      <module name="libpaiman_domain" target="1.8" />
+      <module name="libpaiman_main" target="1.8" />
+      <module name="libpaiman_test" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
