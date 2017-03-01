@@ -136,3 +136,4 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 /.idea/
+/versioner.gradle
