@@ -1,8 +1,9 @@
 package de.x4fyr.paiman.domain
 
-import java.time.LocalDate
+import de.x4fyr.paiman.domain.dateTime.LocalDate
+
 
 /**
  * Selling information container.
  */
-data class SellingInformation(val purchaser: Purchaser, val date: LocalDate?, val price: Long)
+data class SellingInformation(val purchaser: Purchaser, val date: LocalDate?, val price: Double = 0.0)

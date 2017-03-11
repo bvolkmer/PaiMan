@@ -4,46 +4,34 @@ import de.x4fyr.paiman.domain.Painting
 import de.x4fyr.paiman.domain.Picture
 import de.x4fyr.paiman.domain.Purchaser
 import de.x4fyr.paiman.domain.SellingInformation
-import java.time.LocalDate
+import de.x4fyr.paiman.domain.dateTime.LocalDate
 
 /**
  * Service for querying, creating, removing and manipulating paintings.
  */
 interface PaintingService {
 
-    fun getAll(): Set<Painting>
 
-    fun getById(id: Int): Painting
+    fun composeNewPainting(mainPicture: Picture,
+                           wip: Set<Picture>,
+                           reference: Set<Picture>,
+                           sellingInfo: SellingInformation,
+                           tags: Set<String>): Painting
 
-    fun getByTag(tag: String): Set<Painting>
+    fun replaceMainPicture(painting: Painting, newPicture: Picture, moveOldToWip: Boolean): Painting
 
-    fun getByTagsOr(tags: Set<String>): Set<Painting>
+    fun sellPainting(painting: Painting, purchaser: Purchaser, date: LocalDate?, price: Double): Painting
 
-    fun getByTagsAnd(tags: Set<String>): Set<Painting>
+    fun addWipPicture(painting: Painting, images: Set<Picture>): Painting
 
-    fun getByPurchaser(purchaser: Purchaser): Set<Painting>
-
-    fun getByDate(date: LocalDate): Set<Painting>
-
-    fun remove(painting: Painting)
-
-    fun createNewPainting(mainImage: Picture,
-                          wip: Set<Picture>?,
-                          reference: Set<Picture>?,
-                          sellingInfo: SellingInformation?,
-                          tags: Set<String>): Painting
-
-    fun replaceMainPicture(painting: Painting, newPicture: Picture, moveOldToWip: Boolean = true): Painting
-
-    fun sellPainting(painting: Painting,
-                     purchaser: Purchaser,
-                     date: LocalDate? = LocalDate.now(),
-                     price: Long = 0): Painting
-
-    fun addWipImages(painting: Painting, images: Set<Picture>): Painting
+    fun removeWipPicture(painting: Painting, images: Set<Picture>): Painting
 
     fun addReferences(painting: Painting, references: Set<Picture>): Painting
 
-    fun replaceTags(painting: Painting, tags: Set<String>): Painting
+    fun removeReferences(painting: Painting, references: Set<Picture>): Painting
+
+    fun addTags(painting: Painting, tags: Set<String>): Painting
+
+    fun removeTags(painting: Painting, tags: Set<String>): Painting
 
 }

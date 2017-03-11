@@ -5,7 +5,7 @@ group parent.project.group
 version parent.project.version
 
 buildscript {
-    ext.kotlin_version = '1.1.0-rc-91'
+    ext.kotlin_version = '1.1.0'
     repositories {
         mavenCentral()
         maven {
@@ -36,8 +36,12 @@ dependencies {
     compile sourceSets.api.output
     compile sourceSets.domain.output
     apiCompile sourceSets.domain.output
-    apiCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    domainCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    apiCompile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
+    apiCompile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '0.12'
+    domainCompile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
+    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '0.12'
     testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '2.6.0'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.7.13'
 }
