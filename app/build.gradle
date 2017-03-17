@@ -1,0 +1,37 @@
+apply plugin: 'org.javafxports.jfxmobile'
+apply plugin: 'kotlin'
+
+mainClassName = 'de.x4fyr.paiman.app.PaimanApp'
+version = '8u40'
+
+repositories {
+    jcenter()
+}
+
+jfxmobile {
+    ios {
+        forceLinkClasses = ['ensemble.**.*']
+    }
+    android {
+        applicationPackage = 'de.x4fyr.paiman.app'
+        compileSdkVersion = 25
+        targetSdkVersion = 25
+        minSdkVersion = 19
+    }
+}
+dependencies {
+    androidCompile project(":libpaiman")
+    compile project(":libpaiman")
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+}
+buildscript {
+    ext.kotlin_version = '1.1.1'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+

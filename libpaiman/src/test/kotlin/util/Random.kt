@@ -1,12 +1,11 @@
 package util
 
 import net.bytebuddy.utility.RandomString
-import java.nio.charset.Charset
 import java.util.Random
 
 /**
  * Frequent used random extensions
- * @author x4fyr
+ * @author de.x4fyr
  * Created on 3/5/17.
  */
 

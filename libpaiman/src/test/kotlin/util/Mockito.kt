@@ -6,7 +6,7 @@ import org.mockito.ArgumentMatchers
 
 /**
  * Mockito calls that return null tricked to be non null for non null parameter
- * @author x4fyr
+ * @author de.x4fyr
  * Created on 3/5/17.
  */
 

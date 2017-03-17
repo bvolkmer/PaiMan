@@ -1,2 +1,3 @@
 rootProject.name = 'paiman'
-include 'libpaiman'
+include ':libpaiman', ':app', ':android'
+
