@@ -1,9 +1,8 @@
 package de.x4fyr.paiman.lib.services
 
-import de.x4fyr.paiman.lib.domain.Painting
-import de.x4fyr.paiman.lib.domain.Picture
-import de.x4fyr.paiman.lib.domain.Purchaser
-import de.x4fyr.paiman.lib.domain.SellingInformation
+import com.couchbase.lite.QueryEnumerator
+import de.x4fyr.paiman.lib.domain.*
+import java.io.InputStream
 import java.time.LocalDate
 
 /**
@@ -12,26 +11,38 @@ import java.time.LocalDate
 interface PaintingService {
 
 
-    fun composeNewPainting(mainPicture: Picture,
-                           wip: Set<Picture>,
-                           reference: Set<Picture>,
-                           sellingInfo: SellingInformation,
-                           tags: Set<String>): Painting
-
-    fun replaceMainPicture(painting: Painting, newPicture: Picture, moveOldToWip: Boolean): Painting
-
-    fun sellPainting(painting: Painting, purchaser: Purchaser, date: LocalDate?, price: Double): Painting
-
-    fun addWipPicture(painting: Painting, images: Set<Picture>): Painting
-
-    fun removeWipPicture(painting: Painting, images: Set<Picture>): Painting
-
-    fun addReferences(painting: Painting, references: Set<Picture>): Painting
-
-    fun removeReferences(painting: Painting, references: Set<Picture>): Painting
-
-    fun addTags(painting: Painting, tags: Set<String>): Painting
-
-    fun removeTags(painting: Painting, tags: Set<String>): Painting
-
+    @Throws(ServiceException::class)
+    fun composeNewPainting(title: String,
+                           mainPicture: InputStream,
+                           wip: Set<InputStream> = setOf(),
+                           reference: Set<InputStream> = setOf(),
+                           sellingInfo: SellingInformation? = null,
+                           tags: Set<String> = setOf()): SavedPainting
+    @Throws(ServiceException::class)
+    fun changePainting(painting: SavedPainting): SavedPainting
+    @Throws(ServiceException::class)
+    fun replaceMainPicture(painting: SavedPainting, newPicture: InputStream, moveOldToWip: Boolean): SavedPainting
+    @Throws(ServiceException::class)
+    fun sellPainting(painting: SavedPainting, purchaser: Purchaser, date: LocalDate, price: Double): SavedPainting
+    @Throws(ServiceException::class)
+    fun addWipPicture(painting: SavedPainting, images: Set<InputStream>): SavedPainting
+    @Throws(ServiceException::class)
+    fun removeWipPicture(painting: SavedPainting, images: Set<String>): SavedPainting
+    @Throws(ServiceException::class)
+    fun addReferences(painting: SavedPainting, references: Set<InputStream>): SavedPainting
+    @Throws(ServiceException::class)
+    fun removeReferences(painting: SavedPainting, references: Set<String>): SavedPainting
+    @Throws(ServiceException::class)
+    fun addTags(painting: SavedPainting, tags: Set<String>): SavedPainting
+    @Throws(ServiceException::class)
+    fun removeTags(painting: SavedPainting, tags: Set<String>): SavedPainting
+    @Throws(ServiceException::class)
+    fun get(id: String): SavedPainting
+    @Throws(ServiceException::class)
+    fun getAll(ids: Set<String>): Set<SavedPainting>
+    @Throws(ServiceException::class)
+    fun getPictureStream(picture: Picture, painting: SavedPainting): InputStream
+    @Throws(ServiceException::class)
+    fun getAllPictureStreams(pictures: Set<Picture>, painting: SavedPainting): Set<InputStream>
+    fun getFromQueryResult(queryEnumerator: QueryEnumerator): Set<SavedPainting>
 }

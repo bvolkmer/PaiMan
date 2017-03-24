@@ -34,10 +34,20 @@ apply from: './versioner.gradle'
 project.version += ".$gitVersionName"
 println("version: $project.version")
 
+apply plugin: 'idea'
 
 allprojects {
     repositories {
         mavenCentral()
         jcenter()
+        flatDir {
+            dirs 'libs'
+        }
+    }
+    idea {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
     }
 }

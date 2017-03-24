@@ -1,0 +1,3 @@
+[submodule "tornadofx"]
+	path = tornadofx
+	url = https://github.com/edvin/tornadofx
