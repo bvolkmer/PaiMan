@@ -41,10 +41,13 @@ dependencies {
     androidCompile project(":libpaiman")
     androidCompile 'com.couchbase.lite:couchbase-lite-android:1.4.0'
     desktopCompile 'com.couchbase.lite:couchbase-lite-java:1.4.0'
+    desktopCompile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.0'
     compile project(":libpaiman")
+    compile project(":fontAwesomeFx")
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    compile files("${parent.projectDir.toString()}/libs/tornadofx-1.7.1-SNAPSHOT.jar")
+    compile "org.glassfish:javax.json:1.0.4"
+    compile files("${parent.projectDir.toString()}/libs/tornadofx-1.7.2-SNAPSHOT.jar")
     runtime "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compileNoRetrolambda 'com.jfoenix:jfoenix:1.0.0'
+    compileNoRetrolambda 'com.jfoenix:jfoenix:1.0.0:retrolambda'
     compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-javafx', version: '0.14'
 }

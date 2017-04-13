@@ -1,14 +1,13 @@
 package de.x4fyr.paiman.lib.provider
 
 import android.app.Activity
-import android.content.Intent
-import android.os.Parcelable
 import android.content.Context
 import android.content.CursorLoader
+import android.content.Intent
 import android.net.Uri
+import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
-import javafx.stage.Stage
 import javafxports.android.FXActivity
 import java.io.File
 
@@ -19,14 +18,15 @@ import java.io.File
  */
 class AndroidPictureProvider : PictureProvider {
 
-    val context: FXActivity = FXActivity.getInstance()
+    private val context: FXActivity = FXActivity.getInstance()
 
     companion object {
-        const val TAG = "ImagePicker"
-        const val TEMP_IMAGE_NAME = "tempImage"
-        const val PICK_IMAGE_ID = 234 //the number doesn't matter
+        private const val TAG = "ImagePicker"
+        private const val TEMP_IMAGE_NAME = "tempImage"
+        private const val PICK_IMAGE_ID = 234 //the number doesn't matter
     }
 
+    /** Action on return of the picker */
     var onReturn: ((url: String) -> Unit)? = null
 
 
@@ -38,12 +38,13 @@ class AndroidPictureProvider : PictureProvider {
 
     }
 
-    fun pickPicture(onReturn: (url: String) -> Unit, stage: Stage) {
+    override fun pickPicture(onReturn: (url: String?) -> Unit) {
         this.onReturn = onReturn
         FXActivity.getInstance().startActivityForResult(getPickImageIntent(), PICK_IMAGE_ID)
     }
 
 
+    /** Create the intent to launch the picker */
     fun getPickImageIntent(): Intent? {
         var chooserIntent: Intent? = null
 

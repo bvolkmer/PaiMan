@@ -1,12 +1,17 @@
 package de.x4fyr.paiman.app
 
-import de.x4fyr.paiman.app.ui.initialLoading.View
-import de.x4fyr.paiman.lib.provider.ServiceProvider
+import de.x4fyr.paiman.app.css.Global
+import de.x4fyr.paiman.app.ui.InitialLoadingView
+import fontAwesomeFx.initialiseFontAwesomeFx
 import tornadofx.*
-import java.util.ServiceLoader
 
 /**
  * @author x4fyr
  * *         Created on 3/16/17.
  */
-class PaimanApp : App(View::class)
+class PaimanApp : App(InitialLoadingView::class, Global::class) {
+
+    init {
+        initialiseFontAwesomeFx(this)
+    }
+}

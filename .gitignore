@@ -97,9 +97,6 @@ freeline_project_description.json
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-### Gradle template
-.gradle
-/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -137,3 +134,4 @@ crashlytics-build.properties
 fabric.properties
 /.idea/
 /versioner.gradle
+/app/data/

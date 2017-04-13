@@ -1,17 +1,18 @@
 package de.x4fyr.paiman.lib.provider
 
-import de.x4fyr.paiman.lib.provider.PictureProvider
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 
 /**
- * Created by x4fyr on 3/24/17.
+ * PictureProvider implementation for desktop opening the default file selection dialog to let the user pick an image
  */
 class DesktopPictureProvider: PictureProvider {
-    override fun pickPicture(stage: Stage, onReturn: (url: String) -> Unit) {
+    private var stage: Stage = tornadofx.DefaultScope.workspace.primaryStage
+
+    override fun pickPicture(onReturn: (url: String?) -> Unit) {
         FileChooser().apply {
             title = "Open picture"
-            onReturn(showOpenDialog(stage).path)
+            onReturn(showOpenDialog(stage)?.path)
         }
     }
 }

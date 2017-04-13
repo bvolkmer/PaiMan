@@ -10,12 +10,13 @@ import java.time.LocalDate
 import java.util.logging.Logger
 
 /**
+ * Main Service implementation combining multiple services
  * @author de.x4fyr
  * Created on 3/1/17.
  */
-internal class MainServiceImpl(var paintingCRUDAdapter: PaintingCRUDAdapter,
+internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdapter,
                                queryAdapter: QueryAdapter,
-                               val pictureCRUDAdapter: PictureCRUDAdapter) :
+                               private val pictureCRUDAdapter: PictureCRUDAdapter) :
         PaintingService,
         QueryService by queryAdapter {
 
@@ -24,7 +25,7 @@ internal class MainServiceImpl(var paintingCRUDAdapter: PaintingCRUDAdapter,
 
     override fun getAll(ids: Set<String>): Set<SavedPainting> = paintingCRUDAdapter.read(ids)
 
-    var LOG = Logger.getLogger(this::class.simpleName)
+    private var LOG = Logger.getLogger(this::class.simpleName)
 
     private val dummyPicture = Picture("dummy")
 
@@ -120,4 +121,12 @@ internal class MainServiceImpl(var paintingCRUDAdapter: PaintingCRUDAdapter,
 
     override fun getFromQueryResult(queryEnumerator: QueryEnumerator): Set<SavedPainting> = getAll(
             queryEnumerator.map { it.key.toString() }.toSet())
+
+    override fun delete(painting: SavedPainting) {
+        paintingCRUDAdapter.delete(id = painting.id)
+    }
+
+    override fun delete(paintingId: String) {
+        paintingCRUDAdapter.delete(id = paintingId)
+    }
 }

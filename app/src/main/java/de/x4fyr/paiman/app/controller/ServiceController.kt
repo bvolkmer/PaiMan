@@ -7,21 +7,24 @@ import de.x4fyr.paiman.lib.services.QueryService
 import tornadofx.*
 import java.io.File
 import java.io.InputStream
-import java.util.ServiceLoader
+import java.util.*
 import java.util.logging.Logger
-import kotlin.reflect.full.isSubclassOf
 
 /**
- * Created by x4fyr on 3/20/17.
+ * Controller managing services through provider
  */
 class ServiceController : Controller() {
 
-    val LOG = Logger.getLogger(this::class.simpleName)
-    val serviceProvider = loadProvider<ServiceProvider>(ServiceProvider::class.java)
-    val pictureProvider = loadProvider<PictureProvider>(PictureProvider::class.java)
+    private val LOG = Logger.getLogger(this::class.simpleName)
+    /** Platform dependent ServiceProvider instance */
+    val serviceProvider by lazy { loadProvider<ServiceProvider>(ServiceProvider::class.java) }
+    /** Platform dependent PictureProvider instance */
+    val pictureProvider by lazy { loadProvider<PictureProvider>(PictureProvider::class.java) }
 
-    val paintingService: PaintingService = serviceProvider.paintingService
-    val queryService: QueryService = serviceProvider.queryService
+    /** PaintingService instance */
+    val paintingService: PaintingService by lazy { serviceProvider.paintingService }
+    /** QueryService instance */
+    val queryService: QueryService by lazy { serviceProvider.queryService }
 
 
     private fun <T : Any> loadProvider(clazz: Class<T>): T {
@@ -37,6 +40,9 @@ class ServiceController : Controller() {
         return result ?: throw RuntimeException("No ServiceProvider found!")
     }
 
+    /** Open a given path as an InputStream
+     * @param path path to open
+     */
     fun pathToInputStream(path: String): InputStream? {
         val pictureFile: File = File(path)
         if (pictureFile.exists() && pictureFile.canRead()) {
