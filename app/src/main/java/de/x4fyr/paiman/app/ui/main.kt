@@ -3,9 +3,9 @@ package de.x4fyr.paiman.app.ui
 import com.jfoenix.controls.JFXRippler
 import de.x4fyr.paiman.app.controller.ImageCacheController
 import de.x4fyr.paiman.app.controller.ServiceController
-import de.x4fyr.paiman.app.controlls.addShortLongPressHandler
-import de.x4fyr.paiman.app.controlls.jfxButton
 import de.x4fyr.paiman.app.css.Global
+import de.x4fyr.paiman.app.utils.addShortLongPressHandler
+import de.x4fyr.paiman.app.utils.jfxButton
 import de.x4fyr.paiman.lib.domain.SavedPainting
 import fontAwesomeFx.FontAwesomeUnicode
 import javafx.beans.property.ListProperty

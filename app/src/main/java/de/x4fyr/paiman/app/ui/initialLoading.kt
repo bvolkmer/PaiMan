@@ -1,7 +1,7 @@
 package de.x4fyr.paiman.app.ui
 
 import de.x4fyr.paiman.app.controller.ServiceController
-import de.x4fyr.paiman.app.controlls.jfxSpinner
+import de.x4fyr.paiman.app.utils.jfxSpinner
 import de.x4fyr.paiman.lib.provider.PictureProvider
 import de.x4fyr.paiman.lib.provider.ServiceProvider
 import javafx.stage.Screen

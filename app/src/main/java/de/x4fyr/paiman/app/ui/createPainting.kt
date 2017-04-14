@@ -1,8 +1,11 @@
 package de.x4fyr.paiman.app.ui
 
 import de.x4fyr.paiman.app.controller.ServiceController
-import de.x4fyr.paiman.app.controlls.*
 import de.x4fyr.paiman.app.css.Global
+import de.x4fyr.paiman.app.utils.StubDecorator
+import de.x4fyr.paiman.app.utils.imageViewPane
+import de.x4fyr.paiman.app.utils.jfxButton
+import de.x4fyr.paiman.app.utils.jfxTextfield
 import fontAwesomeFx.FontAwesomeUnicode
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -44,14 +47,13 @@ class CreatePaintingController : Controller() {
         model.commit()
         val modelItem = model.item
         launch(JavaFx) {
-            var success = false
+            var id: String? = null
             val mainPictureFile: File = File(modelItem.mainPictureUrl)
             if (mainPictureFile.exists() && mainPictureFile.canRead()) {
                 val inputStream = mainPictureFile.inputStream()
                 if (inputStream.available() > 0) {
                     LOG.info("InputStream of size ${inputStream.available()}: ${mainPictureFile.path}")
-                    paintingService.composeNewPainting(title = modelItem.title, mainPicture = inputStream)
-                    success = true
+                    id = paintingService.composeNewPainting(title = modelItem.title, mainPicture = inputStream).id
                 } else {
                     LOG.warning("Trying to read empty file: ${mainPictureFile.path}")
                 }
@@ -59,8 +61,9 @@ class CreatePaintingController : Controller() {
                 LOG.warning(
                         "Error: ${mainPictureFile.path} -> ${mainPictureFile.exists()} || ${mainPictureFile.canRead()}")
             }
-            if (success) {
-                fragment.replaceWith(find<MainView>()) //TODO: Redirect to detail view
+            if (id != null) {
+                fragment.replaceWith(find<DetailFragment>(mapOf(DetailFragment::paintingId to id,
+                        DetailFragment::referrer to find<MainView>())))
             } else {
                 LOG.warning("Saving finished unsuccessful")
             }
@@ -96,7 +99,7 @@ class CreatePaintingModel : ItemViewModel<CreatePaintingModel.Holder>() {
 /**
  * Fragment for creating paintings
  */
-class CreatePaintingFragment : Fragment() {
+class CreatePaintingFragment : de.x4fyr.paiman.app.utils.Fragment() {
     private val model by inject<CreatePaintingModel>()
     private val controller by inject<CreatePaintingController>()
     private val LOG = Logger.getLogger(this::class.qualifiedName)
@@ -126,7 +129,7 @@ class CreatePaintingFragment : Fragment() {
                     hbox {
                         alignment = Pos.CENTER_LEFT
                         jfxButton(FontAwesomeUnicode.REMOVE) {
-                            setOnAction { replaceWith(find<MainView>()) }
+                            setOnAction { backToReferrer() }
                         }
                     }
                     hbox {
@@ -152,12 +155,10 @@ class CreatePaintingFragment : Fragment() {
 
                 }
                 jfxButton(FontAwesomeUnicode.PICTURE) {
-                    visibleProperty().bind(model.mainPictureImage.isNull())
                     setOnAction { controller.pickImage() }
                 }
                 val imageView = imageViewPane {
                     isPreserveRatio = true
-                    visibleProperty().bind(model.mainPictureImage.isNotNull())
                     imageProperty().bind(model.mainPictureImage)
                     setOnMouseClicked { controller.pickImage() }
                 }

@@ -1,4 +1,4 @@
-package de.x4fyr.paiman.app.controlls
+package de.x4fyr.paiman.app.utils
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.HPos

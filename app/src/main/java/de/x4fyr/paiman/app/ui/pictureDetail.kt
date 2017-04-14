@@ -1,7 +1,7 @@
 package de.x4fyr.paiman.app.ui
 
-import de.x4fyr.paiman.app.controlls.Vector
-import de.x4fyr.paiman.app.controlls.jfxButton
+import de.x4fyr.paiman.app.utils.Vector
+import de.x4fyr.paiman.app.utils.jfxButton
 import fontAwesomeFx.FontAwesomeUnicode.ARROW_LEFT
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -17,12 +17,11 @@ import java.util.logging.Logger
  * Fragment used to show details of a single picture
  */
 
-class PictureDetailFragment : Fragment() {
+class PictureDetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
     private val LOG = Logger.getLogger(this::class.qualifiedName)
     /** Parameter for the picture to show */
     val picture by param<Image>()
     /** Parameter for the referring UIComponent which will be returned to */
-    val referrer by param<UIComponent>()
     private val pictureProperty = SimpleObjectProperty<Image>(picture)
     private var moveInProgressProperty = SimpleBooleanProperty(false)
     private var moveInProgress by moveInProgressProperty
@@ -89,7 +88,7 @@ class PictureDetailFragment : Fragment() {
         }
         jfxButton(ARROW_LEFT) {
             onAction = EventHandler {
-                replaceWith(referrer)
+                backToReferrer()
             }
         }
     }

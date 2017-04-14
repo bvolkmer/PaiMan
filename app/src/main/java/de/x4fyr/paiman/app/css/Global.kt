@@ -1,7 +1,7 @@
 package de.x4fyr.paiman.app.css
 
 
-import de.x4fyr.paiman.app.controlls.elevate
+import de.x4fyr.paiman.app.utils.elevate
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight

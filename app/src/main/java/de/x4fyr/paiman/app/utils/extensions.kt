@@ -1,17 +1,23 @@
-package de.x4fyr.paiman.app.controlls
+package de.x4fyr.paiman.app.utils
 
 import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXSpinner
 import com.jfoenix.controls.JFXTextField
 import fontAwesomeFx.FontAwesomeIcon
 import fontAwesomeFx.FontAwesomeUnicode
+import javafx.animation.PauseTransition
 import javafx.beans.property.Property
 import javafx.event.EventTarget
 import javafx.geometry.HPos
 import javafx.geometry.VPos
+import javafx.scene.Node
 import javafx.scene.effect.DropShadow
 import javafx.scene.image.ImageView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
+import javafx.scene.input.MouseEvent
 import javafx.scene.paint.Color
+import javafx.util.Duration
 import tornadofx.*
 import java.util.logging.Logger
 
@@ -88,10 +94,41 @@ fun CssSelectionBlock.elevate(z: Int) = when (z) {
 }
 
 
-private fun Any?.isNull() = this == null
-private fun Any?.isNotNull() = this != null
-/** Boolean Observable of the null state of a value */
-fun <T : Any?> Property<T>.isNull() = observable(getter = Property<Any>::getValue::isNull)
+/** Add a handler for escape button (hw back button on android) relesed */
+fun UIComponent.onEscapeReleased(handler: (KeyEvent) -> Unit) {
+    primaryStage.scene.addEventHandler(KeyEvent.KEY_RELEASED) { event ->
+        if (event.code == KeyCode.ESCAPE) {
+            handler.invoke(event)
+        }
+    }
+}
 
-/** Boolean Observable of the null state of a value, negated */
-fun <T : Any?> Property<T>.isNotNull() = observable(getter = Property<Any>::getValue::isNotNull)
+/**
+ * Node extension function to add a differentiated behaviour whether long or short press
+ *
+ * @param threshold duration after which the press is considered long
+ * @param consume whether the handler should consume the actions. Default: false
+ * @param shortHandler handler invoked on short press
+ * @param longHandler handler invoked on long press
+ */
+fun Node.addShortLongPressHandler(threshold: Duration = Duration(500.0),
+                                  consume: Boolean = false,
+                                  shortHandler: (MouseEvent) -> Unit,
+                                  longHandler: (MouseEvent) -> Unit) {
+    var event: MouseEvent? = null
+    val holdTimer = PauseTransition(threshold)
+    holdTimer.setOnFinished { longHandler.invoke(event!!) }
+    this.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_PRESSED, {
+        event = it
+        holdTimer.playFromStart()
+        if (consume) it.consume()
+    })
+    this.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_RELEASED, {
+        if (holdTimer.status == javafx.animation.Animation.Status.RUNNING) {
+            holdTimer.stop()
+            shortHandler.invoke(event!!)
+            if (consume) it.consume()
+        }
+    })
+
+}

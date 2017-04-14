@@ -1,41 +1,8 @@
-package de.x4fyr.paiman.app.controlls
+package de.x4fyr.paiman.app.utils
 
-import javafx.animation.PauseTransition
 import javafx.geometry.Point2D
 import javafx.scene.Node
-import javafx.scene.input.MouseEvent
-import javafx.util.Duration
 import tornadofx.*
-
-/**
- * Node extension function to add a differentiated behaviour whether long or short press
- *
- * @param threshold duration after which the press is considered long
- * @param consume whether the handler should consume the actions. Default: false
- * @param shortHandler handler invoked on short press
- * @param longHandler handler invoked on long press
- */
-fun Node.addShortLongPressHandler(threshold: Duration = Duration(500.0),
-                                  consume: Boolean = false,
-                                  shortHandler: (MouseEvent) -> Unit,
-                                  longHandler: (MouseEvent) -> Unit) {
-    var event: MouseEvent? = null
-    val holdTimer = PauseTransition(threshold)
-    holdTimer.setOnFinished { longHandler.invoke(event!!) }
-    this.addEventHandler(MouseEvent.MOUSE_PRESSED, {
-        event = it
-        holdTimer.playFromStart()
-        if (consume) it.consume()
-    })
-    this.addEventHandler(MouseEvent.MOUSE_RELEASED, {
-        if (holdTimer.status == javafx.animation.Animation.Status.RUNNING) {
-            holdTimer.stop()
-            shortHandler.invoke(event!!)
-            if (consume) it.consume()
-        }
-    })
-
-}
 
 /**
  * Simple 2-dimensional vector with some mathematical operators implemented

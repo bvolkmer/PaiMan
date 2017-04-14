@@ -7,9 +7,9 @@ import de.x4fyr.paiman.app.controller.IS_SMOOTH
 import de.x4fyr.paiman.app.controller.ImageCacheController
 import de.x4fyr.paiman.app.controller.PREVIEW_SIZE
 import de.x4fyr.paiman.app.controller.ServiceController
-import de.x4fyr.paiman.app.controlls.jfxButton
-import de.x4fyr.paiman.app.controlls.jfxTextfield
 import de.x4fyr.paiman.app.css.Global
+import de.x4fyr.paiman.app.utils.jfxButton
+import de.x4fyr.paiman.app.utils.jfxTextfield
 import de.x4fyr.paiman.lib.domain.Purchaser
 import de.x4fyr.paiman.lib.domain.SellingInformation
 import fontAwesomeFx.FontAwesomeIcon
@@ -160,7 +160,7 @@ class DetailController : tornadofx.Controller() {
 /**
  * View showing the details of a painting
  */
-class DetailFragment : Fragment() {
+class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
     private val LOG = Logger.getLogger(this::class.qualifiedName)
     /** ID parameter for the painting to show*/
     val paintingId by param<String>()
@@ -441,7 +441,7 @@ class DetailFragment : Fragment() {
                 }
             }
         }
-        jfxButton(ARROW_LEFT) { setOnAction { replaceWith(find<MainView>()) } }
+        jfxButton(ARROW_LEFT) { setOnAction { backToReferrer() } }
     }
 }
 
