@@ -83,7 +83,7 @@ class CreatePaintingModel : ItemViewModel<CreatePaintingModel.Holder>() {
     val mainPictureUrl = bind { item?.mainPictureUrlProperty }
 
     /** Holder class to hold the creation information */
-    @Suppress("KDocMissingDocumentation")
+    @Suppress("KDocMissingDocumentation", "unused")
     class Holder {
         val titleProperty = SimpleStringProperty()
         var title: String by titleProperty
@@ -102,19 +102,20 @@ class CreatePaintingModel : ItemViewModel<CreatePaintingModel.Holder>() {
 class CreatePaintingFragment : de.x4fyr.paiman.app.utils.Fragment() {
     private val model by inject<CreatePaintingModel>()
     private val controller by inject<CreatePaintingController>()
-    private val LOG = Logger.getLogger(this::class.qualifiedName)
 
     init {
         model.itemProperty.set(CreatePaintingModel.Holder())
         model.item.title = ""
     }
 
+    /**  */
     override fun onDock() {
         super.onDock()
         model.itemProperty.set(CreatePaintingModel.Holder())
         model.item.title = ""
     }
 
+    /**  */
     override val root = borderpane {
         top {
             gridpane {

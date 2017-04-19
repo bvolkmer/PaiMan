@@ -20,24 +20,24 @@ ext {
     gitVersionName = version.name
 }
 
-public class GitVersion {
+class GitVersion {
 
-    public String name;
+    public String name
 
-    public int version = 0;
+    public int version = 0
 
-    public String branchName;
+    public String branchName
 
-    public String shortBranch = "";
+    public String shortBranch = ""
 
-    public int branchVersion = 0;
+    public int branchVersion = 0
 
-    public int localChanges = 0;
+    public int localChanges = 0
 
-    public String commit;
+    public String commit
 
     @Override
-    public String toString() {
+    String toString() {
         if (name == null || name.isEmpty()) {
             return "${super.toString()}{" +
                     "name='" + name + '\'' +
@@ -45,13 +45,14 @@ public class GitVersion {
                     ", branchName='" + branchName + '\'' +
                     ", shortBranch='" + shortBranch + '\'' +
                     ", branchVersion=" + branchVersion +
-                    '}';
+                    '}'
         }
         return name
     }
 }
 
-def GitVersion generateVersionName() {
+@SuppressWarnings("GroovyUnusedCatchParameter")
+GitVersion generateVersionName() {
 
     // check if git project
     def status = 'git status'.execute([], rootDir)
@@ -74,7 +75,7 @@ def GitVersion generateVersionName() {
 
     // read ext properties
     Map configuration = getPropertyOrDefault(rootProject, "gitVersioner", [:]) as Map
-    def String[] stableBranches = configuration.get("stableBranches") ?: []
+    String[] stableBranches = configuration.get("stableBranches") ?: []
     def defaultBranch = configuration.get("defaultBranch") ?: "master"
     float yearFactor = (configuration.get("yearFactor") ?: "1000").toString().toFloat()
     boolean snapshotEnabled = configuration.get("snapshotEnabled") != false
@@ -105,7 +106,7 @@ def GitVersion generateVersionName() {
         diffToDefault = "git rev-list origin/$defaultBranch..".execute([], rootDir)
     }
     def featurelines = diffToDefault.text.trim().readLines()
-    def commitsInFeatureBranch = featurelines.size();
+    def commitsInFeatureBranch = featurelines.size()
 
     def defaultAndFeatureLines = "git rev-list $currentCommit"
             .execute([], rootDir).text.trim().readLines()
@@ -133,17 +134,17 @@ def GitVersion generateVersionName() {
     def commitCount = defautBranchCommitCount.isInteger() ? defautBranchCommitCount.toInteger() : 0
 
     // calculate the time part of the version. 2500 == 2 years, 6 months; 300 == 0.3 year
-    def long YEAR_IN_SECONDS = 60 * 60 * 24 * 365
+    long YEAR_IN_SECONDS = 60 * 60 * 24 * 365
     def diff = latestCommitDate - initialCommitDate
 
 
     long time = {
         if (yearFactor <= 0) {
-            return 0;
+            return 0
         } else {
             return (diff * yearFactor / YEAR_IN_SECONDS + 0.5).intValue()
         }
-    }();
+    }()
 
     // this is the version
     def combinedVersion = commitCount + time
@@ -188,11 +189,13 @@ def GitVersion generateVersionName() {
     return holder
 }
 
-def Object getPropertyOrDefault(Object root, String name, Object fallback) {
+@SuppressWarnings("GrMethodMayBeStatic")
+Object getPropertyOrDefault(Object root, String name, Object fallback) {
     return root.hasProperty(name) ? root.property(name) : fallback
 }
 
-def String getTinyBranchName(String originalName, int length) {
+@SuppressWarnings("GrMethodMayBeStatic")
+String getTinyBranchName(String originalName, int length) {
     String nameBase64 = originalName.bytes.encodeBase64().toString()
     if (nameBase64.length() < length) {
         int charPos = originalName.size() % 26 + 65

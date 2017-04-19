@@ -116,10 +116,12 @@ class MainView : tornadofx.View() {
     private var inSelectionMode by inSelectionModeProperty
     private var selectedItems by singleAssign<ObservableList<MainModel>>()
 
+    /**  */
     override fun onDock() {
         controller.reloadModel(paintingsProperty)
     }
 
+    /**  */
     override val root = borderpane {
         maxHeight = bounds.height
         maxWidth = bounds.width

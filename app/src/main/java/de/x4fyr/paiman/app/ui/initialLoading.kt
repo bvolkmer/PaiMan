@@ -40,6 +40,7 @@ class InitialLoadingView : View() {
     private val controller: initialLoadingController by inject()
     private val bounds = Screen.getPrimary().visualBounds!!
 
+    /**  */
     override val root = stackpane {
         maxHeight = bounds.height
         maxWidth = bounds.width
@@ -48,6 +49,7 @@ class InitialLoadingView : View() {
         jfxSpinner()
     }
 
+    /**  */
     override fun onDock() {
         controller.init()
     }

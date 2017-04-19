@@ -7,6 +7,7 @@ version = '8u40'
 repositories {
     jcenter()
     mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/"}
 }
 compileKotlin {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -40,13 +41,14 @@ dependencies {
     androidCompile fileTree(dir: 'libs', include: ['*.jar'])
     androidCompile project(":libpaiman")
     androidCompile 'com.couchbase.lite:couchbase-lite-android:1.4.0'
+    androidCompile group: "no.tornado", name: "tornadofx-android-compat", version: "1.0"
     desktopCompile 'com.couchbase.lite:couchbase-lite-java:1.4.0'
     desktopCompile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.0'
     compile project(":libpaiman")
     compile project(":fontAwesomeFx")
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile "org.glassfish:javax.json:1.0.4"
-    compile files("${parent.projectDir.toString()}/libs/tornadofx-1.7.2-SNAPSHOT-ANDROID.jar")
+    compile group: "no.tornado", name: "tornadofx", version: "1.7.3-SNAPSHOT"
     runtime "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compileNoRetrolambda 'com.jfoenix:jfoenix:1.0.0:retrolambda'
     compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-javafx', version: '0.14'

@@ -1,10 +1,8 @@
 package de.x4fyr.paiman.lib.provider
 
 import com.couchbase.lite.JavaContext
-import de.x4fyr.paiman.lib.provider.ServiceProvider
 
 /**
- * Created by x4fyr on 3/24/17.
+ * ServiceProvider implementation for desktop platform
  */
-class DesktopServiceProvider: ServiceProvider(JavaContext()) {
-}
+class DesktopServiceProvider : ServiceProvider(JavaContext())

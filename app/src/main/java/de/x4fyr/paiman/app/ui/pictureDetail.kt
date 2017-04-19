@@ -11,14 +11,12 @@ import javafx.scene.Node
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import tornadofx.*
-import java.util.logging.Logger
 
 /**
  * Fragment used to show details of a single picture
  */
 
 class PictureDetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
-    private val LOG = Logger.getLogger(this::class.qualifiedName)
     /** Parameter for the picture to show */
     val picture by param<Image>()
     /** Parameter for the referring UIComponent which will be returned to */
@@ -30,6 +28,7 @@ class PictureDetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
     private var initialSize = Vector(picture.width, picture.height)
     private var imageView by singleAssign<ImageView>()
 
+    /**  */
     override val root = anchorpane {
         imageView = imageview {
             imageProperty().bind(pictureProperty)

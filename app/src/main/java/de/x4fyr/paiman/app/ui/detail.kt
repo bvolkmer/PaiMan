@@ -36,6 +36,7 @@ import java.io.InputStream
 import java.text.MessageFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.function.Supplier
 import java.util.logging.Logger
 
 /**
@@ -178,16 +179,20 @@ class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
         controller.loadModel(model, paintingId)
     }
 
+    /**  */
     override fun onDock() {
         LOG.info("onDock: $paintingId")
         controller.loadModel(model, paintingId)
     }
 
+    /**  */
     override fun onUndock() {
         primaryStage.scene.widthProperty().removeListener(widthChangeListener)
     }
 
+    /**  */
     override val root = stackpane {
+        Supplier { }
         alignment = Pos.TOP_LEFT
         scrollpane {
             isFitToWidth = true

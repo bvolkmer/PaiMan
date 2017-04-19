@@ -54,7 +54,7 @@ else
 
 private fun SellingInformation.toPropertiesMap(): Map<String, Any?> = mapOf(
         SELLING_INFO.PURCHASER to purchaser.toPropertiesMap(),
-        SELLING_INFO.DATE to date?.toISOString(),
+        SELLING_INFO.DATE to date.toISOString(),
         SELLING_INFO.PRICE to price)
 
 private fun SellingInformation(propertiesMap: Map<String, Any?>) = de.x4fyr.paiman.lib.domain.SellingInformation(
