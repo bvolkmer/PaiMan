@@ -7,7 +7,8 @@ version = '8u40'
 repositories {
     jcenter()
     mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/releases"} //TODO: Remove once tornadofx 1.7.3 is in maven central
+    maven { url "https://oss.sonatype.org/content/repositories/releases" }
+    //TODO: Remove once tornadofx 1.7.3 is in maven central
 }
 compileKotlin {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -30,6 +31,13 @@ jfxmobile {
         targetSdkVersion = 25
         minSdkVersion = 19
         manifest = sourceSets.android.java.srcDirs[0].absolutePath + "/AndroidManifest.xml"
+        signingConfig {
+            keyAlias = "androidkey"
+            keyPassword = "keypasswd"
+            storeFile = new File("/home/x4fyr/Coding/android-keystore/android.jks")
+            storePassword = "storePasswd"
+            storeType = "jks"
+        }
         packagingOptions {
             exclude 'META-INF/ASL2.0'
             exclude 'META-INF/LICENSE'
@@ -43,8 +51,8 @@ dependencies {
     androidCompile project(":libpaiman")
     androidCompile 'com.couchbase.lite:couchbase-lite-android:1.4.0'
     androidCompile group: "no.tornado", name: "tornadofx-android-compat", version: "1.0"
-    desktopCompile 'com.couchbase.lite:couchbase-lite-java:1.4.0'
-    desktopCompile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.0'
+    compile 'com.couchbase.lite:couchbase-lite-java:1.4.0'
+    compile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.0'
     compile project(":libpaiman")
     compile project(":fontAwesomeFx")
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
