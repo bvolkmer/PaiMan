@@ -66,6 +66,7 @@ class MainController : Controller() {
 
     /** Open a selected painting */
     fun selectPainting(id: String) {
+        serviceController.platformService.startProfiling("detailOpen")
         view.replaceWith(find<DetailFragment>(mapOf(DetailFragment::paintingId to id)))
     }
 

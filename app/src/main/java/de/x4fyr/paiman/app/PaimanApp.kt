@@ -11,7 +11,11 @@ import tornadofx.*
  */
 class PaimanApp : App(InitialLoadingView::class, Global::class) {
 
+    private val platformService = PlatformService.loadProvider(PlatformService::class.java)
+
     init {
+        platformService.preUI()
         initialiseFontAwesomeFx(this)
     }
+
 }

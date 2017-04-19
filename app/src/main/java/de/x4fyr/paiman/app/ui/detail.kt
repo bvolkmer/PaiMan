@@ -163,6 +163,7 @@ class DetailController : tornadofx.Controller() {
  */
 class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
     private val LOG = Logger.getLogger(this::class.qualifiedName)
+    private val serviceController by inject<ServiceController>()
     /** ID parameter for the painting to show*/
     val paintingId by param<String>()
     private val controller by inject<DetailController>()
@@ -183,6 +184,7 @@ class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
     override fun onDock() {
         LOG.info("onDock: $paintingId")
         controller.loadModel(model, paintingId)
+        serviceController.platformService.stopProfiling()
     }
 
     /**  */
@@ -288,6 +290,7 @@ class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
                             })
                             focusColor = Global.COLOR.ACCENT
                             unFocusColor = Global.COLOR.LIGHT_PRIMARY
+                            promptText = messages["tagsInput"]
                         }
                         label.onMouseClicked = EventHandler {
                             label.hide()

@@ -7,7 +7,7 @@ version = '8u40'
 repositories {
     jcenter()
     mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/"}
+    maven { url "https://oss.sonatype.org/content/repositories/releases"} //TODO: Remove once tornadofx 1.7.3 is in maven central
 }
 compileKotlin {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -25,10 +25,11 @@ jfxmobile {
         forceLinkClasses = ['ensemble.**.*']
     }
     android {
-        applicationPackage = 'de.x4fyr.paiman.app'
+        applicationPackage = 'de.x4fyr.paiman'
         compileSdkVersion = 25
         targetSdkVersion = 25
         minSdkVersion = 19
+        manifest = sourceSets.android.java.srcDirs[0].absolutePath + "/AndroidManifest.xml"
         packagingOptions {
             exclude 'META-INF/ASL2.0'
             exclude 'META-INF/LICENSE'
@@ -48,7 +49,7 @@ dependencies {
     compile project(":fontAwesomeFx")
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile "org.glassfish:javax.json:1.0.4"
-    compile group: "no.tornado", name: "tornadofx", version: "1.7.3-SNAPSHOT"
+    compile group: "no.tornado", name: "tornadofx", version: "1.7.3"
     runtime "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compileNoRetrolambda 'com.jfoenix:jfoenix:1.0.0:retrolambda'
     compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-javafx', version: '0.14'

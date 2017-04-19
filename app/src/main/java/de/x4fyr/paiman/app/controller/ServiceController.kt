@@ -1,5 +1,7 @@
 package de.x4fyr.paiman.app.controller
 
+import de.x4fyr.paiman.app.PlatformService
+import de.x4fyr.paiman.app.PlatformService.Companion.loadProvider
 import de.x4fyr.paiman.lib.provider.PictureProvider
 import de.x4fyr.paiman.lib.provider.ServiceProvider
 import de.x4fyr.paiman.lib.services.PaintingService
@@ -7,7 +9,6 @@ import de.x4fyr.paiman.lib.services.QueryService
 import tornadofx.*
 import java.io.File
 import java.io.InputStream
-import java.util.*
 import java.util.logging.Logger
 
 /**
@@ -25,20 +26,9 @@ class ServiceController : Controller() {
     val paintingService: PaintingService by lazy { serviceProvider.paintingService }
     /** QueryService instance */
     val queryService: QueryService by lazy { serviceProvider.queryService }
+    /** PlatformService instance*/
+    val platformService: PlatformService by lazy { loadProvider<PlatformService>(PlatformService::class.java) }
 
-
-    private fun <T : Any> loadProvider(clazz: Class<T>): T {
-        var result: T? = null
-        val serviceLoader: ServiceLoader<out T> = ServiceLoader.load(clazz)
-        for (provider in serviceLoader.iterator()) {
-            if (result == null) {
-                result = provider
-            } else {
-                break
-            }
-        }
-        return result ?: throw RuntimeException("No ServiceProvider found!")
-    }
 
     /** Open a given path as an InputStream
      * @param path path to open
