@@ -46,6 +46,12 @@ jfxmobile {
     }
 }
 
+task testing(){
+    doLast {
+        println "Testing..."
+    }
+}
+
 dependencies {
     androidCompile fileTree(dir: 'libs', include: ['*.jar'])
     androidCompile project(":libpaiman")
@@ -57,7 +63,9 @@ dependencies {
     compile project(":fontAwesomeFx")
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile "org.glassfish:javax.json:1.0.4"
-    compile group: "no.tornado", name: "tornadofx", version: "1.7.3"
+    compile files(project(":external").projectDir.absolutePath + "/libs/tornadofx-1.7.4-SNAPSHOT.jar") {
+        builtBy project(":external").getTasksByName("tornadoFx", false)
+    }
     runtime "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compileNoRetrolambda 'com.jfoenix:jfoenix:1.0.0:retrolambda'
     compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-javafx', version: '0.14'

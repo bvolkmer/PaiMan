@@ -1,3 +1,6 @@
 [submodule "tornadofx"]
 	path = tornadofx
 	url = https://github.com/edvin/tornadofx
+[submodule "external/tornadofx"]
+	path = external/tornadofx
+	url = https://github.com/bvolkmer/tornadofx
