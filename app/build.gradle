@@ -2,7 +2,7 @@ apply plugin: 'org.javafxports.jfxmobile'
 apply plugin: 'kotlin'
 
 mainClassName = 'de.x4fyr.paiman.app.PaimanApp'
-version = '8u40'
+version = parent.version
 
 repositories {
     jcenter()
