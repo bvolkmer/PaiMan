@@ -1,14 +1,9 @@
-apply plugin: 'org.javafxports.jfxmobile'
 apply plugin: 'kotlin'
-
-mainClassName = 'de.x4fyr.paiman.app.PaimanApp'
 version = parent.version
 
 repositories {
     jcenter()
     mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/releases" }
-    //TODO: Remove once tornadofx 1.7.3 is in maven central
 }
 compileKotlin {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -21,52 +16,18 @@ compileKotlin {
     }
 }
 
-jfxmobile {
-    ios {
-        forceLinkClasses = ['ensemble.**.*']
-    }
-    android {
-        applicationPackage = 'de.x4fyr.paiman'
-        compileSdkVersion = 25
-        targetSdkVersion = 25
-        minSdkVersion = 19
-        manifest = sourceSets.android.java.srcDirs[0].absolutePath + "/AndroidManifest.xml"
-        signingConfig {
-            keyAlias = "androidkey"
-            keyPassword = "keypasswd"
-            storeFile = new File("/home/x4fyr/Coding/android-keystore/android.jks")
-            storePassword = "storePasswd"
-            storeType = "jks"
-        }
-        packagingOptions {
-            exclude 'META-INF/ASL2.0'
-            exclude 'META-INF/LICENSE'
-            exclude 'META-INF/NOTICE'
-        }
-    }
-}
-
-task testing(){
-    doLast {
-        println "Testing..."
-    }
-}
-
 dependencies {
-    androidCompile fileTree(dir: 'libs', include: ['*.jar'])
-    androidCompile project(":libpaiman")
-    androidCompile 'com.couchbase.lite:couchbase-lite-android:1.4.0'
-    androidCompile group: "no.tornado", name: "tornadofx-android-compat", version: "1.0"
     compile 'com.couchbase.lite:couchbase-lite-java:1.4.0'
     compile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.0'
     compile project(":libpaiman")
     compile project(":fontAwesomeFx")
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile "org.glassfish:javax.json:1.0.4"
-    compile files(project(":external").projectDir.absolutePath + "/libs/tornadofx-1.7.4-SNAPSHOT.jar") {
-        builtBy project(":external").getTasksByName("tornadoFx", false)
-    }
+    compile "no.tornado:tornadofx:1.7.3"
+    //compile files(project(":external").projectDir.absolutePath + "/libs/tornadofx-1.7.4-SNAPSHOT.jar") {
+    //    builtBy project(":external").getTasksByName("tornadoFx", false)
+    //}
     runtime "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compileNoRetrolambda 'com.jfoenix:jfoenix:1.0.0:retrolambda'
+    compile 'com.jfoenix:jfoenix:1.0.0'
     compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-javafx', version: '0.14'
 }
