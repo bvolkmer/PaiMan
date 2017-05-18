@@ -1,10 +1,23 @@
+buildscript {
+    dependencies {
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+    }
+    repositories {
+        mavenCentral()
+    }
+}
+
 apply plugin: 'kotlin'
+apply plugin: 'application'
+apply plugin: 'javafx-gradle-plugin'
 version = parent.version
 
 repositories {
     jcenter()
     mavenCentral()
 }
+
+mainClassName = 'de.x4fyr.paiman.app.PaimanApp'
 compileKotlin {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -14,6 +27,12 @@ compileKotlin {
         apiVersion = "1.1"
         languageVersion = "1.1"
     }
+}
+
+jfx {
+    mainClass = "de.x4fyr.paiman.app.PaimanApp"
+    jfxMainAppJarName = "paiman-${version}.jar"
+    vendor = 'Benedikt Volkmer'
 }
 
 dependencies {

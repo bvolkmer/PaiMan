@@ -5,11 +5,11 @@ sourceSets {
     test.java.srcDirs += 'src/test/kotlin'
 }
 compileKotlin {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "1.6"
         apiVersion = "1.1"
         languageVersion = "1.1"
     }
