@@ -6,7 +6,7 @@ import de.x4fyr.paiman.lib.adapter.database.PictureCRUDAdapter
 import de.x4fyr.paiman.lib.adapter.database.QueryAdapter
 import de.x4fyr.paiman.lib.domain.*
 import java.io.InputStream
-import java.time.LocalDate
+import org.threeten.bp.LocalDate
 import java.util.logging.Logger
 
 /**

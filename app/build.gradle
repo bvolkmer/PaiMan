@@ -18,6 +18,8 @@ repositories {
 }
 
 mainClassName = 'de.x4fyr.paiman.app.PaimanApp'
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 compileKotlin {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8

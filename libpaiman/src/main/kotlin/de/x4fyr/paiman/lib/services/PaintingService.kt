@@ -6,7 +6,7 @@ import de.x4fyr.paiman.lib.domain.Purchaser
 import de.x4fyr.paiman.lib.domain.SavedPainting
 import de.x4fyr.paiman.lib.domain.SellingInformation
 import java.io.InputStream
-import java.time.LocalDate
+import org.threeten.bp.LocalDate
 
 /**
  * Service for querying, creating, removing and manipulating paintings, including the needed persistence actions

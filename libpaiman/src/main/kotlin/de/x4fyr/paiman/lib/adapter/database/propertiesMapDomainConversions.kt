@@ -1,8 +1,8 @@
 package de.x4fyr.paiman.lib.adapter.database
 
 import de.x4fyr.paiman.lib.domain.*
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import org.threeten.bp.LocalDate
+import org.threeten.bp.format.DateTimeFormatter
 
 /**
  * @author de.x4fyr
@@ -77,7 +77,7 @@ private fun Map<*, *>.asPropertiesMap(): Map<String, Any?> {
     return result
 }
 
-private fun LocalDate.toISOString(): String = this.format(java.time.format.DateTimeFormatter.ISO_DATE)
+private fun LocalDate.toISOString(): String = this.format(org.threeten.bp.format.DateTimeFormatter.ISO_DATE)
 
 private fun localDateOfIsoString(isoString: String): LocalDate? {
     return if (isoString == "null" || isoString == "kotlin.Unit") {

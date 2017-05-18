@@ -1,9 +1,6 @@
 package de.x4fyr.paiman.lib.adapter.database
 
 import de.x4fyr.paiman.lib.domain.*
-import kotlinx.coroutines.experimental.Deferred
-import java.time.LocalDate
-import java.util.concurrent.Future
 
 /**
  * @author de.x4fyr
