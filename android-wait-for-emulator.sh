@@ -11,6 +11,8 @@ timeout_in_sec=360
 for serial in "$@"
 do
 
+echo "Probing $serial"
+
 until [[ "$bootanim" =~ "stopped" ]]; do
   bootanim=`$ANDROID_HOME/platform-tools/adb -s $serial -e shell getprop init.svc.bootanim 2>&1 &`
   if [[ "$bootanim" =~ "device not found" || "$bootanim" =~ "device offline"
@@ -27,4 +29,4 @@ done
 
 done
 
-echo "Emulator is ready"
+echo "Emulators are ready"

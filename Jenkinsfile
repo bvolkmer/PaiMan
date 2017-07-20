@@ -50,7 +50,7 @@ pipeline{
                     waitUntil {
                         sh 'if [ `$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 | wc -l` -ne 3 ]; then return 1; fi'
                     }
-                    sh './android-wait-for-emulators.sh `$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 `'
+                    sh './android-wait-for-emulator.sh `$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 `'
                     echo "RunCheck"
                     sh './gradlew android:connectedCheck'
                 }
