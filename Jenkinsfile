@@ -34,11 +34,11 @@ pipeline{
                 android: {
                     echo "Create android test devices"
                     sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-19 -k " +
-                            "'system-images;android-19;default;armeabi-v7' "
+                            "'system-images;android-19;default;armeabi-v7a' "
                     sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-21 -k " +
-                            "'system-images;android-23;default;armeabi-v7' "
+                            "'system-images;android-23;default;armeabi-v7a' "
                     sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-24 -k " +
-                            "'system-images;android-24;default;armeabi-v7' "
+                            "'system-images;android-24;default;armeabi-v7a' "
                     echo "Start emulators"
                     sh "$ANDROID_HOME/tools/emulator @jenkins-paiman-19 -no-audio -no-window"
                     sh "$ANDROID_HOME/tools/emulator @jenkins-paiman-21 -no-audio -no-window"
