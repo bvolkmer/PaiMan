@@ -32,9 +32,6 @@ pipeline{
                     sh './gradlew app:check'
                 },
                 android: {
-                    echo "Kill running emulators"
-                    sh '$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 | while read line; do ' +
-                            '$ANDROID_HOME/platform-tools/adb -s $line emu kill; done'
                     echo "Create android test devices"
                     sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-19 -k ' +
                             '"system-images;android-19;default;armeabi-v7a" --force'
@@ -43,9 +40,9 @@ pipeline{
                     sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-24 -k ' +
                             '"system-images;android-24;default;armeabi-v7a" --force'
                     echo "Start emulators"
-                    sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-19 -no-audio -no-window &'
-                    sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-21 -no-audio -no-window &'
-                    sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-24 -no-audio -no-window &'
+                    sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-19 -no-audio -no-window -wipe-data &'
+                    sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-21 -no-audio -no-window -wipe-data &'
+                    sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-24 -no-audio -no-window -wipe-data &'
                     echo "Wait for emulators"
                     waitUntil {
                         script {
