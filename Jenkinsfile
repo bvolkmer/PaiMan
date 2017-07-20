@@ -15,7 +15,7 @@ pipeline{
             }
         }
         stage('Build client') {
-            agent {label: android-sdk}
+            agent {label "android-sdk"}
             steps {
                 parallel javafx: {
                     sh './gradlew app:build'
@@ -26,7 +26,7 @@ pipeline{
             }
         }
         stage('Test clients') {
-            agent {label: "android-emulator"}
+            agent {label "android-emulator"}
             steps {
                 parallel javafx: {
                     sh './gradlew app:check'
@@ -48,12 +48,12 @@ pipeline{
                 }
             }
         }
-        post {
-            always {
-                sh '($ANDROID_HOME/tools/bin/avdmanager remove -n jenkins-paiman-19 && ' +
-                        '$ANDROID_HOME/tools/bin/avdmanager remove -n jenkins-paiman-23 && ' +
-                        '$ANDROID_HOME/tools/bin/avdmanager remove -n jenkins-paiman-24) || return 0'
-            }
+    }
+    post {
+        always {
+            sh '($ANDROID_HOME/tools/bin/avdmanager remove -n jenkins-paiman-19 && ' +
+                    '$ANDROID_HOME/tools/bin/avdmanager remove -n jenkins-paiman-23 && ' +
+                    '$ANDROID_HOME/tools/bin/avdmanager remove -n jenkins-paiman-24) || return 0'
         }
     }
 }
