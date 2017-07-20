@@ -54,7 +54,7 @@ pipeline{
             }
         }
         stage ("Deploy") {
-            agent "master"
+            agent { name: "master" }
             steps {
                 sh "./gradlew copyArtifacts"
                 sh "cp archive/* /srv/http/develop/downloads/PaiMan"
