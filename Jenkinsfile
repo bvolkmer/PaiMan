@@ -34,11 +34,11 @@ pipeline{
                 android: {
                     echo "Create android test devices"
                     sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-19 -k " +
-                            "'system-images;android-19;default;armeabi-v7a' "
+                            "'system-images;android-19;default;armeabi-v7a' --force"
                     sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-21 -k " +
-                            "'system-images;android-21;default;armeabi-v7a' "
+                            "'system-images;android-21;default;armeabi-v7a' --force"
                     sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-24 -k " +
-                            "'system-images;android-24;default;armeabi-v7a' "
+                            "'system-images;android-24;default;armeabi-v7a' --force"
                     echo "Start emulators"
                     sh "$ANDROID_HOME/tools/emulator @jenkins-paiman-19 -no-audio -no-window"
                     sh "$ANDROID_HOME/tools/emulator @jenkins-paiman-21 -no-audio -no-window"
@@ -47,13 +47,6 @@ pipeline{
                     sh './gradlew android:connectedCheck'
                 }
             }
-        }
-    }
-    post {
-        always {
-            sh '($ANDROID_HOME/tools/bin/avdmanager remove -n jenkins-paiman-19 && ' +
-                    '$ANDROID_HOME/tools/bin/avdmanager remove -n jenkins-paiman-23 && ' +
-                    '$ANDROID_HOME/tools/bin/avdmanager remove -n jenkins-paiman-24) || return 0'
         }
     }
 }
