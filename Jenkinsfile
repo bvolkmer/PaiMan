@@ -32,17 +32,19 @@ pipeline{
                     sh './gradlew app:check'
                 },
                 android: {
+                    echo "Kill running emulators"
+                    sh '$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 | while read line; do adb -s $line emu kill; done'
                     echo "Create android test devices"
-                    sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-19 -k " +
-                            "'system-images;android-19;default;armeabi-v7a' --force"
-                    sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-21 -k " +
-                            "'system-images;android-21;default;armeabi-v7a' --force"
-                    sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-24 -k " +
-                            "'system-images;android-24;default;armeabi-v7a' --force"
+                    sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-19 -k ' +
+                            '"system-images;android-19;default;armeabi-v7a" --force'
+                    sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-21 -k ' +
+                            '"system-images;android-21;default;armeabi-v7a" --force'
+                    sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-24 -k ' +
+                            '"system-images;android-24;default;armeabi-v7a" --force'
                     echo "Start emulators"
-                    sh "$ANDROID_HOME/tools/emulator @jenkins-paiman-19 -no-audio -no-window"
-                    sh "$ANDROID_HOME/tools/emulator @jenkins-paiman-21 -no-audio -no-window"
-                    sh "$ANDROID_HOME/tools/emulator @jenkins-paiman-24 -no-audio -no-window"
+                    sh '$ANDROID_HOME/tools/emulator @jenkins-paiman-19 -no-audio -no-window'
+                    sh '$ANDROID_HOME/tools/emulator @jenkins-paiman-21 -no-audio -no-window'
+                    sh '$ANDROID_HOME/tools/emulator @jenkins-paiman-24 -no-audio -no-window'
                     echo "RunCheck"
                     sh './gradlew android:connectedCheck'
                 }
