@@ -38,6 +38,28 @@ println("version: $project.version")
 
 apply plugin: 'idea'
 
+task copyJavaFxApp(type: Copy) {
+    from ('app/build/distributions') {
+        rename ".*.zip", "paiman-${version}.zip"
+    }
+    into 'archive/'
+    include "*.zip"
+    dependsOn "app:distZip"
+}
+
+task copyAndroidApp(type: Copy) {
+    from ('android/build/outputs/apk/release/') {
+        rename ".*.apk", "paiman-${version}-unsigned.apk"
+    }
+    into 'archive/'
+    include "*.apk"
+    dependsOn "android:assembleRelease"
+}
+
+task copyArtifacts() {
+    dependsOn "copyJavaFxApp", "copyAndroidApp"
+}
+
 allprojects {
     repositories {
         mavenCentral()

@@ -18,7 +18,7 @@ pipeline{
             agent {label "android-sdk"}
             steps {
                 parallel javafx: {
-                    sh './gradlew app:build'
+                    sh './gradlew app:distZip'
                 },
                 android: {
                     sh './gradlew android:assemble'
@@ -58,6 +58,13 @@ pipeline{
                     echo "RunCheck"
                     sh './gradlew android:connectedCheck'
                 }
+            }
+        }
+        stage ("Deploy") {
+            agent "master"
+            steps {
+                sh "./gradlew copyArtifacts"
+                sh "cp archive/* /srv/http/develop/downloads/PaiMan"
             }
         }
     }
