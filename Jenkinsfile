@@ -48,7 +48,7 @@ pipeline{
                     sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-24 -no-audio -no-window &'
                     echo "Wait for emulators"
                     waitUntil {
-                        sh 'if [ `$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 | wc -l` -ne 3 ]; then return 1; fi'
+                        sh 'if [ `$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 | wc -l` -ne 3 ]; then exit 1; fi'
                     }
                     sh './android-wait-for-emulator.sh `$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 `'
                     echo "RunCheck"
