@@ -15,25 +15,23 @@ pipeline{
             }
         }
         stage('Build client') {
+            agent {label: android-sdk}
             steps {
                 parallel javafx: {
-                    agent any
                     sh './gradlew app:build'
                 },
                 android: {
-                    agent {label: android-sdk}
                     sh './gradlew android:assemble'
                 }
             }
         }
         stage('Test clients') {
+            agent {label: "android-emulator"}
             steps {
                 parallel javafx: {
-                    agent any
                     sh './gradlew app:check'
                 },
                 android: {
-                    agent {label: "android-emulator"}
                     echo "Create android test devices"
                     sh "echo 'no\n' | $ANDROID_HOME/tools/bin/avdmanager create -n jenkins-paiman-19 -k " +
                             "'system-images;android-19;default;armeabi-v7' "
