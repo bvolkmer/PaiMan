@@ -1,6 +1,7 @@
-package de.x4fyr.paiman.lib.provider
+/*package de.x4fyr.paiman.lib.provider
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.CursorLoader
 import android.content.Intent
@@ -8,17 +9,14 @@ import android.net.Uri
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
-import javafxports.android.FXActivity
 import java.io.File
 
 
-/**
+*//**
  * Created by x4fyr on 3/22/17.
  * Taken an modified from https://gist.github.com/Mariovc/f06e70ebe8ca52fbbbe2
- */
-class AndroidPictureProvider : PictureProvider {
-
-    private val context: FXActivity = FXActivity.getInstance()
+ *//*
+class AndroidPictureProvider(var context: Context) : PictureProvider {
 
     companion object {
         private const val TAG = "ImagePicker"
@@ -26,25 +24,28 @@ class AndroidPictureProvider : PictureProvider {
         private const val PICK_IMAGE_ID = 234 //the number doesn't matter
     }
 
-    /** Action on return of the picker */
+    *//** Action on return of the picker *//*
     var onReturn: ((url: String) -> Unit)? = null
 
 
     init {
+        *//*TODO
         FXActivity.getInstance().setOnActivityResultHandler { requestCode, resultCode, intent ->
             if (requestCode == PICK_IMAGE_ID)
                 onReturn?.invoke(getUriFromResult(context, resultCode, intent))
         }
-
+        *//*
     }
 
     override fun pickPicture(onReturn: (url: String?) -> Unit) {
         this.onReturn = onReturn
+        *//*TODO
         FXActivity.getInstance().startActivityForResult(getPickImageIntent(), PICK_IMAGE_ID)
+         *//*
     }
 
 
-    /** Create the intent to launch the picker */
+    *//** Create the intent to launch the picker *//*
     fun getPickImageIntent(): Intent? {
         var chooserIntent: Intent? = null
 
@@ -89,10 +90,10 @@ class AndroidPictureProvider : PictureProvider {
         if (resultCode == Activity.RESULT_OK) {
             val intentDataString = imageReturnedIntent?.data?.toString()
             if (intentDataString == null || intentDataString.contains(imageFile.toString())) {
-                /** CAMERA **/
+                *//** CAMERA **//*
                 selectedImage = imageFile.path
             } else {
-                /** ALBUM **/
+                *//** ALBUM **//*
                 if (imageReturnedIntent.data.toString().contains("content:/")) {
                     val projection: Array<String> = Array(1, { MediaStore.Images.Media.DATA })
                     val cursor = CursorLoader(context, imageReturnedIntent.data, projection, null, null,
@@ -107,4 +108,4 @@ class AndroidPictureProvider : PictureProvider {
         }
         return selectedImage ?: ""
     }
-}
+}*/

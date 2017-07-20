@@ -2,13 +2,16 @@ group 'de.de.x4fyr'
 version '0.2'
 
 buildscript {
-    ext.kotlin_version = '1.1.2'
+    ext.kotlin_version = '1.1.2-4'
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url 'https://maven.google.com'
+        }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:2.3.2"
+        classpath "com.android.tools.build:gradle:3.0.0-alpha3"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -20,7 +23,7 @@ ext.gitVersioner = [
         yearFactor              : 1000,       // default "1000", increasing every 8.57h
         snapshotEnabled         : true,      // default true, the "-SNAPSHOT" postfix
         localChangesCountEnabled: false,       // default true, the (<commitCount>) before -SNAPSHOT
-        shortName: { gitVersion ->            // optional closure to build a short name
+        shortName               : { gitVersion ->            // optional closure to build a short name
             // allows you to add your own short name logic
             // All properties from gitVersion are available
             // can be used for CI `System.getenv("BUILD_NUMBER")`
