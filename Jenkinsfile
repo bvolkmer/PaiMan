@@ -33,7 +33,8 @@ pipeline{
                 },
                 android: {
                     echo "Kill running emulators"
-                    sh '$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 | while read line; do adb -s $line emu kill; done'
+                    sh '$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 | while read line; do ' +
+                            '$ANDROID_HOME/platform-tools/adb -s $line emu kill; done'
                     echo "Create android test devices"
                     sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-19 -k ' +
                             '"system-images;android-19;default;armeabi-v7a" --force'
