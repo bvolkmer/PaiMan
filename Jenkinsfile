@@ -42,9 +42,9 @@ pipeline{
                     sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-24 -k ' +
                             '"system-images;android-24;default;armeabi-v7a" --force'
                     echo "Start emulators"
-                    sh '$ANDROID_HOME/tools/emulator @jenkins-paiman-19 -no-audio -no-window'
-                    sh '$ANDROID_HOME/tools/emulator @jenkins-paiman-21 -no-audio -no-window'
-                    sh '$ANDROID_HOME/tools/emulator @jenkins-paiman-24 -no-audio -no-window'
+                    sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-19 -no-audio -no-window'
+                    sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-21 -no-audio -no-window'
+                    sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-24 -no-audio -no-window'
                     echo "RunCheck"
                     sh './gradlew android:connectedCheck'
                 }
