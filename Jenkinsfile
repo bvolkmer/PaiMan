@@ -47,7 +47,9 @@ pipeline{
                     sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-21 -no-audio -no-window &'
                     sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-24 -no-audio -no-window &'
                     echo "Wait for emulators"
-                    wait 20
+                    waitUntil {
+                        '$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 | wc -l'.execute() == 3
+                    }
                     sh './android-wait-for-emulators.sh `$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 `'
                     echo "RunCheck"
                     sh './gradlew android:connectedCheck'
