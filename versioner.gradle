@@ -92,10 +92,8 @@ GitVersion generateVersionName() {
 
     // use a defined stable branch when on such a branch
     if (currentBranch != "" && stableBranches.contains(currentBranch)) {
-        println "DEBUG: $currentBranch is in stable branches $stableBranches and becomes $defaultBranch"
         defaultBranch = currentBranch
     }
-    println "DEBUG: current: $currentBranch, default: $defaultBranch"
     def currentCommit = 'git rev-parse HEAD'.execute([], rootDir).text.trim()
 
     def log = "git log --pretty=format:'%at' --reverse".execute([], rootDir)
@@ -105,16 +103,14 @@ GitVersion generateVersionName() {
             size()
     boolean hasLocalChanges = localChangesCount > 0
 
-    println "DEBUG: " + "git rev-list master..".execute([], rootDir).text
 
     def diffToDefault = "git rev-list $defaultBranch..".execute([], rootDir)
     diffToDefault.waitFor()
     if (diffToDefault.exitValue() != 0) {
-        diffToDefault = "git rev-list origin/$defaultBranch..".execute([], rootDir)
+        diffToDefault = "git rev-list refs/remotes/origin/$defaultBranch..".execute([], rootDir)
     }
     def featurelines = diffToDefault.text.trim().readLines()
     def commitsInFeatureBranch = featurelines.size()
-    println "DEBUG: featureLines: $featurelines, commitsInFeatureBranch: $commitsInFeatureBranch"
 
     def defaultAndFeatureLines = "git rev-list $currentCommit"
             .execute([], rootDir).text.trim().readLines()
