@@ -88,7 +88,6 @@ GitVersion generateVersionName() {
     def shortNameClosure = configuration.get("shortName")
     // get information from git
     def currentBranch = configuration.get("currentBranch") ?: 'git symbolic-ref --short -q HEAD'.execute([], rootDir).text.trim()
-    println 'currentBranch: ' + currentBranch
 
     // use a defined stable branch when on such a branch
     if (currentBranch != "" && stableBranches.contains(currentBranch)) {
