@@ -105,7 +105,7 @@ GitVersion generateVersionName() {
             size()
     boolean hasLocalChanges = localChangesCount > 0
 
-
+    println "DEBUG: " + "git status".execute([], rootDir).text
 
     def diffToDefault = "git rev-list $defaultBranch..".execute([], rootDir)
     diffToDefault.waitFor()
