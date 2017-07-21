@@ -1,27 +1,28 @@
+def gradleParams = "-Psnapshot=false -Pbranch=${env.BRANCH_NAME}"
 pipeline{
     agent any
     stages {
         stage('Build lib') {
             agent any
             steps {
-                checkout scm
-                sh  './gradlew libpaiman:build'
+                sh "git fetch https://github.com/bvolkmer/PaiMan.git +refs/heads/master:refs/remotes/origin/master"
+                sh  "./gradlew libpaiman:build $gradleParams"
             }
         }
         stage('Test lib') {
             agent any
             steps {
-                sh './gradlew libpaiman:check'
+                sh "./gradlew libpaiman:check $gradleParams"
             }
         }
         stage('Build client') {
             agent {label "android-sdk"}
             steps {
                 parallel javafx: {
-                    sh './gradlew app:build'
+                    sh "./gradlew app:distZip $gradleParams"
                 },
                 android: {
-                    sh './gradlew android:assemble'
+                    sh "./gradlew android:assemble $gradleParams"
                 }
             }
         }
@@ -29,16 +30,9 @@ pipeline{
             agent {label "android-emulator"}
             steps {
                 parallel javafx: {
-                    sh './gradlew app:check'
+                    sh "./gradlew app:check $gradleParams"
                 },
                 android: {
-                    echo "Create android test devices"
-                    sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-19 -k ' +
-                            '"system-images;android-19;default;armeabi-v7a" --force'
-                    sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-21 -k ' +
-                            '"system-images;android-21;default;armeabi-v7a" --force'
-                    sh 'echo "no\n" | $ANDROID_HOME/tools/bin/avdmanager create avd -n jenkins-paiman-24 -k ' +
-                            '"system-images;android-24;default;armeabi-v7a" --force'
                     echo "Start emulators"
                     sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-19 -no-audio -no-window -wipe-data &'
                     sh '$ANDROID_HOME/emulator/emulator @jenkins-paiman-21 -no-audio -no-window -wipe-data &'
@@ -56,8 +50,18 @@ pipeline{
                     }
                     sh './android-wait-for-emulator.sh `$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 `'
                     echo "RunCheck"
-                    sh './gradlew android:connectedCheck'
+                    sh "./gradlew android:connectedCheck $gradleParams"
                 }
+            }
+        }
+        stage ("Deploy") {
+            agent { label "deploy" }
+            steps {
+                sh "mkdir -p archive/"
+                sh "rm -f archive/*"
+                sh "git fetch https://github.com/bvolkmer/PaiMan.git +refs/heads/master:refs/remotes/origin/master"
+                sh "./gradlew copyArtifacts $gradleParams"
+                sh "cp -f archive/* /srv/http/develop/downloads/PaiMan"
             }
         }
     }
