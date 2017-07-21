@@ -88,12 +88,14 @@ GitVersion generateVersionName() {
     def shortNameClosure = configuration.get("shortName")
     // get information from git
     def currentBranch = configuration.get("currentBranch") ?: 'git symbolic-ref --short -q HEAD'.execute([], rootDir).text.trim()
-    println 'currentBranch:' + currentBranch
+    println 'currentBranch: ' + currentBranch
 
     // use a defined stable branch when on such a branch
     if (currentBranch != "" && stableBranches.contains(currentBranch)) {
+        println "DEBUG: $currentBranch is in stable branches $stableBranches and becomes $defaultBranch"
         defaultBranch = currentBranch
     }
+    println "DEBUG: current: $currentBranch, default: $defaultBranch"
     def currentCommit = 'git rev-parse HEAD'.execute([], rootDir).text.trim()
 
     def log = "git log --pretty=format:'%at' --reverse".execute([], rootDir)
@@ -112,6 +114,7 @@ GitVersion generateVersionName() {
     }
     def featurelines = diffToDefault.text.trim().readLines()
     def commitsInFeatureBranch = featurelines.size()
+    println "DEBUG: featureLines: $featurelines, commitsInFeatureBranch: $commitsInFeatureBranch"
 
     def defaultAndFeatureLines = "git rev-list $currentCommit"
             .execute([], rootDir).text.trim().readLines()
