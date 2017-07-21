@@ -58,7 +58,7 @@ pipeline{
             agent { label "deploy" }
             steps {
                 sh "./gradlew copyArtifacts $gradleParams"
-                sh "cp archive/* /srv/http/develop/downloads/PaiMan"
+                sh "cp -f archive/* /srv/http/develop/downloads/PaiMan"
             }
         }
     }
