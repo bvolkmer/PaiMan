@@ -7,7 +7,7 @@ pipeline{
             steps {
                 sh "git status"
                 sh "git log"
-                sh "git fetch --all"
+                sh "git fetch origin master"
                 sh "git branch"
                 sh "git rev-list origin/master.."
                 sh  "./gradlew libpaiman:build $gradleParams"
