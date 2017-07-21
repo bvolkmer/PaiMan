@@ -19,6 +19,7 @@ buildscript {
 if (hasProperty('branch')) {
     ext.branch = branch
     ext.hasBranch = true
+    println "Working in branch $branch"
 }
 
 ext.gitVersioner = [
