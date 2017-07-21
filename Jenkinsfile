@@ -1,5 +1,5 @@
+def gradleParams = "-Psnapshot=false -Pbranch=${env.branchName}"
 pipeline{
-    def gradleParams = "-Psnapshot=false -Pbranch=${env.branchName}"
     agent any
     stages {
         stage('Build lib') {
