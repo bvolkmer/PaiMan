@@ -5,7 +5,9 @@ pipeline{
         stage('Build lib') {
             agent any
             steps {
-                checkout scm
+                sh "git status"
+                sh "git log"
+                sh "git rev-list master.."
                 sh  "./gradlew libpaiman:build $gradleParams"
             }
         }
