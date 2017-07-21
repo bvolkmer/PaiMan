@@ -5,7 +5,6 @@ pipeline{
         stage('Build lib') {
             agent any
             steps {
-                //sh "git fetch https://github.com/bvolkmer/PaiMan.git +refs/heads/master:refs/remotes/origin/master"
                 sh  "./gradlew libpaiman:build $gradleParams"
             }
         }
