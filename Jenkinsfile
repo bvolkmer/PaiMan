@@ -1,27 +1,28 @@
 pipeline{
+    def gradleParams = "-Psnapshot=false -Pbranch=${env.branchName}"
     agent any
     stages {
         stage('Build lib') {
             agent any
             steps {
                 checkout scm
-                sh  './gradlew libpaiman:build'
+                sh  "./gradlew libpaiman:build $gradleParams"
             }
         }
         stage('Test lib') {
             agent any
             steps {
-                sh './gradlew libpaiman:check'
+                sh "./gradlew libpaiman:check $gradleParams"
             }
         }
         stage('Build client') {
             agent {label "android-sdk"}
             steps {
                 parallel javafx: {
-                    sh './gradlew app:distZip'
+                    sh "./gradlew app:distZip $gradleParams"
                 },
                 android: {
-                    sh './gradlew android:assemble'
+                    sh "./gradlew android:assemble $gradleParams"
                 }
             }
         }
@@ -29,7 +30,7 @@ pipeline{
             agent {label "android-emulator"}
             steps {
                 parallel javafx: {
-                    sh './gradlew app:check'
+                    sh "./gradlew app:check $gradleParams"
                 },
                 android: {
                     echo "Start emulators"
@@ -49,14 +50,14 @@ pipeline{
                     }
                     sh './android-wait-for-emulator.sh `$ANDROID_HOME/platform-tools/adb devices | grep emulator | cut -f1 `'
                     echo "RunCheck"
-                    sh './gradlew android:connectedCheck'
+                    sh "./gradlew android:connectedCheck $gradleParams"
                 }
             }
         }
         stage ("Deploy") {
             agent { label "deploy" }
             steps {
-                sh "./gradlew copyArtifacts"
+                sh "./gradlew copyArtifacts $gradleParams"
                 sh "cp archive/* /srv/http/develop/downloads/PaiMan"
             }
         }
