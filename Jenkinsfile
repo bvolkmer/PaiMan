@@ -57,6 +57,7 @@ pipeline{
         stage ("Deploy") {
             agent { label "deploy" }
             steps {
+                sh "rm archive/*"
                 sh "git fetch https://github.com/bvolkmer/PaiMan.git +refs/heads/master:refs/remotes/origin/master"
                 sh "./gradlew copyArtifacts $gradleParams"
                 sh "cp -f archive/* /srv/http/develop/downloads/PaiMan"
