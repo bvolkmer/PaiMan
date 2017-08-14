@@ -1,50 +1,90 @@
 package de.x4fyr.paiman
 
-import android.graphics.drawable.Drawable
+import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
+import android.support.v4.app.DialogFragment
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.CardView
-import android.support.v7.widget.RecyclerView
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.view.View.INVISIBLE
-import android.view.ViewGroup
+import de.x4fyr.paiman.app.ApplyingDialogFragment
+import de.x4fyr.paiman.lib.provider.AndroidPictureProvider
+import de.x4fyr.paiman.lib.provider.AndroidServiceProvider
+import de.x4fyr.paiman.lib.services.DesignService
+import de.x4fyr.paiman.lib.services.PaintingService
+import de.x4fyr.paiman.lib.services.QueryService
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.jetbrains.anko.*
-import org.jetbrains.anko.coroutines.experimental.*
-import org.jetbrains.anko.support.v4.*
+import org.jetbrains.anko.coroutines.experimental.bg
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.support.v4.onRefresh
+import org.jetbrains.anko.uiThread
 
-class MainActivity : AppCompatActivity() {
+/** Main Activity of the app, which is launched first and shows a list of current paintings
+ *
+ * It initialises the different providers.
+ */
+class MainActivity: AppCompatActivity() {
+
+    /** Initial [AndroidServiceProvider] */
+    lateinit var serviceProvider: AndroidServiceProvider
+    /** Initial [AndroidPictureProvider] */
+    lateinit var pictureProvider: AndroidPictureProvider
+    private lateinit var queryService: QueryService
+    private lateinit var paintingService: PaintingService
+    private lateinit var designService: DesignService
+    private var onActivityResultHandler: ((Int, Int, Intent?) -> Unit)? = null
+    private var activeDialogFragment: ApplyingDialogFragment? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+        serviceProvider = AndroidServiceProvider(this)
+        pictureProvider = AndroidPictureProvider(this)
+        queryService = serviceProvider.queryService
+        paintingService = serviceProvider.paintingService
+        designService = serviceProvider.designService
+        fab.setOnClickListener { _ ->
+            val fragment: DialogFragment = AddPaintingFragment()
+            // if (designService.isLargeDevice) {
+            fragment.show(supportFragmentManager, "dialog")
+            /*} else {
+                supportFragmentManager.beginTransaction().apply {
+                    setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    add(android.R.id.content, fragment)
+                    addToBackStack(null)
+                    commit()
+                }
+            }*/
         }
         progressBar.apply {
             progress = 0
             secondaryProgress = 0
             max = 10
         }
-        load({ progressBar.progress = it }, { progressBar.visibility = INVISIBLE })
+        loadContent({ progressBar.progress = it }, { progressBar.visibility = INVISIBLE })
         swipeRefreshLayout.onRefresh {
-            load(completionHandler = { swipeRefreshLayout.isRefreshing = false })
+            loadContent(completionHandler = { swipeRefreshLayout.isRefreshing = false })
         }
     }
 
 
-    private fun load(onProgress: (Int) -> Unit = {}, completionHandler: () -> Unit = {}) {
+    /**
+     *
+     */
+    private fun loadContent(onProgress: (percent: Int) -> Unit = {}, completionHandler: () -> Unit = {}) {
         doAsync {
             bg {
-                for (i in 1..10) {
-                    Thread.sleep(500) //TODO Load
-                    uiThread {
-                        onProgress(i * 10)
+                queryService.allPaintingsQuery.toLiveQuery().apply {
+                    addChangeListener {
+                        paintingService.getFromQueryResult(it.rows)
                     }
+                    start()
                 }
+                uiThread { onProgress(50) }
             }.invokeOnCompletion {
                 uiThread {
                     completionHandler()
@@ -52,25 +92,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-}
 
-private data class CardModel(val title: String, val picture: Drawable)
-
-private class ListAdapter: RecyclerView.Adapter<ListAdapter.Holder>() {
-
-    override fun getItemCount(): Int {
-        TODO("not implemented") //TODO: not implemented
+    /** See [AppCompatActivity] */
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
     }
 
-    override fun onBindViewHolder(holder: Holder?, position: Int) {
-        TODO("not implemented") //TODO: not implemented
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        onActivityResultHandler?.invoke(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): Holder {
-        TODO("not implemented") //TODO: not implemented
+    /** Set the handler handling results of activities */
+    fun setOnActivityResultHandler(handler: (requestCode: Int, resultCode: Int, data: Intent?) -> Unit) {
+        onActivityResultHandler = handler
     }
 
-    class Holder(view: CardView): RecyclerView.ViewHolder(view) {
+    /** Set the current active dialog fragment */
+    fun setActiveDialogFragment(dialogFragment: ApplyingDialogFragment) {
+        activeDialogFragment = dialogFragment
+    }
+
+    /** The apply action on the current active dialog fragment */
+    fun onApply(menuItem: MenuItem) {
+        activeDialogFragment?.onApply(menuItem)
+    }
+
+    /** Button action on the current active dialog fragment */
+    fun onDialogButton(view: View) {
+        activeDialogFragment?.onDialogButton(view)
     }
 
 }

@@ -94,4 +94,13 @@
     <string name="action_settings">Settings</string>
     <string name="initial_loading_message">Loading…</string>
     <string name="main_card_missing_title">&lt;Missing Title&gt;</string>
+
+    <string name="image_name">Image Name</string>
+    <string name="add_painting_title">Add painting</string>
+    <string name="add_painting_warning_name_missing">The title may not be empty.</string>
+    <string name="add_painting_warning_image_missing">The image may not be empty.</string>
+    <string name="add_painting_warning_image_not_readable">The image could not be processed.</string>
+    <string name="add_painting_warning_no_id">The painting could not be saved.</string>
+    <string name="add_painting_apply">Apply</string>
+    <string name="add_painting_image_button_description">Button to add/change the main image</string>
 </resources>
