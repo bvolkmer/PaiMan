@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.CardView
@@ -24,6 +25,7 @@ import de.x4fyr.paiman.lib.services.QueryService
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import org.jetbrains.anko.displayMetrics
@@ -50,7 +52,63 @@ class MainActivity: AppCompatActivity() {
 
     private lateinit var gridAdapter: GridAdapter
     private var models: MutableList<Model> = mutableListOf()
+    private var selectedPositions: MutableSet<Int> = hashSetOf()
 
+    private val actionModeCallback = object: ActionMode.Callback {
+        /** See [ActionMode.Callback] */
+        override fun onActionItemClicked(mode: ActionMode, menuItem: MenuItem): Boolean {
+            when {
+                menuItem.itemId == R.id.main_selection_delete -> {
+                    selectedPositions.forEach { paintingService.delete(models[it].id) }
+                    mode.finish()
+                    Snackbar.make(main_layout, R.string.main_delete_notification, Snackbar.LENGTH_SHORT).show()
+                    reloadContent()
+                    return true
+                }
+            }
+            return false
+        }
+
+        /** See [ActionMode.Callback] */
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu?): Boolean {
+            mode.menuInflater.inflate(R.menu.selection_menu_main, menu)
+            return true
+        }
+
+        /** See [ActionMode.Callback] */
+        override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean = false
+
+        /** See [ActionMode.Callback] */
+        override fun onDestroyActionMode(mode: ActionMode?) {
+            selectedPositions.clear()
+            gridAdapter.notifyDataSetChanged()
+            actionMode = null
+        }
+
+
+    }
+    private var actionMode: ActionMode? = null
+
+    /** Actions that happen on long click on a painting in the grid.
+     *
+     * Mainly selecting the item and enter/exit selection mode
+     */
+    val onPaintingLongClick: (id: Int) -> Unit = { id ->
+        //if (actionMode != null) return
+        if (selectedPositions.contains(id))
+            selectedPositions.remove(id)
+        else
+            selectedPositions.add(id)
+        gridAdapter.notifyDataSetChanged()
+        val selectedCount = selectedPositions.size
+        if (selectedCount > 0) {
+            if (actionMode == null) {
+                actionMode = startActionMode(actionModeCallback)
+            }
+        } else
+            actionMode?.finish()
+        actionMode?.title = getString(R.string.main_selection_title, selectedCount)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +119,7 @@ class MainActivity: AppCompatActivity() {
         queryService = serviceProvider.queryService
         paintingService = serviceProvider.paintingService
         designService = serviceProvider.designService
-        gridAdapter = GridAdapter(models, resources)
+        gridAdapter = GridAdapter(models, selectedPositions, resources)
 
         val spanCount = Math.floor(
                 displayMetrics.widthPixels/TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 106.toFloat(),
@@ -93,7 +151,7 @@ class MainActivity: AppCompatActivity() {
                                 Model(id = it.id, mainImage = paintingService.getPictureStream(it.mainPicture, it),
                                         title = it.title, mainImageId = it.mainPicture.id)
                             }
-                        } else listOf<Model>()
+                        } else listOf()
                     }
                     models.clear()
                     models.addAll(newModels.await())
@@ -103,14 +161,14 @@ class MainActivity: AppCompatActivity() {
             }
             start()
         }
-        swipeRefreshLayout.onRefresh { loadContent(completionHandler = { swipeRefreshLayout.isRefreshing = false }) }
+        swipeRefreshLayout.onRefresh { reloadContent(completionHandler = { swipeRefreshLayout.isRefreshing = false }) }
     }
 
 
     /**
      *
      */
-    private fun loadContent(completionHandler: () -> Unit = {}) {
+    private fun reloadContent(completionHandler: () -> Unit = {}) {
         async(UI) {
             val newModels = async(CommonPool) {
                 paintingService.getFromQueryResult(queryService.allPaintingsQuery.run()).map {
@@ -156,39 +214,58 @@ class MainActivity: AppCompatActivity() {
         activeDialogFragment?.onDialogButton(view)
     }
 
-    private data class Model(val id: String, val mainImage: InputStream, val title: String, val mainImageId: String)
+}
 
-    private class GridAdapter(val models: MutableList<Model>, val resources: Resources)
-        : RecyclerView.Adapter<GridAdapter.ModelViewHolder>() {
 
-        /** See [RecyclerView.Adapter] */
-        override fun onBindViewHolder(holder: ModelViewHolder, position: Int) {
-            val model = models[position]
-            async(UI) {
-                val image: BitmapDrawable = async(CommonPool) {
-                    BitmapDrawable(resources,
-                            Bitmap.createScaledBitmap(BitmapFactory.decodeStream(model.mainImage), 100, 100, false))
-                }.await()
-                holder.mainImage.image = image
-                holder.title.text = model.title
+private class GridAdapter(val models: MutableList<Model>, val selectedPositions: Set<Int>, val resources: Resources)
+    : RecyclerView.Adapter<GridAdapter.ModelViewHolder>() {
+
+    /** See [RecyclerView.Adapter] */
+    override fun onBindViewHolder(holder: ModelViewHolder, position: Int) {
+        val model = models[position]
+        async(UI) {
+            val imageDeferred: Deferred<BitmapDrawable> = async(CommonPool) {
+                BitmapDrawable(resources,
+                        Bitmap.createScaledBitmap(BitmapFactory.decodeStream(model.mainImage), 100, 100, false))
             }
-        }
-
-        /** See [RecyclerView.Adapter] */
-        override fun getItemCount(): Int = models.size
-
-        /** See [RecyclerView.Adapter] */
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ModelViewHolder
-                = ModelViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.card_main, parent, false))
-
-        private class ModelViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-            /** [CardView] container */
-            var container: CardView = itemView.findViewById<CardView>(R.id.painting_preview_card)
-            /** [ImageView] containing the main image preview */
-            var mainImage: ImageView = itemView.findViewById<ImageView>(R.id.painting_preview_image)
-            /** [TextView] containing the title */
-            var title: TextView = itemView.findViewById<TextView>(R.id.painting_preview_title)
+            holder.title.text = model.title
+            if (selectedPositions.contains(position)) {
+                holder.container.cardElevation = holder.container.maxCardElevation
+                //holder.container.setCardBackgroundColor(resources.getColor(R.color.cardview_dark_background))
+            } else {
+                holder.container.cardElevation = 2.toFloat()
+                //holder.container.setCardBackgroundColor(resources.getColor(R.color.cardview_light_background))
+            }
+            val image: BitmapDrawable = imageDeferred.await()
+            holder.mainImage.image = image
         }
     }
 
+    /** See [RecyclerView.Adapter] */
+    override fun getItemCount(): Int = models.size
+
+    /** See [RecyclerView.Adapter] */
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ModelViewHolder
+            = ModelViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.card_main, parent, false))
+
+    private class ModelViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+
+        /** [CardView] container */
+        var container: CardView = itemView.findViewById(R.id.painting_preview_card)
+        /** [ImageView] containing the main image preview */
+        var mainImage: ImageView = itemView.findViewById(R.id.painting_preview_image)
+        /** [TextView] containing the title */
+        var title: TextView = itemView.findViewById(R.id.painting_preview_title)
+
+        init {
+            container.setOnLongClickListener {
+                (container.context as MainActivity).onPaintingLongClick(adapterPosition)
+                false
+            }
+        }
+
+    }
+
 }
+
+private data class Model(val id: String, val mainImage: InputStream, val title: String, val mainImageId: String)
