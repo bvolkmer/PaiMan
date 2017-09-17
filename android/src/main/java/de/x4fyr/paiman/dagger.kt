@@ -53,8 +53,6 @@ abstract class ActivitiesModule {
     @ContributesAndroidInjector(modules = arrayOf())
     abstract fun contributeMainActivityInjector(): MainActivity
 
-    @ContributesAndroidInjector(modules = arrayOf())
-    abstract fun contributeDriveTestActivity(): DriveTestActivity
 }
 
 @Scope

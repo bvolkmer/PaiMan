@@ -2,7 +2,6 @@ package de.x4fyr.paiman
 
 import android.app.Activity
 import android.app.Dialog
-import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -239,7 +238,6 @@ class MainActivity: BaseActivity(), HasActivityInjector {
     fun onMenuClick(item: MenuItem) {
         when {
             item.itemId == R.id.action_settings -> TODO("Not implemented") //TODO: Not implemented
-            item.itemId == R.id.action_gdrive_test -> startActivity(Intent(this, DriveTestActivity::class.java))
         }
     }
 
