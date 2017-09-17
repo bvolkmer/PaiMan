@@ -1,53 +1,73 @@
 package de.x4fyr.paiman
 
+import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.app.DialogFragment
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.StaggeredGridLayoutManager
+import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
+import dagger.android.AndroidInjection
+import dagger.android.AndroidInjector
+import dagger.android.DispatchingAndroidInjector
+import dagger.android.HasActivityInjector
 import de.x4fyr.paiman.app.ApplyingDialogFragment
+import de.x4fyr.paiman.app.BaseActivity
 import de.x4fyr.paiman.lib.provider.AndroidPictureProvider
 import de.x4fyr.paiman.lib.provider.AndroidServiceProvider
+import de.x4fyr.paiman.lib.provider.PictureProvider
 import de.x4fyr.paiman.lib.services.DesignService
 import de.x4fyr.paiman.lib.services.PaintingService
 import de.x4fyr.paiman.lib.services.QueryService
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.fragment_add_painting.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.displayMetrics
 import org.jetbrains.anko.image
+import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.support.v4.onRefresh
-import java.io.InputStream
+import java.io.File
+import javax.inject.Inject
 
 /** Main Activity of the app, which is launched first and shows a list of current paintings
  *
  * It initialises the different providers.
  */
-class MainActivity: AppCompatActivity() {
+class MainActivity: BaseActivity(), HasActivityInjector {
+    /** [DispatchingAndroidInjector] for dependency injection */
+    @Inject lateinit var dispatchingActivityInjector: DispatchingAndroidInjector<Activity>
 
     /** Initial [AndroidServiceProvider] */
-    lateinit var serviceProvider: AndroidServiceProvider
+    @Inject lateinit var serviceProvider: AndroidServiceProvider
     /** Initial [AndroidPictureProvider] */
     lateinit var pictureProvider: AndroidPictureProvider
-    private lateinit var queryService: QueryService
-    private lateinit var paintingService: PaintingService
-    private lateinit var designService: DesignService
+    /** [QueryService] instance*/
+    @Inject lateinit var queryService: QueryService
+    /** [PaintingService] instance */
+    @Inject lateinit var paintingService: PaintingService
+    /** [DesignService] instance */
+    @Inject lateinit var designService: DesignService
 
-    private var onActivityResultHandler: ((Int, Int, Intent?) -> Unit)? = null
     private var activeDialogFragment: ApplyingDialogFragment? = null
 
     private lateinit var gridAdapter: GridAdapter
@@ -59,10 +79,14 @@ class MainActivity: AppCompatActivity() {
         override fun onActionItemClicked(mode: ActionMode, menuItem: MenuItem): Boolean {
             when {
                 menuItem.itemId == R.id.main_selection_delete -> {
-                    selectedPositions.forEach { paintingService.delete(models[it].id) }
-                    mode.finish()
-                    Snackbar.make(main_layout, R.string.main_delete_notification, Snackbar.LENGTH_SHORT).show()
-                    reloadContent()
+                    launch(CommonPool) {
+                        selectedPositions.forEach { paintingService.delete(models[it].id) }
+                        launch(UI) {
+                            mode.finish()
+                            Snackbar.make(main_layout, R.string.main_delete_notification, Snackbar.LENGTH_SHORT).show()
+                            reloadContent()
+                        }
+                    }
                     return true
                 }
             }
@@ -111,14 +135,11 @@ class MainActivity: AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        serviceProvider = AndroidServiceProvider(this)
         pictureProvider = AndroidPictureProvider(this)
-        queryService = serviceProvider.queryService
-        paintingService = serviceProvider.paintingService
-        designService = serviceProvider.designService
         gridAdapter = GridAdapter(models, selectedPositions, resources)
 
         val spanCount = Math.floor(
@@ -148,7 +169,10 @@ class MainActivity: AppCompatActivity() {
                     val newModels = async(CommonPool) {
                         if (it.rows != null) {
                             paintingService.getFromQueryResult(it.rows!!).map {
-                                Model(id = it.id, mainImage = paintingService.getPictureStream(it.mainPicture, it),
+                                Model(id = it.id, mainImage = async(CommonPool) {
+                                    Bitmap.createScaledBitmap(BitmapFactory.decodeStream(
+                                            paintingService.getPictureStream(it.mainPicture)), 100, 100, false)
+                                },
                                         title = it.title, mainImageId = it.mainPicture.id)
                             }
                         } else listOf()
@@ -164,6 +188,8 @@ class MainActivity: AppCompatActivity() {
         swipeRefreshLayout.onRefresh { reloadContent(completionHandler = { swipeRefreshLayout.isRefreshing = false }) }
     }
 
+    /** [HasActivityInjector] for this [Activity] */
+    override fun activityInjector(): AndroidInjector<Activity> = dispatchingActivityInjector
 
     /**
      *
@@ -172,7 +198,12 @@ class MainActivity: AppCompatActivity() {
         async(UI) {
             val newModels = async(CommonPool) {
                 paintingService.getFromQueryResult(queryService.allPaintingsQuery.run()).map {
-                    Model(id = it.id, mainImage = paintingService.getPictureStream(it.mainPicture, it),
+                    Model(id = it.id,
+                            mainImage = async(CommonPool) {
+                                Bitmap.createScaledBitmap(
+                                        BitmapFactory.decodeStream(paintingService.getPictureStream(it.mainPicture)),
+                                        100, 100, false)
+                            },
                             title = it.title, mainImageId = it.mainPicture.id)
                 }
             }
@@ -187,16 +218,6 @@ class MainActivity: AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        onActivityResultHandler?.invoke(requestCode, resultCode, data)
-        super.onActivityResult(requestCode, resultCode, data)
-    }
-
-    /** Set the handler handling results of activities */
-    fun setOnActivityResultHandler(handler: (requestCode: Int, resultCode: Int, data: Intent?) -> Unit) {
-        onActivityResultHandler = handler
     }
 
     /** Set the current active dialog fragment */
@@ -214,6 +235,14 @@ class MainActivity: AppCompatActivity() {
         activeDialogFragment?.onDialogButton(view)
     }
 
+    /** Handler for menu clicks */
+    fun onMenuClick(item: MenuItem) {
+        when {
+            item.itemId == R.id.action_settings -> TODO("Not implemented") //TODO: Not implemented
+            item.itemId == R.id.action_gdrive_test -> startActivity(Intent(this, DriveTestActivity::class.java))
+        }
+    }
+
 }
 
 
@@ -223,21 +252,19 @@ private class GridAdapter(val models: MutableList<Model>, val selectedPositions:
     /** See [RecyclerView.Adapter] */
     override fun onBindViewHolder(holder: ModelViewHolder, position: Int) {
         val model = models[position]
-        async(UI) {
-            val imageDeferred: Deferred<BitmapDrawable> = async(CommonPool) {
-                BitmapDrawable(resources,
-                        Bitmap.createScaledBitmap(BitmapFactory.decodeStream(model.mainImage), 100, 100, false))
+        holder.title.text = model.title
+        if (selectedPositions.contains(position)) {
+            holder.container.cardElevation = holder.container.maxCardElevation
+            //holder.container.setCardBackgroundColor(resources.getColor(R.color.cardview_dark_background))
+        } else {
+            holder.container.cardElevation = 2.toFloat()
+            //holder.container.setCardBackgroundColor(resources.getColor(R.color.cardview_light_background))
+        }
+        launch(CommonPool) {
+            val image = BitmapDrawable(resources, model.mainImage.await())
+            launch(UI) {
+                holder.mainImage.image = image
             }
-            holder.title.text = model.title
-            if (selectedPositions.contains(position)) {
-                holder.container.cardElevation = holder.container.maxCardElevation
-                //holder.container.setCardBackgroundColor(resources.getColor(R.color.cardview_dark_background))
-            } else {
-                holder.container.cardElevation = 2.toFloat()
-                //holder.container.setCardBackgroundColor(resources.getColor(R.color.cardview_light_background))
-            }
-            val image: BitmapDrawable = imageDeferred.await()
-            holder.mainImage.image = image
         }
     }
 
@@ -268,4 +295,111 @@ private class GridAdapter(val models: MutableList<Model>, val selectedPositions:
 
 }
 
-private data class Model(val id: String, val mainImage: InputStream, val title: String, val mainImageId: String)
+
+private data class Model(val id: String, val mainImage: Deferred<Bitmap>, val title: String, val mainImageId:
+String)
+
+
+/** Dialog to add new paintings */
+class AddPaintingFragment: ApplyingDialogFragment() {
+
+    private lateinit var paintingService: PaintingService
+    private lateinit var pictureProvider: PictureProvider
+    private lateinit var currentView: View
+
+    private var model = Model(null, null)
+
+    private val picturePickHandler: (String?) -> Unit = {
+        Log.i("IMAGE_SELECT", "Got image $it")
+        model.imageUrl = it
+        if (it != null) {
+            add_painting_main_image.image = Drawable.createFromPath(it)
+        } else {
+            add_painting_main_image.imageResource = android.R.drawable.ic_menu_report_image
+        }
+    }
+
+    /** See [ApplyingDialogFragment] */
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_add_painting, container, false).also {
+            val toolbar = it.findViewById<Toolbar>(R.id.add_painting_toolbar)
+            toolbar.inflateMenu(R.menu.menu_add_painting)
+            toolbar.setTitle(R.string.add_painting_title)
+        }
+    }
+
+    /** See [ApplyingDialogFragment] */
+    override fun onStart() {
+        (context as MainActivity).setActiveDialogFragment(this)
+        if (model.imageUrl == null) pictureProvider.pickPicture(picturePickHandler)
+        super.onStart()
+    }
+
+    /** See [ApplyingDialogFragment] */
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = super.onCreateDialog(savedInstanceState)
+            .also {
+                it.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                paintingService = (context as MainActivity).serviceProvider.paintingService
+                pictureProvider = (context as MainActivity).pictureProvider
+            }
+
+    /** See [ApplyingDialogFragment] */
+    override fun onCreate(savedInstanceState: Bundle?) {
+        paintingService = (context as MainActivity).serviceProvider.paintingService
+        pictureProvider = (context as MainActivity).pictureProvider
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onApply(menuItem: MenuItem) {
+        model.title = add_painting_name.text!!.toString()
+
+        when {
+            model.title.isNullOrEmpty() -> errorDialog(R.string.add_painting_warning_name_missing)
+            model.imageUrl.isNullOrEmpty() -> errorDialog(R.string.add_painting_warning_image_missing)
+            else -> launch(CommonPool) {
+                var id: String? = null
+                val mainPictureFile = File(model.imageUrl!!)
+                if (mainPictureFile.exists() && mainPictureFile.canRead()) {
+                    val inputStream = mainPictureFile.inputStream()
+                    if (inputStream.available() > 0) {
+                        Log.i("IMAGE_LOADING",
+                                "InputStream of size ${inputStream.available()}: ${mainPictureFile.path}")
+                        id = paintingService.composeNewPainting(title = model.title!!, mainPicture = inputStream).id
+                    } else {
+                        errorDialog(R.string.add_painting_warning_image_not_readable)
+                        Log.w("IMAGE_LOADING", "Trying to read empty file: ${mainPictureFile.path}")
+                    }
+                } else {
+                    errorDialog(R.string.add_painting_warning_image_not_readable)
+                    Log.w("IMAGE_LOADING",
+                            "Error: ${mainPictureFile.path} -> ${mainPictureFile.exists()} || ${mainPictureFile.canRead()}")
+                }
+                if (id != null) {
+                    dismiss()
+                } else {
+                    errorDialog(R.string.add_painting_warning_no_id)
+                    Log.w("IMAGE_LOADING", "Saving finished unsuccessful")
+                }
+            }
+        }
+    }
+
+    override fun onDialogButton(view: View) {
+        when {
+            view.id == R.id.add_painting_main_image -> pictureProvider.pickPicture(picturePickHandler)
+        }
+    }
+
+    private fun errorDialog(msg: Int) {
+        AlertDialog.Builder(activity)
+                .setMessage(msg)
+                .create()
+                .show()
+    }
+
+    /** Model containing data of the to be created painting */
+    data class Model(var title: String?, var imageUrl: String?)
+
+}

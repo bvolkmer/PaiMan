@@ -1,7 +1,6 @@
 package de.x4fyr.paiman.lib.provider
 
 import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.content.CursorLoader
 import android.content.Intent
@@ -9,7 +8,7 @@ import android.net.Uri
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
-import de.x4fyr.paiman.MainActivity
+import de.x4fyr.paiman.app.BaseActivity
 import java.io.File
 
 
@@ -17,7 +16,7 @@ import java.io.File
  * Created by x4fyr on 3/22/17.
  * Taken an modified from https://gist.github.com/Mariovc/f06e70ebe8ca52fbbbe2
  */
-class AndroidPictureProvider(var context: Context) : PictureProvider {
+class AndroidPictureProvider(private var owningActivity: BaseActivity) : PictureProvider {
 
     companion object {
         private const val TAG = "ImagePicker"
@@ -26,24 +25,23 @@ class AndroidPictureProvider(var context: Context) : PictureProvider {
     }
 
     /** Action on return of the picker */
-    var onReturn: ((url: String) -> Unit)? = null
+    private var onReturn: ((url: String) -> Unit)? = null
 
 
     init {
-        (context as MainActivity).setOnActivityResultHandler { requestCode, resultCode, intent ->
+        owningActivity.addActivityResultHandler(this) { requestCode, resultCode, intent ->
             if (requestCode == PICK_IMAGE_ID)
-                onReturn?.invoke(getUriFromResult(context, resultCode, intent))
+                onReturn?.invoke(getUriFromResult(owningActivity, resultCode, intent))
         }
     }
 
     override fun pickPicture(onReturn: (url: String?) -> Unit) {
-        (context as MainActivity).startActivityForResult(getPickImageIntent(), PICK_IMAGE_ID)
+        owningActivity.startActivityForResult(getPickImageIntent(), PICK_IMAGE_ID)
         this.onReturn = onReturn
     }
 
 
-    /** Create the intent to launch the picker */
-    fun getPickImageIntent(): Intent? {
+    private fun getPickImageIntent(): Intent? {
         var chooserIntent: Intent? = null
 
         var intentList: MutableList<Intent> = ArrayList()
@@ -51,9 +49,9 @@ class AndroidPictureProvider(var context: Context) : PictureProvider {
         val pickIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         val takePhotoIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         takePhotoIntent.putExtra("return-data", true)
-        takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile(context)))
-        intentList = addIntentsToList(context, intentList, pickIntent)
-        intentList = addIntentsToList(context, intentList, takePhotoIntent)
+        takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(getTempFile(owningActivity)))
+        intentList = addIntentsToList(owningActivity, intentList, pickIntent)
+        intentList = addIntentsToList(owningActivity, intentList, takePhotoIntent)
 
         if (intentList.size > 0) {
             chooserIntent = Intent.createChooser(intentList.removeAt(intentList.size - 1), "Pick Image")
@@ -91,15 +89,15 @@ class AndroidPictureProvider(var context: Context) : PictureProvider {
                 selectedImage = imageFile.path
             } else {
                 /** ALBUM **/
-                if (imageReturnedIntent.data.toString().contains("content:/")) {
+                selectedImage = if (imageReturnedIntent.data.toString().contains("content:/")) {
                     val projection: Array<String> = Array(1, { MediaStore.Images.Media.DATA })
                     val cursor = CursorLoader(context, imageReturnedIntent.data, projection, null, null,
                             null).loadInBackground()
                     val idx = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
                     cursor.moveToFirst()
-                    selectedImage = cursor.getString(idx)
+                    cursor.getString(idx)
                 } else {
-                    selectedImage = imageReturnedIntent.data.path
+                    imageReturnedIntent.data.path
                 }
             }
         }

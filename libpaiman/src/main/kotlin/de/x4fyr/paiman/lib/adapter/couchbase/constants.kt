@@ -1,7 +1,9 @@
-package de.x4fyr.paiman.lib.adapter.database
+@file:Suppress("KDocMissingDocumentation")
+
+package de.x4fyr.paiman.lib.adapter.couchbase
 
 /**
- * Created by x4fyr on 3/22/17.
+ * Database tags
  */
 
 internal const val DB_NAME = "paintings"

@@ -1,9 +1,9 @@
 package de.x4fyr.paiman.lib.services
 
 import com.couchbase.lite.QueryEnumerator
-import de.x4fyr.paiman.lib.adapter.database.PaintingCRUDAdapter
-import de.x4fyr.paiman.lib.adapter.database.PictureCRUDAdapter
-import de.x4fyr.paiman.lib.adapter.database.QueryAdapter
+import de.x4fyr.paiman.lib.adapter.GoogleDriveStorageAdapter
+import de.x4fyr.paiman.lib.adapter.PaintingCRUDAdapter
+import de.x4fyr.paiman.lib.adapter.couchbase.QueryAdapter
 import de.x4fyr.paiman.lib.domain.*
 import org.threeten.bp.LocalDate
 import java.io.InputStream
@@ -17,7 +17,7 @@ import java.util.logging.Logger
  */
 internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdapter,
                                queryAdapter: QueryAdapter,
-                               private val pictureCRUDAdapter: PictureCRUDAdapter):
+                               private val storageAdapter: GoogleDriveStorageAdapter):
         PaintingService,
         QueryService by queryAdapter {
 
@@ -29,26 +29,26 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
 
     private val dummyPicture = Picture("dummy")
 
-    override fun get(id: String): SavedPainting {
+    override suspend fun get(id: String): SavedPainting {
         readLock.lock()
         val result = paintingCRUDAdapter.read(id)
         readLock.unlock()
         return result ?: throw ServiceException("Could not get")
     }
 
-    override fun getAll(ids: Set<String>): Set<SavedPainting> {
+    override suspend fun getAll(ids: Set<String>): Set<SavedPainting> {
         readLock.lock()
         val result = paintingCRUDAdapter.read(ids)
         readLock.unlock()
         return result
     }
 
-    override fun composeNewPainting(title: String,
-                                    mainPicture: InputStream,
-                                    wip: Set<InputStream>,
-                                    reference: Set<InputStream>,
-                                    sellingInfo: SellingInformation?,
-                                    tags: Set<String>): SavedPainting {
+    override suspend fun composeNewPainting(title: String,
+                                            mainPicture: InputStream,
+                                            wip: Set<InputStream>,
+                                            reference: Set<InputStream>,
+                                            sellingInfo: SellingInformation?,
+                                            tags: Set<String>): SavedPainting {
         val newPainting = UnsavedPainting(
                 title = title,
                 wip = setOf(),
@@ -56,129 +56,207 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
                 sellingInfo = sellingInfo,
                 tags = tags, mainPicture = dummyPicture)
         writeLock.lock()
-        var savedPainting = paintingCRUDAdapter.create(newPainting) ?: throw ServiceException("Could not create " +
-                "painting")
-        LOG.info("Saving mainPicture to DB")
-        val mainPictureID = pictureCRUDAdapter.createPicture(pictureStream = mainPicture, paintingID = savedPainting.id)
-        LOG.info("Saving wips to DB")
-        val wipIDs = wip.map { pictureCRUDAdapter.createPicture(it, savedPainting.id) }
-        LOG.info("Saving refs to DB")
-        val refIDs = reference.map { pictureCRUDAdapter.createPicture(it, savedPainting.id) }
-        LOG.info("Saving mainPicture, wips, refs to painting")
-        savedPainting = paintingCRUDAdapter.update(painting = savedPainting.copy(
-                mainPicture = Picture(mainPictureID),
-                wip = wipIDs.map(::Picture).toSet(),
-                references = refIDs.map(::Picture).toSet()
-        )) ?: throw ServiceException("Could not add pictures to painting")
-        writeLock.unlock()
-        return savedPainting
+        try {
+            var savedPainting = paintingCRUDAdapter.create(newPainting) ?: throw ServiceException("Could not create " +
+                    "painting")
+            LOG.info("Saving mainPicture to DB")
+            val mainPictureID = storageAdapter.saveImage(mainPicture)
+            LOG.info("Saving wips to DB")
+            val wipIDs: List<String> = wip.map { storageAdapter.saveImage(it) }
+            LOG.info("Saving refs to DB")
+            val refIDs = reference.map { storageAdapter.saveImage(it) }
+            LOG.info("Saving mainPicture, wips, refs to painting")
+            savedPainting = paintingCRUDAdapter.update(painting = savedPainting.copy(
+                    mainPicture = Picture(mainPictureID),
+                    wip = wipIDs.map(::Picture).toSet(),
+                    references = refIDs.map(::Picture).toSet()
+            )) ?: throw ServiceException("Could not add pictures to painting")
+            writeLock.unlock()
+            return savedPainting
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun replaceMainPicture(painting: SavedPainting,
-                                    newPicture: InputStream,
-                                    moveOldToWip: Boolean): SavedPainting {
+    override suspend fun replaceMainPicture(painting: SavedPainting,
+                                            newPicture: InputStream,
+                                            moveOldToWip: Boolean): SavedPainting {
         writeLock.lock()
-        val mainPictureID = pictureCRUDAdapter.createPicture(newPicture, paintingID = painting.id)
-        val result = paintingCRUDAdapter.update(painting = painting.copy(
-                mainPicture = Picture(mainPictureID),
-                wip = if (moveOldToWip) painting.wip + painting.mainPicture else painting.wip))
-        writeLock.unlock()
-        return result ?: throw ServiceException("Could not replace main picture")
+        try {
+            val mainPictureID = storageAdapter.saveImage(newPicture)
+            val result = paintingCRUDAdapter.update(painting = painting.copy(
+                    mainPicture = Picture(mainPictureID),
+                    wip = if (moveOldToWip) painting.wip + painting.mainPicture else painting.wip))
+            writeLock.unlock()
+            return result ?: throw ServiceException("Could not replace main picture")
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun changePainting(painting: SavedPainting): SavedPainting {
+    override suspend fun changePainting(painting: SavedPainting): SavedPainting {
         writeLock.lock()
-        val result = paintingCRUDAdapter.update(painting)
-        writeLock.unlock()
-        return result ?: throw ServiceException("Could not update painting")
+        try {
+            val result = paintingCRUDAdapter.update(painting)
+            writeLock.unlock()
+            return result ?: throw ServiceException("Could not update painting")
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun sellPainting(painting: SavedPainting,
-                              purchaser: Purchaser,
-                              date: LocalDate,
-                              price: Double): SavedPainting {
+    override suspend fun sellPainting(painting: SavedPainting,
+                                      purchaser: Purchaser,
+                                      date: LocalDate,
+                                      price: Double): SavedPainting {
         writeLock.lock()
-        val result = paintingCRUDAdapter.update(
-                painting.copy(sellingInfo = SellingInformation(purchaser = purchaser, date = date, price = price)))
-        writeLock.unlock()
-        return result ?: throw ServiceException("Could not sell painting")
+        try {
+            val result = paintingCRUDAdapter.update(
+                    painting.copy(sellingInfo = SellingInformation(purchaser = purchaser, date = date, price = price)))
+            writeLock.unlock()
+            return result ?: throw ServiceException("Could not sell painting")
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
 
     }
 
-    override fun addWipPicture(painting: SavedPainting, images: Set<InputStream>): SavedPainting {
+    override suspend fun addWipPicture(painting: SavedPainting, images: Set<InputStream>): SavedPainting {
         writeLock.lock()
-        val wipIDs = images.map { pictureCRUDAdapter.createPicture(pictureStream = it, paintingID = painting.id) }
-        val result = paintingCRUDAdapter.update(painting.copy(wip = painting.wip + wipIDs.map(::Picture)))
-        writeLock.unlock()
-        return result ?: throw ServiceException("Could not add wip")
+        try {
+            val wipIDs = images.map { storageAdapter.saveImage(it) }
+            val result = paintingCRUDAdapter.update(painting.copy(wip = painting.wip + wipIDs.map(::Picture)))
+            writeLock.unlock()
+            return result ?: throw ServiceException("Could not add wip")
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun removeWipPicture(painting: SavedPainting, images: Set<String>): SavedPainting {
+    override suspend fun removeWipPicture(painting: SavedPainting, images: Set<String>): SavedPainting {
         writeLock.lock()
-        val savedPainting = paintingCRUDAdapter.update(painting.copy(wip = painting.wip - images.map(::Picture)))
-        images.forEach { pictureCRUDAdapter.deletePicture(id = it, paintingID = painting.id) }
-        writeLock.unlock()
-        return savedPainting ?: throw ServiceException("Could not remove wip")
+        try {
+            val savedPainting = paintingCRUDAdapter.update(painting.copy(wip = painting.wip - images.map(::Picture)))
+            images.forEach {
+                storageAdapter.deleteImage(it)
+            }
+            writeLock.unlock()
+            return savedPainting ?: throw ServiceException("Could not remove wip")
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun addReferences(painting: SavedPainting,
-                               references: Set<InputStream>): SavedPainting {
+    override suspend fun addReferences(painting: SavedPainting,
+                                       references: Set<InputStream>): SavedPainting {
         writeLock.lock()
-        val refIDs = references.map { pictureCRUDAdapter.createPicture(pictureStream = it, paintingID = painting.id) }
-        val result = paintingCRUDAdapter.update(painting.copy(references = painting.references + refIDs.map(::Picture)))
-        writeLock.unlock()
-        return result ?: throw ServiceException("Could not add reference")
+        try {
+            val refIDs = references.map { storageAdapter.saveImage(it) }
+            val result = paintingCRUDAdapter.update(
+                    painting.copy(references = painting.references + refIDs.map(::Picture)))
+            writeLock.unlock()
+            return result ?: throw ServiceException("Could not add reference")
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun removeReferences(painting: SavedPainting, references: Set<String>): SavedPainting {
+    override suspend fun removeReferences(painting: SavedPainting, references: Set<String>): SavedPainting {
         writeLock.lock()
-        val savedPainting = paintingCRUDAdapter.update(
-                painting.copy(references = painting.references - references.map(::Picture)))
-        references.forEach { pictureCRUDAdapter.deletePicture(id = it, paintingID = painting.id) }
-        writeLock.unlock()
-        return savedPainting ?: throw ServiceException("Could not remove painting")
+        try {
+            val savedPainting = paintingCRUDAdapter.update(
+                    painting.copy(references = painting.references - references.map(::Picture)))
+            references.forEach {
+                storageAdapter.deleteImage(it)
+            }
+            writeLock.unlock()
+            return savedPainting ?: throw ServiceException("Could not remove painting")
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun addTags(painting: SavedPainting, tags: Set<String>): SavedPainting {
+    override suspend fun addTags(painting: SavedPainting, tags: Set<String>): SavedPainting {
         writeLock.lock()
-        val result = paintingCRUDAdapter.update(painting.copy(tags = painting.tags + tags))
-        writeLock.unlock()
-        return result ?: throw ServiceException("Could not add tags")
+        try {
+            val result = paintingCRUDAdapter.update(painting.copy(tags = painting.tags + tags))
+            writeLock.unlock()
+            return result ?: throw ServiceException("Could not add tags")
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun removeTags(painting: SavedPainting, tags: Set<String>): SavedPainting {
+    override suspend fun removeTags(painting: SavedPainting, tags: Set<String>): SavedPainting {
         writeLock.lock()
-        val result = paintingCRUDAdapter.update(painting.copy(tags = painting.tags - tags))
-        writeLock.unlock()
-        return result ?: throw ServiceException("Could not remove tags")
+        try {
+            val result = paintingCRUDAdapter.update(painting.copy(tags = painting.tags - tags))
+            writeLock.unlock()
+            return result ?: throw ServiceException("Could not remove tags")
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun getPictureStream(picture: Picture, painting: SavedPainting): InputStream {
+    override suspend fun getPictureStream(picture: Picture): InputStream {
         readLock.lock()
-        val result = pictureCRUDAdapter.readPicture(id = picture.id, paintingID = painting.id)
-        readLock.unlock()
-        return result ?: throw ServiceException("Could not get picture")
+        try {
+            val result = storageAdapter.getImage(picture.id)
+            readLock.unlock()
+            return result
+        } catch (e: Exception) {
+            readLock.unlock()
+            throw e
+        }
     }
 
-    override fun getAllPictureStreams(pictures: Set<Picture>, painting: SavedPainting): Set<InputStream> {
-        readLock.lock()
-        val result = pictureCRUDAdapter.readPictures(pictures.map { it.id }.toSet(), painting.id)
-        readLock.lock()
-        return result
-    }
-
-    override fun getFromQueryResult(queryEnumerator: QueryEnumerator): Set<SavedPainting> = getAll(
+    override suspend fun getFromQueryResult(queryEnumerator: QueryEnumerator): Set<SavedPainting> = getAll(
             queryEnumerator.map { it.key.toString() }.toSet())
 
-    override fun delete(painting: SavedPainting) {
+    override suspend fun delete(painting: SavedPainting) {
         writeLock.lock()
-        paintingCRUDAdapter.delete(id = painting.id)
-        writeLock.unlock()
+        try {
+            storageAdapter.deleteImage(painting.mainPicture.id)
+            painting.wip.forEach { storageAdapter.deleteImage(it.id) }
+            painting.references.forEach { storageAdapter.deleteImage(it.id) }
+            paintingCRUDAdapter.delete(id = painting.id)
+            writeLock.unlock()
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 
-    override fun delete(paintingId: String) {
+    override suspend fun delete(paintingId: String) {
         writeLock.lock()
-        paintingCRUDAdapter.delete(id = paintingId)
-        writeLock.unlock()
+        try {
+            paintingCRUDAdapter.delete(id = paintingId)
+            writeLock.unlock()
+        } finally {
+            if (writeLock.isHeldByCurrentThread) {
+                writeLock.unlock()
+            }
+        }
     }
 }

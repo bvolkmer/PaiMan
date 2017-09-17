@@ -2,7 +2,7 @@ package de.x4fyr.paiman.lib.provider
 
 import android.content.Context
 import com.couchbase.lite.android.AndroidContext
-import de.x4fyr.paiman.lib.provider.ServiceProvider
+import de.x4fyr.paiman.lib.adapter.AndroidGoogleDriveStorageAdapter
 import de.x4fyr.paiman.lib.services.DesignService
 
 /**
@@ -10,7 +10,8 @@ import de.x4fyr.paiman.lib.services.DesignService
  *
  * It also provides the platform depended [DesignService]
  */
-class AndroidServiceProvider(context: Context): ServiceProvider(AndroidContext(context)) {
+class AndroidServiceProvider(context: Context, storageAdapter: AndroidGoogleDriveStorageAdapter): ServiceProvider(
+        AndroidContext(context), storageAdapter) {
 
     /** Provided design service */
     val designService: DesignService = DesignService(context)

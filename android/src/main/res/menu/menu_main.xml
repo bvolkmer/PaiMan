@@ -5,5 +5,6 @@
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
           android:orderInCategory="100"
-          app:showAsAction="never"/>
+          app:showAsAction="never" android:onClick="onMenuClick"/>
+    <item android:title="Gdrive Test" android:id="@+id/action_gdrive_test" app:showAsAction="ifRoom|withText" android:onClick="onMenuClick"/>
 </menu>

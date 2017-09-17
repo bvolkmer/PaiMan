@@ -1,4 +1,4 @@
-package de.x4fyr.paiman.lib.adapter.database
+package de.x4fyr.paiman.lib.adapter.couchbase
 
 import de.x4fyr.paiman.lib.domain.*
 import org.threeten.bp.LocalDate

@@ -1,14 +1,13 @@
 package de.x4fyr.paiman.lib.services
 
 import com.couchbase.lite.Query
-import com.couchbase.lite.QueryEnumerator
-import de.x4fyr.paiman.lib.domain.Painting
-import de.x4fyr.paiman.lib.domain.SavedPainting
 
 /**
- * Created by x4fyr on 3/22/17.
+ * Basic service handling couchbase queries
  */
 interface QueryService {
+    /** A query containing all paintings */
     val allPaintingsQuery: Query
+    /** A query containing everything */
     val allQuery: Query
 }
