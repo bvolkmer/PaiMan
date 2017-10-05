@@ -10,9 +10,7 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.drive.Drive
-import com.google.android.gms.drive.DriveFile
-import com.google.android.gms.drive.MetadataChangeSet
+import com.google.android.gms.drive.*
 import com.google.android.gms.drive.query.Filters
 import com.google.android.gms.drive.query.Query
 import com.google.android.gms.drive.query.SearchableField
@@ -22,6 +20,8 @@ import kotlinx.coroutines.experimental.async
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.UUID
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.withLock
 import kotlin.properties.Delegates
 
 /**
@@ -43,6 +43,8 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
     private var currentActiveActivity: BaseActivity?  by Delegates.observable<BaseActivity?>(null) { _, old, new ->
         Log.i(this::class.simpleName, "$ID: Current active activity changed: $old -> $new")
     }
+
+    private val lock = ReentrantReadWriteLock()
 
     /** Connect [GoogleApiClient] with current active activity */
     fun connect(activeActivity: BaseActivity) {
@@ -98,86 +100,139 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
 
     /** See [GoogleDriveStorageAdapter.getImage]] */
     override suspend fun getImage(id: String): InputStream {
-        connect(currentActiveActivity!!)
-        while (googleApiClient?.isConnected == false) {
-            while (googleApiClient?.isConnecting == true) {
-            }
-            if (googleApiClient?.isConnected == false) {
+        return lock.readLock().withLock {
+            var result: InputStream? = null
+            for (i in 1..10) {
                 connect(currentActiveActivity!!)
-                Log.w(this::class.simpleName, "Trying to reconnect")
+                while (googleApiClient?.isConnected == false) {
+                    while (googleApiClient?.isConnecting == true) {
+                    }
+                    if (googleApiClient?.isConnected == false) {
+                        connect(currentActiveActivity!!)
+                        Log.w(this::class.simpleName, "Trying to reconnect")
+                    }
+                }
+                if (googleApiClient?.isConnected == true) {
+                    val appFolder = Drive.DriveApi.getAppFolder(googleApiClient)
+                    Log.d("${this::class.simpleName}::getImage", "Start attempt $i to get image.")
+                    val queryResult = appFolder.queryChildren(googleApiClient, Query.Builder()
+                            .addFilter(Filters.eq(SearchableField.TITLE, "$id.png"))
+                            .build()).await()
+                    val metadataBuffer: MetadataBuffer
+                    Log.d("${this::class.simpleName}::getImage", "Got queryResult")
+                    if (queryResult.status.isSuccess) {
+                        metadataBuffer = queryResult.metadataBuffer!!
+                    } else {
+                        error("Failed to get image queryResult with status: ${queryResult.status
+                                .statusCode}\n${queryResult
+                                .status.statusMessage}")
+                        continue
+                    }
+                    if (metadataBuffer.count >= 1) {
+                        val fid = metadataBuffer[0].driveId
+                        metadataBuffer.release()
+                        var fileResult: DriveApi.DriveContentsResult
+                        fileResult = fid.asDriveFile().open(googleApiClient, DriveFile.MODE_READ_ONLY,
+                                { _, _ -> }).await()
+                        Log.d("${this::class.simpleName}::getImage", "Got fileResult")
+                        val fd: ParcelFileDescriptor
+                        if (fileResult.status.isSuccess) {
+                            fd = fileResult.driveContents!!.parcelFileDescriptor
+                        } else {
+                            error("Failed to get fileResult with status: ${fileResult.status.statusCode}\n${fileResult
+                                    .status.statusMessage}")
+                            continue
+                        }
+                        result = ParcelFileDescriptor.AutoCloseInputStream(fd)
+                        Log.d("${this::class.simpleName}::getImage", "Successfully got image $id")
+                        break
+                    } else {
+                        error("Failed to get image, as there is no image with id $id found")
+                        continue
+                    }
+                } else {
+                    throw error("Failed to get image, as GoogleApiClient is not connected")
+                }
             }
-        }
-        if (googleApiClient?.isConnected == true) {
-            val appFolder = Drive.DriveApi.getAppFolder(googleApiClient)
-            val queryResult = appFolder.queryChildren(googleApiClient, Query.Builder()
-                    .addFilter(Filters.eq(SearchableField.TITLE, "$id.png"))
-                    .build()).await().metadataBuffer
-            if (queryResult.count >= 1) {
-                val fd = queryResult[0].driveId.asDriveFile().open(googleApiClient, DriveFile.MODE_READ_ONLY,
-                        { _, _ -> }).await().driveContents.parcelFileDescriptor
-                val result = ParcelFileDescriptor.AutoCloseInputStream(fd)
-                Log.i(this::class.simpleName, "Successfully got image $id")
-                return result
-            } else {
-                throw error("Failed to get image, as there is no image with id $id found")
-            }
-        } else {
-            throw error("Failed to get image, as GoogleApiClient is not connected")
+            if (result == null) throw error("Failed to get image ten times in a row.")
+            else result
         }
     }
 
     /** See [GoogleDriveStorageAdapter.saveImage]] */
     override suspend fun saveImage(image: InputStream): String {
-        connect(currentActiveActivity!!)
-        if (googleApiClient?.isConnected == true) {
-            val appFolder = Drive.DriveApi.getAppFolder(googleApiClient)
-            val result = Drive.DriveApi.newDriveContents(googleApiClient).await()
-            if (result.status.isSuccess) {
-                val markableStream: InputStream = if (image.markSupported()) image
-                else image.buffered(image.available())
-                markableStream.mark(Int.MAX_VALUE)
-                val id = UUID.nameUUIDFromBytes(markableStream.readBytes()).toString()
-                markableStream.reset()
-                val compressedImageStream = ByteArrayOutputStream()
-                val bitmap = BitmapFactory.decodeStream(markableStream)
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, compressedImageStream)
-                result.driveContents.outputStream.write(compressedImageStream.toByteArray())
-                val metadataChangeSet = MetadataChangeSet.Builder().setMimeType("image/png").setTitle("$id.png").build()
-                val createResult = appFolder.createFile(googleApiClient, metadataChangeSet, result.driveContents)
-                        .await()
-                if (!createResult.status.isSuccess) {
-                    throw error("Failed to create file")
+        lock.writeLock().withLock {
+            while (googleApiClient?.isConnected == false) {
+                while (googleApiClient?.isConnecting == true) {
+                }
+                if (googleApiClient?.isConnected == false) {
+                    connect(currentActiveActivity!!)
+                    Log.w(this::class.simpleName, "Trying to reconnect")
+                }
+            }
+            if (googleApiClient?.isConnected == true) {
+                val appFolder = Drive.DriveApi.getAppFolder(googleApiClient)
+                val result = Drive.DriveApi.newDriveContents(googleApiClient).await()
+                if (result.status.isSuccess) {
+                    val markableStream: InputStream = if (image.markSupported()) image
+                    else image.buffered(image.available())
+                    markableStream.mark(Int.MAX_VALUE)
+                    val id = UUID.nameUUIDFromBytes(markableStream.readBytes()).toString()
+                    markableStream.reset()
+                    val compressedImageStream = ByteArrayOutputStream()
+                    val bitmap = BitmapFactory.decodeStream(markableStream)
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, compressedImageStream)
+                    result.driveContents.outputStream.write(compressedImageStream.toByteArray())
+                    val metadataChangeSet = MetadataChangeSet.Builder().setMimeType("image/png").setTitle(
+                            "$id.png").build()
+                    val createResult = appFolder.createFile(googleApiClient, metadataChangeSet, result.driveContents)
+                            .await()
+                    if (!createResult.status.isSuccess) {
+                        lock.writeLock().unlock()
+                        throw error("Failed to create file")
+                    } else {
+                        Log.i(this::class.simpleName, "Successfully saved image $id")
+                        return id
+                    }
                 } else {
-                    Log.i(this::class.simpleName, "Successfully saved image $id")
-                    return id
+                    throw error("Failed to create new content with status: ${result.status.statusCode}\n${result.status
+                            .statusMessage}")
                 }
             } else {
-                throw error("Failed to create new content")
+                throw error("Failed to save image, as GoogleApiClient is not connected")
             }
-        } else {
-            throw error("Failed to save image, as GoogleApiClient is not connected")
         }
     }
 
     /** See [GoogleDriveStorageAdapter.deleteImage]] */
     override suspend fun deleteImage(id: String) {
-        connect(currentActiveActivity!!)
-        if (googleApiClient?.isConnected == true) {
-            val appFolder = Drive.DriveApi.getAppFolder(googleApiClient)
-            val queryResult = appFolder.queryChildren(googleApiClient, Query.Builder()
-                    .addFilter(Filters.eq(SearchableField.TITLE, "$id.png"))
-                    .build()).await().metadataBuffer
-            if (queryResult.count == 1) {
-                async(CommonPool) {
-                    queryResult[0].driveId.asDriveFile().delete(googleApiClient)
+        lock.writeLock().withLock {
+            while (googleApiClient?.isConnected == false) {
+                while (googleApiClient?.isConnecting == true) {
                 }
-                Log.i(this::class.simpleName, "Successfully deleted image $id")
-            } else {
-                throw error("Image could not be deleted, as there is no image with id [$id] " +
-                        "found.")
+                if (googleApiClient?.isConnected == false) {
+                    connect(currentActiveActivity!!)
+                    Log.w(this::class.simpleName, "Trying to reconnect")
+                }
             }
-        } else {
-            throw error("Image could not be deleted, as GoogleApiClient is not connected")
+            if (googleApiClient?.isConnected == true) {
+                val appFolder = Drive.DriveApi.getAppFolder(googleApiClient)
+                val queryResult = appFolder.queryChildren(googleApiClient, Query.Builder()
+                        .addFilter(Filters.eq(SearchableField.TITLE, "$id.png"))
+                        .build()).await().metadataBuffer
+                if (queryResult.count == 1) {
+                    async(CommonPool) {
+                        queryResult[0].driveId.asDriveFile().delete(googleApiClient)
+                    }
+                    Log.i(this::class.simpleName, "Successfully deleted image $id")
+                    return
+                } else {
+                    throw error("Image could not be deleted, as there is no image with id [$id] " +
+                            "found.")
+                }
+            } else {
+                throw error("Image could not be deleted, as GoogleApiClient is not connected")
+            }
         }
     }
 

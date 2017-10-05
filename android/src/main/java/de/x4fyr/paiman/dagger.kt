@@ -11,7 +11,6 @@ import dagger.android.support.AndroidSupportInjectionModule
 import de.x4fyr.paiman.lib.adapter.AndroidGoogleDriveStorageAdapter
 import de.x4fyr.paiman.lib.provider.AndroidServiceProvider
 import de.x4fyr.paiman.lib.provider.ServiceProvider
-import de.x4fyr.paiman.lib.services.DesignService
 import de.x4fyr.paiman.lib.services.PaintingService
 import de.x4fyr.paiman.lib.services.QueryService
 import javax.inject.Scope
@@ -23,7 +22,9 @@ import javax.inject.Singleton
 @Component(modules = arrayOf(
         AndroidSupportInjectionModule::class,
         ActivitiesModule::class,
-        ApplicationModule::class, ServicesModule::class))
+        ApplicationModule::class,
+        FragmentsModule::class,
+        ServicesModule::class))
 @Singleton
 interface AppComponent: AndroidInjector<DaggerApplication> {
     fun inject(application: Application)
@@ -53,7 +54,14 @@ abstract class ActivitiesModule {
     @ContributesAndroidInjector(modules = arrayOf())
     abstract fun contributeMainActivityInjector(): MainActivity
 
+    @ContributesAndroidInjector(modules = arrayOf())
+    abstract fun contributePaintingDetailActivityInjector(): PaintingDetailActivity
+
 }
+
+@Module
+abstract class FragmentsModule
+
 
 @Scope
 @Retention(AnnotationRetention.RUNTIME)
@@ -98,8 +106,4 @@ class ServicesModule {
     @Provides
     @Singleton
     fun provideQueryService(provider: ServiceProvider): QueryService = provider.queryService
-
-    @Provides
-    @Singleton
-    fun provideDesignService(provider: AndroidServiceProvider): DesignService = provider.designService
 }

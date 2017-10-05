@@ -7,8 +7,10 @@
                                     android:layout_gravity="center"
                                     card_view:cardCornerRadius="4dp"
                                     android:id="@+id/painting_preview_card"
-                                    app:contentPadding="2dp" app:cardElevation="5dp"
-                                    android:layout_marginHorizontal="3dp" android:layout_marginVertical="3dp">
+                                    card_view:contentPadding="@dimen/default_gap" app:cardElevation="5dp"
+                                    card_view:cardUseCompatPadding="true"
+                                    card_view:cardPreventCornerOverlap="true"
+>
 
     <LinearLayout
             android:layout_width="wrap_content"

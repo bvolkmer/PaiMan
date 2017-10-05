@@ -33,7 +33,7 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
         readLock.lock()
         val result = paintingCRUDAdapter.read(id)
         readLock.unlock()
-        return result ?: throw ServiceException("Could not get")
+        return result ?: throw ServiceException("Could not get painting with id $id")
     }
 
     override suspend fun getAll(ids: Set<String>): Set<SavedPainting> {
