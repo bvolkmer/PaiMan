@@ -46,7 +46,9 @@ import org.jetbrains.anko.displayMetrics
 import org.jetbrains.anko.image
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.support.v4.onRefresh
+import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
+import kotlin.concurrent.withLock
 
 /** Main Activity of the app, which is launched first and shows a list of current paintings
  *
@@ -75,6 +77,7 @@ class MainActivity: BaseActivity(), HasActivityInjector {
 
     private lateinit var gridAdapter: GridAdapter
     private var models: MutableList<Model> = mutableListOf()
+    private var modelsLock = ReentrantLock()
     private var selectedPositions: MutableSet<Int> = hashSetOf()
 
     private val actionModeCallback = object: ActionMode.Callback {
@@ -171,17 +174,17 @@ class MainActivity: BaseActivity(), HasActivityInjector {
             addChangeListener {
                 async(UI) {
                     swipeRefreshLayout.isRefreshing = true
-                    val newModels = async(CommonPool) {
-                        if (it.rows != null) {
-                            paintingService.getFromQueryResult(it.rows!!).map {
-                                Model(id = it.id, mainImage = async(CommonPool) {
-                                    designService.getOrLoadThumbnailBitmap(it.mainPicture)
-                                }, title = it.title, mainImageId = it.mainPicture.id)
-                            }
-                        } else listOf()
+                    val newModels = if (it.rows != null) {
+                        paintingService.getFromQueryResult(it.rows!!).map {
+                            Model(id = it.id, mainImage = async(CommonPool) {
+                                designService.getOrLoadThumbnailBitmap(it.mainPicture)
+                            }, title = it.title, mainImageId = it.mainPicture.id)
+                        }
+                    } else listOf()
+                    modelsLock.withLock {
+                        models.clear()
+                        models.addAll(newModels)
                     }
-                    models.clear()
-                    models.addAll(newModels.await())
                     gridAdapter.notifyDataSetChanged()
                     swipeRefreshLayout.isRefreshing = false
                 }
@@ -201,16 +204,14 @@ class MainActivity: BaseActivity(), HasActivityInjector {
      */
     private fun reloadContent(completionHandler: () -> Unit = {}) {
         async(UI) {
-            val newModels = async(CommonPool) {
-                paintingService.getFromQueryResult(queryService.allPaintingsQuery.run()).map {
-                    Model(id = it.id,
-                            mainImage = async(CommonPool) {
-                                designService.getOrLoadThumbnailBitmap(it.mainPicture)
-                            }, title = it.title, mainImageId = it.mainPicture.id)
-                }
+            val newModels = paintingService.getFromQueryResult(queryService.allPaintingsQuery.run()).map {
+                Model(id = it.id, title = it.title, mainImageId = it.mainPicture.id,
+                        mainImage = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it.mainPicture) })
             }
-            models.clear()
-            models.addAll(newModels.await())
+            modelsLock.withLock {
+                models.clear()
+                models.addAll(newModels)
+            }
             gridAdapter.notifyDataSetChanged()
             completionHandler()
         }
@@ -317,7 +318,6 @@ class AddPaintingFragment: ApplyingDialogFragment() {
 
     private lateinit var paintingService: PaintingService
     private lateinit var pictureProvider: PictureProvider
-    private lateinit var currentView: View
 
     private var model = Model(null, null)
 
