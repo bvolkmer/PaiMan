@@ -1,7 +1,6 @@
 package de.x4fyr.paiman
 
 import android.app.Activity
-import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -76,8 +75,8 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
     private lateinit var id: String
     private lateinit var model: DetailModel
 
-    private lateinit var wipGridAdapter: PictureGridAdapter
-    private lateinit var refGridAdapter: PictureGridAdapter
+    private lateinit var wipGridAdapter: WIPGridAdapter
+    private lateinit var refGridAdapter: RefGridAdapter
 
     private var loadLocked: Boolean by Delegates.observable(false) { _, _, newValue ->
         if (!newValue && lockWaiter.size > 0) {
@@ -226,7 +225,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                 }
             }.create().show()
         }
-        wipGridAdapter = PictureGridAdapter(mutableListOf(), resources, this)
+        wipGridAdapter = WIPGridAdapter(mutableListOf(), resources, this, paintingService)
         wip.apply {
             val spanCount = Math.floor(
                     displayMetrics.widthPixels/TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 106.toFloat(),
@@ -248,7 +247,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                 }
             }
         }
-        refGridAdapter = PictureGridAdapter(mutableListOf(), resources, this)
+        refGridAdapter = RefGridAdapter(mutableListOf(), resources, this, paintingService)
         refs.apply {
             val spanCount = Math.floor(
                     displayMetrics.widthPixels/TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 106.toFloat(),
@@ -296,7 +295,8 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
         }
     }
 
-    private fun loadModel() {
+    /** Load model and update view */
+    fun loadModel() {
         swipeRefreshLayout?.isRefreshing = true
         Log.d(this::class.simpleName, "Started loading of model")
         actUnderLoadLock {
@@ -317,13 +317,13 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                         price = painting.sellingInfo?.price,
                         wip = async(CommonPool) {
                             painting.wip.map {
-                                ImageModel(id = it.id,
+                                ImageModel(id = it.id, painting = painting,
                                         image = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it) })
                             }
                         },
                         ref = async(CommonPool) {
                             painting.references.map {
-                                ImageModel(id = it.id,
+                                ImageModel(id = it.id, painting = painting,
                                         image = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it) })
                             }
                         })
@@ -456,12 +456,17 @@ private class DetailModel(var painting: SavedPainting,
                           var ref: Deferred<List<ImageModel>>)
 
 private data class ImageModel(val image: Deferred<Bitmap>,
-                              val id: String)
+                              val id: String,
+                              val painting: SavedPainting)
 
-private class PictureGridAdapter(val models: MutableList<ImageModel>, val res: Resources, val context: Context):
-        RecyclerView
-        .Adapter<PictureGridAdapter
-        .ModelViewHolder>() {
+private abstract class PictureGridAdapter(val models: MutableList<ImageModel>,
+                                          val res: Resources,
+                                          val context: PaintingDetailActivity): RecyclerView.Adapter<PictureGridAdapter
+.ModelViewHolder>
+() {
+
+    abstract protected val aysRes: Int
+    abstract protected val deleteAction: suspend (id: String, painting: SavedPainting) -> Unit
 
     /** See [RecyclerView.Adapter.onBindViewHolder] */
     override fun onBindViewHolder(holder: ModelViewHolder, position: Int) {
@@ -469,6 +474,24 @@ private class PictureGridAdapter(val models: MutableList<ImageModel>, val res: R
         launch(UI) {
             val bitmap = model.image.await()
             holder.imageView.image = BitmapDrawable(res, bitmap)
+            holder.imageView.onLongClick {
+                AlertDialog.Builder(this@PictureGridAdapter.context).apply {
+                    setTitle(aysRes)
+                    setCancelable(true)
+                    setPositiveButton(R.string.delete_wip_ref_delete) { dialog, _ ->
+                        launch(UI) {
+                            with(models[position]) {
+                                deleteAction.invoke(id, painting)
+                            }
+                            dialog.dismiss()
+                            this@PictureGridAdapter.context.loadModel()
+                        }
+                    }
+                    setNegativeButton(R.string.delete_wip_ref_cancel) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                }.create().show()
+            }
         }
     }
 
@@ -480,4 +503,26 @@ private class PictureGridAdapter(val models: MutableList<ImageModel>, val res: R
     override fun getItemCount(): Int = models.size
 
     private class ModelViewHolder(var imageView: ImageView): RecyclerView.ViewHolder(imageView)
+}
+
+private class WIPGridAdapter(models: MutableList<ImageModel>,
+                             res: Resources,
+                             context: PaintingDetailActivity,
+                             paintingService: PaintingService)
+    : PictureGridAdapter(models, res, context) {
+    override val aysRes: Int = R.string.delete_wip_ays
+    override val deleteAction: suspend (id: String, painting: SavedPainting) -> Unit = { id, painting ->
+        paintingService.removeWipPicture(painting, setOf(id))
+    }
+}
+
+private class RefGridAdapter(models: MutableList<ImageModel>,
+                             res: Resources,
+                             context: PaintingDetailActivity,
+                             paintingService: PaintingService)
+    : PictureGridAdapter(models, res, context) {
+    override val aysRes: Int = R.string.delete_ref_ays
+    override val deleteAction: suspend (id: String, painting: SavedPainting) -> Unit = { id, painting ->
+        paintingService.removeReferences(painting, setOf(id))
+    }
 }

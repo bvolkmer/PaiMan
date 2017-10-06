@@ -202,7 +202,7 @@ class MainActivity: BaseActivity(), HasActivityInjector {
     /**
      *
      */
-    private fun reloadContent(completionHandler: () -> Unit = {}) {
+    fun reloadContent(completionHandler: () -> Unit = {}) {
         async(UI) {
             val newModels = paintingService.getFromQueryResult(queryService.allPaintingsQuery.run()).map {
                 Model(id = it.id, title = it.title, mainImageId = it.mainPicture.id,

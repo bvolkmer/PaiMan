@@ -217,9 +217,9 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
             }
             if (googleApiClient?.isConnected == true) {
                 val appFolder = Drive.DriveApi.getAppFolder(googleApiClient)
-                val queryResult = appFolder.queryChildren(googleApiClient, Query.Builder()
+                val queryResult = async(CommonPool) { appFolder.queryChildren(googleApiClient, Query.Builder()
                         .addFilter(Filters.eq(SearchableField.TITLE, "$id.png"))
-                        .build()).await().metadataBuffer
+                        .build()).await()}.await().metadataBuffer //To prohibit error when cast in UI CoroutineContext
                 if (queryResult.count == 1) {
                     async(CommonPool) {
                         queryResult[0].driveId.asDriveFile().delete(googleApiClient)

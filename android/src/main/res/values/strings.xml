@@ -130,6 +130,10 @@
     <string name="sell_painting_date">Date</string>
     <string name="sell_painting_price">Price</string>
     <string name="sell_painting_apply">Apply</string>
+    <string name="delete_wip_ays">Are you sure to delete this Work In Progress picture?</string>
+    <string name="delete_ref_ays">Are you sure to delete this reference picture?</string>
+    <string name="delete_wip_ref_delete">Delete</string>
+    <string name="delete_wip_ref_cancel">Cancel</string>
 
     <string name="dummyText">[dummy]</string>
 </resources>
