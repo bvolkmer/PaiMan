@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* Modifications by Benedikt Volkmer 2017
+ *
+ * - Enable branch override
+ *
+ */
 
 ext {
     GitVersion version = this.generateVersionName()
@@ -81,12 +86,11 @@ GitVersion generateVersionName() {
     boolean snapshotEnabled = configuration.get("snapshotEnabled") != false
     boolean localChangesCountEnabled = configuration.get("localChangesCountEnabled") != false
     def shortNameClosure = configuration.get("shortName")
-
     // get information from git
-    def currentBranch = 'git symbolic-ref --short -q HEAD'.execute([], rootDir).text.trim()
+    def currentBranch = configuration.get("currentBranch") ?: 'git symbolic-ref --short -q HEAD'.execute([], rootDir).text.trim()
 
     // use a defined stable branch when on such a branch
-    if (stableBranches.contains(currentBranch)) {
+    if (currentBranch != "" && stableBranches.contains(currentBranch)) {
         defaultBranch = currentBranch
     }
     def currentCommit = 'git rev-parse HEAD'.execute([], rootDir).text.trim()
@@ -99,11 +103,10 @@ GitVersion generateVersionName() {
     boolean hasLocalChanges = localChangesCount > 0
 
 
-
     def diffToDefault = "git rev-list $defaultBranch..".execute([], rootDir)
     diffToDefault.waitFor()
     if (diffToDefault.exitValue() != 0) {
-        diffToDefault = "git rev-list origin/$defaultBranch..".execute([], rootDir)
+        diffToDefault = "git rev-list refs/remotes/origin/$defaultBranch..".execute([], rootDir)
     }
     def featurelines = diffToDefault.text.trim().readLines()
     def commitsInFeatureBranch = featurelines.size()

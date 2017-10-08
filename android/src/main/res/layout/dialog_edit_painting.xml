@@ -1,0 +1,43 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:ems="10"
+                android:id="@+id/edit_painting_title" android:hint="@string/image_name" android:singleLine="true"/>
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            <ImageButton
+                    android:src="@android:drawable/ic_menu_report_image"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp" android:id="@+id/edit_painting_main_image_button"
+                    android:contentDescription="@string/edit_painting_image_button_description"
+                    tools:layout_editor_absoluteX="8dp"
+                    android:layout_gravity="center_horizontal" android:layout_centerHorizontal="true"/>
+        </RelativeLayout>
+        <CheckBox
+                android:text="@string/edit_painting_old_to_wip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:id="@+id/edit_painting_old_to_wip" android:checked="true"/>
+        <ToggleButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:id="@+id/edit_painting_finished_toggle"
+                android:textOff="@string/edit_painting_not_finished" android:textOn="@string/edit_painting_finished"/>
+        <DatePicker
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:id="@+id/edit_painting_finished_date"
+                android:visibility="visible"/>
+    </LinearLayout>
+
+</ScrollView>

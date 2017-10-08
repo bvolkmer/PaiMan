@@ -1,8 +1,6 @@
 package de.x4fyr.paiman.lib.domain
 
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleObjectProperty
-import java.time.LocalDate
+import org.threeten.bp.LocalDate
 
 
 /**

@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              tools:context="de.x4fyr.paiman.AddPaintingFragment"
+              android:background="@android:color/background_light"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:theme="?attr/actionBarTheme"
+            android:minHeight="?attr/actionBarSize" android:id="@+id/add_painting_toolbar"/>
+    <ImageButton
+            android:src="@android:drawable/ic_menu_report_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/add_painting_main_image"
+            android:onClick="onDialogButton"
+            android:contentDescription="@string/add_painting_image_button_description"/>
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:id="@+id/add_painting_name" android:hint="@string/image_name" android:singleLine="true"/>
+</LinearLayout>

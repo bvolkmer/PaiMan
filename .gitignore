@@ -134,5 +134,5 @@ crashlytics-build.properties
 fabric.properties
 /.idea/
 /versioner.gradle
-/app/data/
 /archive/
+**/data

@@ -10,6 +10,8 @@ import de.x4fyr.paiman.app.controller.ServiceController
 import de.x4fyr.paiman.app.css.Global
 import de.x4fyr.paiman.app.utils.jfxButton
 import de.x4fyr.paiman.app.utils.jfxTextfield
+import de.x4fyr.paiman.app.utils.toBPTime
+import de.x4fyr.paiman.app.utils.toJavaTime
 import de.x4fyr.paiman.lib.domain.Purchaser
 import de.x4fyr.paiman.lib.domain.SellingInformation
 import fontAwesomeFx.FontAwesomeIcon
@@ -34,15 +36,13 @@ import kotlinx.coroutines.experimental.launch
 import tornadofx.*
 import java.io.InputStream
 import java.text.MessageFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.function.Supplier
 import java.util.logging.Logger
 
 /**
  * Controller for painting detail fragment
  */
-class DetailController : tornadofx.Controller() {
+class DetailController: tornadofx.Controller() {
     private val LOG = Logger.getLogger(this::class.qualifiedName)
     private val serviceController by inject<ServiceController>()
     private val imageCacheController by inject<ImageCacheController>()
@@ -73,7 +73,7 @@ class DetailController : tornadofx.Controller() {
             tags.clear()
             tags.setAll(painting.tags)
             setSellingInformationOf(painting.sellingInfo)
-            finishingDate = painting.finishingDate
+            finishingDate = painting.finishingDate?.toJavaTime()
             finished = painting.finished
         }
     }
@@ -81,7 +81,8 @@ class DetailController : tornadofx.Controller() {
     internal fun setFinishingDate(model: PaintingModel) {
         launch(JavaFx) {
             val painting = paintingService.get(model.id)
-            paintingService.changePainting(painting.copy(finished = model.finishingDate != null, finishingDate = model.finishingDate))
+            paintingService.changePainting(painting.copy(finished = model.finishingDate != null, finishingDate =
+            model.finishingDate?.toBPTime()))
             loadModel(model, painting.id)
         }
     }
@@ -92,7 +93,8 @@ class DetailController : tornadofx.Controller() {
                 launch(JavaFx) {
                     val painting = paintingService.get(model.id)
                     val inputStream = serviceController.pathToInputStream(it)
-                    if (inputStream != null) paintingService.replaceMainPicture(painting = painting, newPicture = inputStream, moveOldToWip = false)
+                    if (inputStream != null) paintingService.replaceMainPicture(painting = painting,
+                            newPicture = inputStream, moveOldToWip = false)
                     loadModel(model, paintingId = painting.id)
                 }
             }
@@ -142,7 +144,7 @@ class DetailController : tornadofx.Controller() {
             val painting = paintingService.get(model.id)
             with(model.sellingInformation) {
                 LOG.info("SellInfo: ${purchaser.name}, ${purchaser.address}, $price, $date")
-                paintingService.sellPainting(painting = painting, date = date, price = price,
+                paintingService.sellPainting(painting = painting, date = date.toBPTime(), price = price,
                         purchaser = Purchaser(name = purchaser.name, address = purchaser.address))
             }
             loadModel(model, painting.id)
@@ -161,7 +163,7 @@ class DetailController : tornadofx.Controller() {
 /**
  * View showing the details of a painting
  */
-class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
+class DetailFragment: de.x4fyr.paiman.app.utils.Fragment() {
     private val LOG = Logger.getLogger(this::class.qualifiedName)
     private val serviceController by inject<ServiceController>()
     /** ID parameter for the painting to show*/
@@ -172,8 +174,8 @@ class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
     private var imagePane by singleAssign<AnchorPane>()
     private var scrollBarWidth by singleAssign<Double>()
     private var widthChangeListener: ((Any, Any, Number) -> Unit) = { _, _, new ->
-        val scaleFactor = ((new as Double) - scrollBarWidth) / model.mainPicture.width
-        imagePane.prefHeight = if (scaleFactor < 1) scaleFactor * model.mainPicture.height else model.mainPicture.height
+        val scaleFactor = ((new as Double) - scrollBarWidth)/model.mainPicture.width
+        imagePane.prefHeight = if (scaleFactor < 1) scaleFactor*model.mainPicture.height else model.mainPicture.height
     }
 
     init {
@@ -205,8 +207,8 @@ class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
                 vbox {
                     useMaxWidth = true
                     imagePane = anchorpane {
-                        val scaleFactor = (primaryStage.scene.width - scrollBarWidth) / model.mainPicture.width
-                        prefHeight = if (scaleFactor < 1) scaleFactor * model.mainPicture.height else model.mainPicture.height
+                        val scaleFactor = (primaryStage.scene.width - scrollBarWidth)/model.mainPicture.width
+                        prefHeight = if (scaleFactor < 1) scaleFactor*model.mainPicture.height else model.mainPicture.height
                         primaryStage.scene.widthProperty().addListener(widthChangeListener)
                         alignment = Pos.BOTTOM_CENTER
                         background = Background(BackgroundImage(mainPicture,
@@ -220,7 +222,8 @@ class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
                                         BackgroundRepeat.NO_REPEAT,
                                         BackgroundRepeat.NO_REPEAT,
                                         BackgroundPosition(Side.LEFT, 0.0, false, Side.TOP, 0.0, false),
-                                        BackgroundSize(mainPicture.width, BackgroundSize.AUTO, false, false, true, false)))
+                                        BackgroundSize(mainPicture.width, BackgroundSize.AUTO, false, false, true,
+                                                false)))
                             }
                         })
                         onDoubleClick {
@@ -333,7 +336,7 @@ class DetailFragment : de.x4fyr.paiman.app.utils.Fragment() {
                                 sellingInformationProperty.addListener { _, _, new ->
                                     with(new) {
                                         text = MessageFormat(messages["sellerInfoText"]).format(arrayOf(date
-                                                .format(DateTimeFormatter.ISO_LOCAL_DATE),
+                                                .format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE),
                                                 price,
                                                 purchaser.name, purchaser.address))
                                     }
@@ -472,8 +475,8 @@ class PaintingModel {
     val tagsProperty = SimpleListProperty<String>(tags)
     val sellingInformationProperty = SimpleObjectProperty<SellingInformationHolder>(SellingInformationHolder())
     var sellingInformation: SellingInformationHolder by sellingInformationProperty
-    val finishingDateProperty = SimpleObjectProperty<LocalDate>()
-    var finishingDate: LocalDate? by finishingDateProperty
+    val finishingDateProperty = SimpleObjectProperty<java.time.LocalDate>()
+    var finishingDate: java.time.LocalDate? by finishingDateProperty
     val finishedProperty = SimpleBooleanProperty()
     var finished by finishedProperty
 
@@ -486,7 +489,7 @@ class PaintingModel {
                 address = domain.purchaser.address
             }
             price = domain.price
-            date = domain.date
+            date = domain.date.toJavaTime()
         }
 
     }
@@ -502,13 +505,13 @@ class SellingInformationHolder {
     var purchaser: PurchaserHolder by purchaserProperty
     val priceProperty = SimpleDoubleProperty()
     var price: Double by priceProperty
-    val dateProperty = SimpleObjectProperty<LocalDate>()
-    var date: LocalDate by dateProperty
+    val dateProperty = SimpleObjectProperty<java.time.LocalDate>()
+    var date: java.time.LocalDate by dateProperty
 }
 
 /** ViewModel for the selling information */
 @Suppress("KDocMissingDocumentation", "unused")
-class SellingInformationViewModel : ItemViewModel<SellingInformationHolder>() {
+class SellingInformationViewModel: ItemViewModel<SellingInformationHolder>() {
     val sold = bind { item?.soldProperty }
     val price = bind { item?.priceProperty }
     val date = bind { item?.dateProperty }
