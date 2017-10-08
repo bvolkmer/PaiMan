@@ -19,7 +19,8 @@ buildscript {
 
 ext.gitVersioner = [
         defaultBranch           : "master",  // default "master"
-        stableBranches          : [], // default [], the feature branch postfix (-dm4(6)) will not be appended on stable branches, all commits are included into the version number calculation
+        stableBranches          : [], // default [], the feature branch postfix (-dm4(6)) will not be appended
+        // on stable branches, all commits are included into the version number calculation
         yearFactor              : 1000,       // default "1000", increasing every 8.57h
         snapshotEnabled         : hasProperty('snapshot') ? snapshot.toBoolean() : true,      // default true, the
         // "-SNAPSHOT"
@@ -51,11 +52,11 @@ task copyJavaFxApp(type: Copy) {
 }
 
 task copyAndroidApp(type: Copy) {
-    from('android/build/outputs/apk/release/') {
-        rename ".*.apk", "paiman-${version}-unsigned.apk"
+    from('android/build/outputs/apk/') {
+        rename ".*.apk", "paiman-${version}.apk"
     }
     into 'archive/'
-    include "*.apk"
+    include "*-release.apk"
     dependsOn "android:assembleRelease"
 }
 

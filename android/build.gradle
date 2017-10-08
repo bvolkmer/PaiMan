@@ -4,15 +4,16 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 version = parent.version
 
+
+def debugKeystorePropertiesFile = rootProject.file('debugKeystore.properties')
+def releaseKeystorePropertiesFile = rootProject.file('debugKeystore.properties')
+
+def debugKeystoreProperties = new Properties()
+def releaseKeystoreProperties = new Properties()
+debugKeystoreProperties.load(new FileInputStream(debugKeystorePropertiesFile))
+releaseKeystoreProperties.load(new FileInputStream(releaseKeystorePropertiesFile))
+
 android {
-    signingConfigs {
-        debug {
-            keyAlias 'debugkey'
-            keyPassword 'debugpass'
-            storeFile file('/home/x4fyr/Android/keystore/paiman.jks')
-            storePassword 'storepass'
-        }
-    }
     compileSdkVersion 26
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -28,10 +29,25 @@ android {
         multiDexEnabled true
 
     }
+    signingConfigs {
+        release {
+            keyAlias releaseKeystoreProperties['keyAlias']
+            keyPassword releaseKeystoreProperties.getProperty('keyPassword', System.getenv('RELEASE_KEY_PASSWORD'))
+            storeFile file(releaseKeystoreProperties['storeFile'])
+            storePassword releaseKeystoreProperties['storePassword']
+        }
+        debug {
+            keyAlias debugKeystoreProperties['keyAlias']
+            keyPassword debugKeystoreProperties['keyPassword']
+            storeFile file(debugKeystoreProperties['storeFile'])
+            storePassword debugKeystoreProperties['storePassword']
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         debug {
             signingConfig signingConfigs.debug
