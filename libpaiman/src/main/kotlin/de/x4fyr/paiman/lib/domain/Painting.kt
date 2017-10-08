@@ -1,7 +1,7 @@
 package de.x4fyr.paiman.lib.domain
 
 import de.x4fyr.paiman.lib.domain.Picture
-import java.time.LocalDate
+import org.threeten.bp.LocalDate
 
 
 /**
