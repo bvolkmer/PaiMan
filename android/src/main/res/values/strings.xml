@@ -134,6 +134,15 @@
     <string name="delete_ref_ays">Are you sure to delete this reference picture?</string>
     <string name="delete_wip_ref_delete">Delete</string>
     <string name="delete_wip_ref_cancel">Cancel</string>
+    <string name="update_dialog_title">Update</string>
+    <string name="update_dialog_current_version">Current version: %1$s</string>
+    <string name="update_dialog_upstream_version">Upstream version: %1$s</string>
+    <string name="update_dialog_upstream_version_pending">Pending…</string>
+    <string name="update_dialog_do_update">Run update</string>
+    <string name="update_dialog_cancel">Cancel</string>
+    <string name="update_download_title">Paiman Update</string>
+    <string name="update_download_description">Downloading new Paiman Version</string>
 
     <string name="dummyText">[dummy]</string>
+    <string name="main_menu_update">Update</string>
 </resources>

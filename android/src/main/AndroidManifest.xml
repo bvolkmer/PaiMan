@@ -28,6 +28,15 @@
                 android:label="@string/title_activity_painting_detail"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <provider
+                android:name="android.support.v4.content.FileProvider"
+                android:authorities="de.x4fyr.paiman.fileProvider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/provider_paths"/>
+        </provider>
     </application>
 
 </manifest>
