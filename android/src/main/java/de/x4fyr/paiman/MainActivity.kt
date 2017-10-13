@@ -145,31 +145,30 @@ class MainActivity: BaseActivity(), HasActivityInjector {
         actionMode?.title = getString(R.string.main_selection_title, selectedCount)
     }
 
-    private val updateDialogBuilder: AlertDialog.Builder by lazy {
-        AlertDialog.Builder(this).apply {
-            setTitle(R.string.update_dialog_title)
-            val view = layoutInflater.inflate(R.layout.dialog_update, null, false) as ViewGroup
-            view.findViewById<TextView>(R.id.update_dialog_current_version).apply {
-                text = getString(R.string.update_dialog_current_version, updateService.currentVersion)
-            }
-            view.findViewById<TextView>(R.id.update_dialog_upstream_version).apply {
-                text = getString(R.string.update_dialog_upstream_version,
-                        getString(R.string.update_dialog_upstream_version_pending))
-                launch(UI) {
+    private fun updateDialogBuilder(): AlertDialog.Builder =
+            AlertDialog.Builder(this).apply {
+                setTitle(R.string.update_dialog_title)
+                val view = layoutInflater.inflate(R.layout.dialog_update, null, false) as ViewGroup
+                view.findViewById<TextView>(R.id.update_dialog_current_version).apply {
+                    text = getString(R.string.update_dialog_current_version, updateService.currentVersion)
+                }
+                view.findViewById<TextView>(R.id.update_dialog_upstream_version).apply {
                     text = getString(R.string.update_dialog_upstream_version,
-                            updateService.latestVersion.await())
+                            getString(R.string.update_dialog_upstream_version_pending))
+                    launch(UI) {
+                        text = getString(R.string.update_dialog_upstream_version,
+                                updateService.latestVersion.await())
+                    }
                 }
-            }
-            view.findViewById<Button>(R.id.update_dialog_update_button).apply {
-                isEnabled = false
-                setOnClickListener { updateService.requestUpdate() }
-                launch(UI) {
-                    isEnabled = !updateService.isNewestVersion()
+                view.findViewById<Button>(R.id.update_dialog_update_button).apply {
+                    isEnabled = false
+                    setOnClickListener { updateService.requestUpdate() }
+                    launch(UI) {
+                        isEnabled = !updateService.isNewestVersion()
+                    }
                 }
+                setView(view)
             }
-            setView(view)
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -225,7 +224,7 @@ class MainActivity: BaseActivity(), HasActivityInjector {
         swipeRefreshLayout.onRefresh { reloadContent(completionHandler = { swipeRefreshLayout.isRefreshing = false }) }
         launch(UI) {
             if (!updateService.isNewestVersion()) {
-                updateDialogBuilder.create().show()
+                updateDialogBuilder().create().show()
             }
         }
     }
@@ -277,7 +276,7 @@ class MainActivity: BaseActivity(), HasActivityInjector {
     /** Handler for menu clicks */
     fun onMenuClick(item: MenuItem) {
         when {
-            item.itemId == R.id.menu_main_update -> updateDialogBuilder.create().show()
+            item.itemId == R.id.menu_main_update -> updateDialogBuilder().create().show()
         }
     }
 
