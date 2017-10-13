@@ -13,7 +13,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
                 android:ems="10"
-                android:id="@+id/edit_painting_title" android:hint="@string/image_name" android:singleLine="true"/>
+                android:id="@+id/edit_painting_title" android:hint="@string/painting_name" android:singleLine="true"/>
         <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">

@@ -25,7 +25,6 @@
         </activity>
         <activity
                 android:name=".PaintingDetailActivity"
-                android:label="@string/title_activity_painting_detail"
                 android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <provider
