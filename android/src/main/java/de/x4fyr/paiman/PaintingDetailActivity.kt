@@ -103,6 +103,8 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
         loadModel()
         setContentView(R.layout.activity_painting_detail)
         setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayShowHomeEnabled(true)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         fab.setOnClickListener { _ ->
             AlertDialog.Builder(this@PaintingDetailActivity).apply {
                 setTitle(R.string.edit_painting_title)
@@ -438,6 +440,11 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
     override fun onStart() {
         super.onStart()
         loadModel()
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return super.onSupportNavigateUp()
     }
 
 }
