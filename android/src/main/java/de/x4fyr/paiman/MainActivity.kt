@@ -1,6 +1,7 @@
 package de.x4fyr.paiman
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.content.res.Resources
@@ -18,6 +19,7 @@ import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import dagger.android.AndroidInjection
@@ -34,6 +36,7 @@ import de.x4fyr.paiman.lib.provider.PictureProvider
 import de.x4fyr.paiman.lib.services.DesignService
 import de.x4fyr.paiman.lib.services.PaintingService
 import de.x4fyr.paiman.lib.services.QueryService
+import de.x4fyr.paiman.lib.services.UpdateService
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_add_painting.*
@@ -72,6 +75,8 @@ class MainActivity: BaseActivity(), HasActivityInjector {
     @Inject lateinit var paintingService: PaintingService
     /** [DesignService] instance */
     @Inject lateinit var designService: DesignService
+    /** [UpdateService] instance */
+    @Inject lateinit var updateService: UpdateService
 
     private var activeDialogFragment: ApplyingDialogFragment? = null
 
@@ -140,6 +145,31 @@ class MainActivity: BaseActivity(), HasActivityInjector {
         actionMode?.title = getString(R.string.main_selection_title, selectedCount)
     }
 
+    private fun updateDialogBuilder(): AlertDialog.Builder =
+            AlertDialog.Builder(this).apply {
+                setTitle(R.string.update_dialog_title)
+                val view = layoutInflater.inflate(R.layout.dialog_update, null, false) as ViewGroup
+                view.findViewById<TextView>(R.id.update_dialog_current_version).apply {
+                    text = getString(R.string.update_dialog_current_version, updateService.currentVersion)
+                }
+                view.findViewById<TextView>(R.id.update_dialog_upstream_version).apply {
+                    text = getString(R.string.update_dialog_upstream_version,
+                            getString(R.string.update_dialog_upstream_version_pending))
+                    launch(UI) {
+                        text = getString(R.string.update_dialog_upstream_version,
+                                updateService.latestVersion.await())
+                    }
+                }
+                view.findViewById<Button>(R.id.update_dialog_update_button).apply {
+                    isEnabled = false
+                    setOnClickListener { updateService.requestUpdate() }
+                    launch(UI) {
+                        isEnabled = !updateService.isNewestVersion()
+                    }
+                }
+                setView(view)
+            }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
@@ -192,6 +222,11 @@ class MainActivity: BaseActivity(), HasActivityInjector {
             start()
         }
         swipeRefreshLayout.onRefresh { reloadContent(completionHandler = { swipeRefreshLayout.isRefreshing = false }) }
+        launch(UI) {
+            if (!updateService.isNewestVersion()) {
+                updateDialogBuilder().create().show()
+            }
+        }
     }
 
     override fun onResume() {
@@ -241,7 +276,7 @@ class MainActivity: BaseActivity(), HasActivityInjector {
     /** Handler for menu clicks */
     fun onMenuClick(item: MenuItem) {
         when {
-            item.itemId == R.id.action_settings -> TODO("Not implemented") //TODO: Not implemented
+            item.itemId == R.id.menu_main_update -> updateDialogBuilder().create().show()
         }
     }
 

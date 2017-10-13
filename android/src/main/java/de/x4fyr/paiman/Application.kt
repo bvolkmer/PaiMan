@@ -2,6 +2,8 @@ package de.x4fyr.paiman
 
 import android.app.Activity
 import android.support.multidex.MultiDexApplication
+import com.google.firebase.crash.FirebaseCrash
+import com.jakewharton.threetenabp.AndroidThreeTen
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
@@ -21,6 +23,8 @@ class Application: MultiDexApplication(), HasActivityInjector {
     /** See [MultiDexApplication] complemented with dependency injection */
     override fun onCreate() {
         super.onCreate()
+        FirebaseCrash.setCrashCollectionEnabled(!BuildConfig.DEBUG)
+        AndroidThreeTen.init(this)
         DaggerAppComponent.builder().application(this).build().inject(this)
     }
 }

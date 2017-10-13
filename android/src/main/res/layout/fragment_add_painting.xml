@@ -22,5 +22,5 @@
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
             android:ems="10"
-            android:id="@+id/add_painting_name" android:hint="@string/image_name" android:singleLine="true"/>
+            android:id="@+id/add_painting_name" android:hint="@string/painting_name" android:singleLine="true"/>
 </LinearLayout>
