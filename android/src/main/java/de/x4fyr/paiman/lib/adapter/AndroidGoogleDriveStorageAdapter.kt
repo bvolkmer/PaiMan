@@ -103,13 +103,16 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
         return lock.readLock().withLock {
             var result: InputStream? = null
             for (i in 1..10) {
+                for ( j in 1..10 ) {
                 connect(currentActiveActivity!!)
-                while (googleApiClient?.isConnected == false) {
-                    while (googleApiClient?.isConnecting == true) {
-                    }
                     if (googleApiClient?.isConnected == false) {
-                        connect(currentActiveActivity!!)
-                        Log.w(this::class.simpleName, "Trying to reconnect")
+                        while (googleApiClient?.isConnecting == true) {
+                            Thread.sleep(1000)
+                        }
+                        if (googleApiClient?.isConnected == false) {
+                            connect(currentActiveActivity!!)
+                            Log.w(this::class.simpleName, "Trying to reconnect")
+                        }
                     }
                 }
                 if (googleApiClient?.isConnected == true) {
@@ -162,12 +165,16 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
     /** See [GoogleDriveStorageAdapter.saveImage]] */
     override suspend fun saveImage(image: InputStream): String {
         lock.writeLock().withLock {
-            while (googleApiClient?.isConnected == false) {
-                while (googleApiClient?.isConnecting == true) {
-                }
+            for ( j in 1..10 ) {
+                connect(currentActiveActivity!!)
                 if (googleApiClient?.isConnected == false) {
-                    connect(currentActiveActivity!!)
-                    Log.w(this::class.simpleName, "Trying to reconnect")
+                    while (googleApiClient?.isConnecting == true) {
+                        Thread.sleep(1000)
+                    }
+                    if (googleApiClient?.isConnected == false) {
+                        connect(currentActiveActivity!!)
+                        Log.w(this::class.simpleName, "Trying to reconnect")
+                    }
                 }
             }
             if (googleApiClient?.isConnected == true) {
@@ -207,12 +214,16 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
     /** See [GoogleDriveStorageAdapter.deleteImage]] */
     override suspend fun deleteImage(id: String) {
         lock.writeLock().withLock {
-            while (googleApiClient?.isConnected == false) {
-                while (googleApiClient?.isConnecting == true) {
-                }
+            for ( j in 1..10 ) {
+                connect(currentActiveActivity!!)
                 if (googleApiClient?.isConnected == false) {
-                    connect(currentActiveActivity!!)
-                    Log.w(this::class.simpleName, "Trying to reconnect")
+                    while (googleApiClient?.isConnecting == true) {
+                        Thread.sleep(1000)
+                    }
+                    if (googleApiClient?.isConnected == false) {
+                        connect(currentActiveActivity!!)
+                        Log.w(this::class.simpleName, "Trying to reconnect")
+                    }
                 }
             }
             if (googleApiClient?.isConnected == true) {

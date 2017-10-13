@@ -45,7 +45,6 @@ import org.jetbrains.anko.sdk25.coroutines.onLongClick
 import org.jetbrains.anko.support.v4.onRefresh
 import org.threeten.bp.LocalDate
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 /** Activity to show and edit a paintings details */
 class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFragmentInjector {
@@ -77,23 +76,6 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
 
     private lateinit var wipGridAdapter: WIPGridAdapter
     private lateinit var refGridAdapter: RefGridAdapter
-
-    private var loadLocked: Boolean by Delegates.observable(false) { _, _, newValue ->
-        if (!newValue && lockWaiter.size > 0) {
-            loadLocked = true
-            lockWaiter.removeAt(0).invoke()
-        }
-    }
-    private val lockWaiter = mutableListOf<() -> Unit>()
-
-    private fun actUnderLoadLock(action: () -> Unit) {
-        if (loadLocked) {
-            lockWaiter.add(action)
-        } else {
-            loadLocked = true
-            action.invoke()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -242,6 +224,9 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                         val stream = getInputStreamFromUrl(it)
                         if (stream != null) {
                             paintingService.addWipPicture(model.painting, setOf(stream))
+                            launch(UI) {
+                                loadModel()
+                            }
                         } else {
                             errorDialog(R.string.error_image_not_readable)
                         }
@@ -264,6 +249,9 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                         val stream = getInputStreamFromUrl(it)
                         if (stream != null) {
                             paintingService.addReferences(model.painting, setOf(stream))
+                            launch(UI) {
+                                loadModel()
+                            }
                         } else {
                             errorDialog(R.string.error_image_not_readable)
                         }
@@ -298,39 +286,40 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
     }
 
     /** Load model and update view */
+    @Synchronized
     fun loadModel() {
         swipeRefreshLayout?.isRefreshing = true
         Log.d(this::class.simpleName, "Started loading of model")
-        actUnderLoadLock {
-            launch(UI) {
-                Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "1 Get Painting")
-                val painting = paintingService.get(id)
-                Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "2 Assemble model")
-                model = DetailModel(mainImage = async(CommonPool) {
-                    designService.getOrLoadFullSizeBitmap(painting.mainPicture)
-                }, painting = painting,
-                        title = painting.title,
-                        tags = painting.tags,
-                        finished = painting.finished,
-                        finishingDate = painting.finishingDate,
-                        sold = painting.sellingInfo != null,
-                        purchaser = painting.sellingInfo?.purchaser?.name,
-                        sellingDate = painting.sellingInfo?.date,
-                        price = painting.sellingInfo?.price,
-                        wip = async(CommonPool) {
-                            painting.wip.map {
-                                ImageModel(id = it.id, painting = painting,
-                                        image = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it) })
-                            }
-                        },
-                        ref = async(CommonPool) {
-                            painting.references.map {
-                                ImageModel(id = it.id, painting = painting,
-                                        image = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it) })
-                            }
-                        })
-                Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "3 Successfully assembled model")
-                Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "4 Updating view")
+        launch(CommonPool) {
+            Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "1 Get Painting")
+            val painting = paintingService.get(id)
+            Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "2 Assemble model")
+            model = DetailModel(mainImage = async(CommonPool) {
+                designService.getOrLoadFullSizeBitmap(painting.mainPicture)
+            }, painting = painting,
+                    title = painting.title,
+                    tags = painting.tags,
+                    finished = painting.finished,
+                    finishingDate = painting.finishingDate,
+                    sold = painting.sellingInfo != null,
+                    purchaser = painting.sellingInfo?.purchaser?.name,
+                    sellingDate = painting.sellingInfo?.date,
+                    price = painting.sellingInfo?.price,
+                    wip = async(CommonPool) {
+                        painting.wip.map {
+                            ImageModel(id = it.id, painting = painting,
+                                    image = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it) })
+                        }
+                    },
+                    ref = async(CommonPool) {
+                        painting.references.map {
+                            ImageModel(id = it.id, painting = painting,
+                                    image = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it) })
+                        }
+                    })
+            Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "3 Successfully assembled model")
+            Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "4 Updating view")
+            async(UI) {
                 toolbar_layout.title = model.title
                 finishing.text = if (model.finished) getString(R.string.painting_detail_finished, model
                         .finishingDate)
@@ -340,21 +329,25 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                 else getString(R.string.painting_detail_unsold)
                 tagLayout.removeAllViews()
                 model.tags.forEach { tag ->
-                    tagLayout.addView((layoutInflater.inflate(R.layout.tag, tagLayout, false) as LinearLayout).apply {
-                        findViewById<Button>(R.id.btn)!!.apply button@ {
-                            text = tag
-                            onLongClick {
-                                launch(CommonPool) {
-                                    paintingService.removeTags(model.painting, setOf(this@button.text.toString()
-                                            .trim()))
-                                    loadModel()
+                    tagLayout.addView(
+                            (layoutInflater.inflate(R.layout.tag, tagLayout, false) as LinearLayout).apply {
+                                findViewById<Button>(R.id.btn)!!.apply button@ {
+                                    text = tag
+                                    onLongClick {
+                                        launch(CommonPool) {
+                                            paintingService.removeTags(model.painting,
+                                                    setOf(this@button.text.toString()
+                                                            .trim()))
+                                            launch(UI) {
+                                                loadModel()
+                                            }
+                                        }
+                                    }
+                                    onClick {
+                                        TODO() //TRACKED: Open search for tag #8
+                                    }
                                 }
-                            }
-                            onClick {
-                                TODO() //TRACKED: Open search for tag #8
-                            }
-                        }
-                    })
+                            })
                 }
                 tagLayout.addView((layoutInflater.inflate(R.layout.tag, tagLayout, false) as ViewGroup).apply {
                     this.findViewById<Button>(R.id.btn)!!.apply {
@@ -363,7 +356,8 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                         onClick {
                             AlertDialog.Builder(this@PaintingDetailActivity).apply {
                                 setTitle(R.string.add_tag_title)
-                                val contentView = layoutInflater.inflate(R.layout.dialog_add_tag, null) as LinearLayout
+                                val contentView = layoutInflater.inflate(R.layout.dialog_add_tag,
+                                        null) as LinearLayout
                                 val inputView = contentView.findViewById<EditText>(R.id.add_tag_input)
                                 setView(contentView)
                                 setCancelable(true)
@@ -384,55 +378,59 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                     }
 
                 })
-                Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel",
-                        "5 Successfully updated non wait views")
-                val mainImageBitmap = model.mainImage.await()
+            }.await()
+            Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel",
+                    "5 Successfully updated non wait views")
+            val mainImageBitmap = model.mainImage.await()
+            async(UI) {
                 mainImage.apply {
                     image = BitmapDrawable(resources, mainImageBitmap)
                     minimumHeight = Math.floor(
                             (mainImage.width.toDouble()/mainImageBitmap.width)*mainImageBitmap.height).toInt()
                     parent.requestLayout()
                 }
-                Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "6 Successfully updated mainImage")
-                for (i in 1..10) {
-                    try {
-                        wipGridAdapter.models.apply {
-                            clear()
-                            addAll(model.wip.await())
-                            launch(UI) {
-                                wipGridAdapter.notifyDataSetChanged()
-                            }
+            }.await()
+            Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "6 Successfully updated mainImage")
+            for (i in 1..10) {
+                try {
+                    wipGridAdapter.models.apply {
+                        clear()
+                        addAll(model.wip.await())
+                        launch(UI) {
+                            wipGridAdapter.notifyDataSetChanged()
                         }
-                        break
-                    } catch (e: UninitializedPropertyAccessException) {
-                        Log.w("${this@PaintingDetailActivity::class.simpleName}::loadModel", "Tried to get " +
-                                "uninitialized wipGridAdapter $i times")
-                        Thread.sleep(10)
-                        continue
                     }
+                    break
+                } catch (e: UninitializedPropertyAccessException) {
+                    Log.w("${this@PaintingDetailActivity::class.simpleName}::loadModel", "Tried to get " +
+                            "uninitialized wipGridAdapter $i times")
+                    Thread.sleep(100)
+                    continue
                 }
-                Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "7 Successfully updated wip")
-                for (i in 1..10) {
-                    try {
-                        refGridAdapter.models.apply {
-                            clear()
-                            addAll(model.ref.await())
-                            launch(UI) {
-                                refGridAdapter.notifyDataSetChanged()
-                            }
+            }
+            Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "7 Successfully updated wip")
+            for (i in 1..10) {
+                try {
+                    refGridAdapter.models.apply {
+                        clear()
+                        addAll(model.ref.await())
+                        launch(UI) {
+                            refGridAdapter.notifyDataSetChanged()
                         }
-                        break
-                    } catch (e: UninitializedPropertyAccessException) {
-                        Log.w("${this@PaintingDetailActivity::class.simpleName}::loadModel", "Tried to get " +
-                                "uninitialized refGridAdapter $i times")
-                        Thread.sleep(10)
-                        continue
                     }
+                    break
+                } catch (e: UninitializedPropertyAccessException) {
+                    Log.w("${this@PaintingDetailActivity::class.simpleName}::loadModel", "Tried to get " +
+                            "uninitialized refGridAdapter $i times")
+                    Thread.sleep(100)
+                    continue
                 }
-                Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "8 Successfully updated ref")
-                Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "9 Successfully updated views")
+            }
+            Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "8 Successfully updated ref")
+            Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "9 Successfully updated views")
+
+            launch(UI) {
                 swipeRefreshLayout?.isRefreshing = false
-                loadLocked = false
             }
         }
     }
