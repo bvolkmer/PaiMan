@@ -118,7 +118,8 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                     launch(UI) {
                         if (model.finished) {
                             visibility = View.VISIBLE
-                            updateDate(model.finishingDate!!.year, model.finishingDate!!.monthValue,
+                            updateDate(model.finishingDate!!.year, model.finishingDate!!.monthValue-1, //datePicker
+                                    // behaves strange, and increases the visible moth by 1
                                     model.finishingDate!!.dayOfMonth)
 
                         } else {
@@ -140,7 +141,8 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                     launch(UI) {
                         val newTitle = titleEditView.text.toString()
                         val isFinished = finishedToggle.isChecked
-                        val finishedDate = LocalDate.of(datePicker.year, datePicker.month, datePicker.dayOfMonth)
+                        val finishedDate = LocalDate.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth)
+                        //datePicker behaves strangely and decreases the picked month by 1
                         val successTitle: Deferred<Boolean>
                         val successImage: Deferred<Boolean>
                         val successFinished: Deferred<Boolean>
@@ -270,7 +272,8 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                 setPositiveButton(R.string.sell_painting_apply) { dialog, _ ->
                     val purchaser = purchaserInput.text.toString().trim()
                     val price = priceInput.text.toString().toDouble()
-                    val date = LocalDate.of(datePicker.year, datePicker.month, datePicker.dayOfMonth)
+                    val date = LocalDate.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth)
+                    //datePicker behaves strangely and decreases the picked month by 1
                     launch(CommonPool) {
                         paintingService.sellPainting(model.painting, Purchaser(name = purchaser), date, price)
                     }

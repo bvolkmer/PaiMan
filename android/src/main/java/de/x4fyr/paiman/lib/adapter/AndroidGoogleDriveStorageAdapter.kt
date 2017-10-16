@@ -20,6 +20,7 @@ import kotlinx.coroutines.experimental.async
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.withLock
 import kotlin.properties.Delegates
@@ -120,7 +121,7 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
                     Log.d("${this::class.simpleName}::getImage", "Start attempt $i to get image.")
                     val queryResult = appFolder.queryChildren(googleApiClient, Query.Builder()
                             .addFilter(Filters.eq(SearchableField.TITLE, "$id.png"))
-                            .build()).await()
+                            .build()).await(5, TimeUnit.SECONDS)
                     val metadataBuffer: MetadataBuffer
                     Log.d("${this::class.simpleName}::getImage", "Got queryResult")
                     if (queryResult.status.isSuccess) {
@@ -136,7 +137,7 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
                         metadataBuffer.release()
                         var fileResult: DriveApi.DriveContentsResult
                         fileResult = fid.asDriveFile().open(googleApiClient, DriveFile.MODE_READ_ONLY,
-                                { _, _ -> }).await()
+                                { _, _ -> }).await(5, TimeUnit.SECONDS)
                         Log.d("${this::class.simpleName}::getImage", "Got fileResult")
                         val fd: ParcelFileDescriptor
                         if (fileResult.status.isSuccess) {
