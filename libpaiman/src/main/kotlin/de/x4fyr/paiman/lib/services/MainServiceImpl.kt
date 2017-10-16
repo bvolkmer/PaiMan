@@ -24,11 +24,9 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
 
     private val dummyPicture = Picture("dummy")
 
-    @Synchronized
     override suspend fun get(id: String): SavedPainting = paintingCRUDAdapter.read(id) ?: throw ServiceException(
             "Could not get painting with id $id")
 
-    @Synchronized
     override suspend fun getAll(ids: Set<String>): Set<SavedPainting> = paintingCRUDAdapter.read(ids)
 
     @Synchronized
@@ -125,11 +123,9 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
             paintingCRUDAdapter.update(painting.copy(tags = painting.tags - tags))
                     ?: throw ServiceException("Could not remove tags")
 
-    @Synchronized
     override suspend fun getPictureStream(picture: Picture): InputStream =
             storageAdapter.getImage(picture.id)
 
-    @Synchronized
     override suspend fun getFromQueryResult(queryEnumerator: QueryEnumerator): Set<SavedPainting> = getAll(
             queryEnumerator.map { it.key.toString() }.toSet())
 
