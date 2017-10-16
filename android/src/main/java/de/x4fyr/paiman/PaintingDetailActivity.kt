@@ -1,6 +1,7 @@
 package de.x4fyr.paiman
 
 import android.app.Activity
+import android.app.Service
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -118,7 +119,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                     launch(UI) {
                         if (model.finished) {
                             visibility = View.VISIBLE
-                            updateDate(model.finishingDate!!.year, model.finishingDate!!.monthValue-1, //datePicker
+                            updateDate(model.finishingDate!!.year, model.finishingDate!!.monthValue - 1, //datePicker
                                     // behaves strange, and increases the visible moth by 1
                                     model.finishingDate!!.dayOfMonth)
 
@@ -141,7 +142,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                     launch(UI) {
                         val newTitle = titleEditView.text.toString()
                         val isFinished = finishedToggle.isChecked
-                        val finishedDate = LocalDate.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth)
+                        val finishedDate = LocalDate.of(datePicker.year, datePicker.month + 1, datePicker.dayOfMonth)
                         //datePicker behaves strangely and decreases the picked month by 1
                         val successTitle: Deferred<Boolean>
                         val successImage: Deferred<Boolean>
@@ -152,8 +153,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                                     paintingService.changePainting(model.painting.copy(title = newTitle))
                                     true
                                 } catch (e: ServiceException) {
-                                    Log.e(this::class.simpleName, "Error changing title", e)
-                                    errorDialog(R.string.edit_painting_error_changing_title)
+                                    errorDialog(R.string.edit_painting_error_changing_title, e)
                                     false
                                 }
                             }
@@ -168,8 +168,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                                                 newPicture = inputStream, moveOldToWip = oldToWip)
                                         true
                                     } catch (e: ServiceException) {
-                                        Log.e(this::class.simpleName, "Error replacing main image", e)
-                                        errorDialog(R.string.edit_painting_error_replacing_main_image)
+                                        errorDialog(R.string.edit_painting_error_replacing_main_image, e)
                                         false
                                     }
                                 } else false
@@ -183,8 +182,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                                                 finishingDate = finishedDate))
                                         true
                                     } catch (e: ServiceException) {
-                                        Log.e(this::class.simpleName, "Error setting finished")
-                                        errorDialog(R.string.edit_painting_error_finished)
+                                        errorDialog(R.string.edit_painting_error_finished, e)
                                         false
                                     }
                                 }
@@ -193,8 +191,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                                             model.painting.copy(finished = false, finishingDate = null))
                                     true
                                 } catch (e: ServiceException) {
-                                    Log.e(this::class.simpleName, "Error setting finished")
-                                    errorDialog(R.string.edit_painting_error_finished)
+                                    errorDialog(R.string.edit_painting_error_finished, e)
                                     false
                                 }
                                 else -> true
@@ -225,7 +222,11 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                     launch(CommonPool) {
                         val stream = getInputStreamFromUrl(it)
                         if (stream != null) {
-                            paintingService.addWipPicture(model.painting, setOf(stream))
+                            try {
+                                paintingService.addWipPicture(model.painting, setOf(stream))
+                            } catch (e: ServiceException) {
+                                errorDialog(R.string.error_adding_wip, e)
+                            }
                             launch(UI) {
                                 loadModel()
                             }
@@ -250,7 +251,11 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                     launch(CommonPool) {
                         val stream = getInputStreamFromUrl(it)
                         if (stream != null) {
-                            paintingService.addReferences(model.painting, setOf(stream))
+                            try {
+                                paintingService.addReferences(model.painting, setOf(stream))
+                            } catch (e: ServiceException) {
+                               this@PaintingDetailActivity.errorDialog(R.string.error_adding_ref, e)
+                            }
                             launch(UI) {
                                 loadModel()
                             }
@@ -272,10 +277,14 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                 setPositiveButton(R.string.sell_painting_apply) { dialog, _ ->
                     val purchaser = purchaserInput.text.toString().trim()
                     val price = priceInput.text.toString().toDouble()
-                    val date = LocalDate.of(datePicker.year, datePicker.month+1, datePicker.dayOfMonth)
+                    val date = LocalDate.of(datePicker.year, datePicker.month + 1, datePicker.dayOfMonth)
                     //datePicker behaves strangely and decreases the picked month by 1
                     launch(CommonPool) {
-                        paintingService.sellPainting(model.painting, Purchaser(name = purchaser), date, price)
+                        try {
+                            paintingService.sellPainting(model.painting, Purchaser(name = purchaser), date, price)
+                        } catch (e: ServiceException) {
+                            errorDialog(R.string.error_selling_painting, e)
+                        }
                     }
                     dialog.dismiss()
                     loadModel()
@@ -298,7 +307,12 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
             val painting = paintingService.get(id)
             Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "2 Assemble model")
             model = DetailModel(mainImage = async(CommonPool) {
-                designService.getOrLoadFullSizeBitmap(painting.mainPicture)
+                try {
+                    designService.getOrLoadFullSizeBitmap(painting.mainPicture)
+                } catch (e: ServiceException) {
+                    this@PaintingDetailActivity.errorDialog(R.string.error_image_load, e)
+                    null
+                }
             }, painting = painting,
                     title = painting.title,
                     tags = painting.tags,
@@ -311,13 +325,29 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                     wip = async(CommonPool) {
                         painting.wip.map {
                             ImageModel(id = it.id, painting = painting,
-                                    image = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it) })
+                                    image = async(CommonPool) {
+                                        try {
+                                            designService.getOrLoadThumbnailBitmap(it)
+                                        } catch (e: ServiceException) {
+                                            this@PaintingDetailActivity.errorDialog(R.string.error_image_load,
+                                                    e)
+                                            null
+                                        }
+                                    })
                         }
                     },
                     ref = async(CommonPool) {
                         painting.references.map {
                             ImageModel(id = it.id, painting = painting,
-                                    image = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it) })
+                                    image = async(CommonPool) {
+                                        try {
+                                            designService.getOrLoadThumbnailBitmap(it)
+                                        } catch (e: ServiceException) {
+                                            this@PaintingDetailActivity.errorDialog(R.string.error_image_load,
+                                                    e)
+                                            null
+                                        }
+                                    })
                         }
                     })
             Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "3 Successfully assembled model")
@@ -338,9 +368,13 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                                     text = tag
                                     onLongClick {
                                         launch(CommonPool) {
-                                            paintingService.removeTags(model.painting,
-                                                    setOf(this@button.text.toString()
-                                                            .trim()))
+                                            try {
+                                                paintingService.removeTags(model.painting,
+                                                        setOf(this@button.text.toString()
+                                                                .trim()))
+                                            } catch (e: ServiceException) {
+                                                errorDialog(R.string.error_removing_tag, e)
+                                            }
                                             launch(UI) {
                                                 loadModel()
                                             }
@@ -368,7 +402,11 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
                                     val input = inputView.text.toString().trim()
                                     if (input.isNotEmpty()) {
                                         launch(CommonPool) {
-                                            paintingService.addTags(model.painting, setOf(input))
+                                            try {
+                                                paintingService.addTags(model.painting, setOf(input))
+                                            } catch (e: ServiceException) {
+                                                errorDialog(R.string.error_adding_tag, e)
+                                            }
                                             launch(UI) {
                                                 dialog.dismiss()
                                                 loadModel()
@@ -387,10 +425,12 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
             val mainImageBitmap = model.mainImage.await()
             async(UI) {
                 mainImage.apply {
-                    image = BitmapDrawable(resources, mainImageBitmap)
-                    minimumHeight = Math.floor(
-                            (mainImage.width.toDouble()/mainImageBitmap.width)*mainImageBitmap.height).toInt()
-                    parent.requestLayout()
+                    if (mainImageBitmap != null) {
+                        image = BitmapDrawable(resources, mainImageBitmap)
+                        minimumHeight = Math.floor(
+                                (mainImage.width.toDouble()/mainImageBitmap.width)*mainImageBitmap.height).toInt()
+                        parent.requestLayout()
+                    }
                 }
             }.await()
             Log.d("${this@PaintingDetailActivity::class.simpleName}::loadModel", "6 Successfully updated mainImage")
@@ -451,7 +491,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
 }
 
 private class DetailModel(var painting: SavedPainting,
-                          var mainImage: Deferred<Bitmap>,
+                          var mainImage: Deferred<Bitmap?>,
                           var title: String,
                           var tags: Set<String>,
                           var finished: Boolean,
@@ -463,7 +503,7 @@ private class DetailModel(var painting: SavedPainting,
                           var wip: Deferred<List<ImageModel>>,
                           var ref: Deferred<List<ImageModel>>)
 
-private data class ImageModel(val image: Deferred<Bitmap>,
+private data class ImageModel(val image: Deferred<Bitmap?>,
                               val id: String,
                               val painting: SavedPainting)
 
@@ -520,7 +560,11 @@ private class WIPGridAdapter(models: MutableList<ImageModel>,
     : PictureGridAdapter(models, res, context) {
     override val aysRes: Int = R.string.delete_wip_ays
     override val deleteAction: suspend (id: String, painting: SavedPainting) -> Unit = { id, painting ->
-        paintingService.removeWipPicture(painting, setOf(id))
+        try {
+            paintingService.removeWipPicture(painting, setOf(id))
+        } catch (e: ServiceException) {
+            context.errorDialog(R.string.error_removing_wip, e)
+        }
     }
 }
 
@@ -531,6 +575,10 @@ private class RefGridAdapter(models: MutableList<ImageModel>,
     : PictureGridAdapter(models, res, context) {
     override val aysRes: Int = R.string.delete_ref_ays
     override val deleteAction: suspend (id: String, painting: SavedPainting) -> Unit = { id, painting ->
-        paintingService.removeReferences(painting, setOf(id))
+        try {
+            paintingService.removeReferences(painting, setOf(id))
+        } catch (e: ServiceException) {
+            context.errorDialog(R.string.error_removing_ref, e)
+        }
     }
 }

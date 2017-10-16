@@ -100,12 +100,14 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
     }
 
     /** See [GoogleDriveStorageAdapter.getImage]] */
+    @Throws(StorageAdapter.StorageException::class)
     override suspend fun getImage(id: String): InputStream {
         return lock.readLock().withLock {
             var result: InputStream? = null
+            val errorList: List<StorageAdapter.StorageException> = listOf()
             for (i in 1..10) {
-                for ( j in 1..10 ) {
-                connect(currentActiveActivity!!)
+                for (j in 1..10) {
+                    connect(currentActiveActivity!!)
                     if (googleApiClient?.isConnected == false) {
                         while (googleApiClient?.isConnecting == true) {
                             Thread.sleep(1000)
@@ -127,7 +129,7 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
                     if (queryResult.status.isSuccess) {
                         metadataBuffer = queryResult.metadataBuffer!!
                     } else {
-                        error("Failed to get image queryResult with status: ${queryResult.status
+                        errorList + error("Failed to get image queryResult with status: ${queryResult.status
                                 .statusCode}\n${queryResult
                                 .status.statusMessage}")
                         continue
@@ -143,7 +145,8 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
                         if (fileResult.status.isSuccess) {
                             fd = fileResult.driveContents!!.parcelFileDescriptor
                         } else {
-                            error("Failed to get fileResult with status: ${fileResult.status.statusCode}\n${fileResult
+                            errorList + error("Failed to get fileResult with status: ${fileResult.status
+                                    .statusCode}\n${fileResult
                                     .status.statusMessage}")
                             continue
                         }
@@ -151,22 +154,26 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
                         Log.d("${this::class.simpleName}::getImage", "Successfully got image $id")
                         break
                     } else {
-                        error("Failed to get image, as there is no image with id $id found")
+                        errorList + error("Failed to get image, as there is no image with id $id found")
                         continue
                     }
                 } else {
-                    throw error("Failed to get image, as GoogleApiClient is not connected")
+                    errorList + error("Failed to get image, as GoogleApiClient is not connected")
                 }
             }
-            if (result == null) throw error("Failed to get image ten times in a row.")
-            else result
+            if (result == null) {
+                throw error(
+                        "Failed to get image ten times in a row:\n${errorList.mapIndexed { i, e -> "$i:\t${e.message}" }
+                                .joinToString(separator = "\n")}")
+            } else result
         }
     }
 
     /** See [GoogleDriveStorageAdapter.saveImage]] */
+    @Throws(StorageAdapter.StorageException::class)
     override suspend fun saveImage(image: InputStream): String {
         lock.writeLock().withLock {
-            for ( j in 1..10 ) {
+            for (j in 1..10) {
                 connect(currentActiveActivity!!)
                 if (googleApiClient?.isConnected == false) {
                     while (googleApiClient?.isConnecting == true) {
@@ -213,9 +220,10 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
     }
 
     /** See [GoogleDriveStorageAdapter.deleteImage]] */
+    @Throws(StorageAdapter.StorageException::class)
     override suspend fun deleteImage(id: String) {
         lock.writeLock().withLock {
-            for ( j in 1..10 ) {
+            for (j in 1..10) {
                 connect(currentActiveActivity!!)
                 if (googleApiClient?.isConnected == false) {
                     while (googleApiClient?.isConnecting == true) {
@@ -229,9 +237,11 @@ class AndroidGoogleDriveStorageAdapter(private val context: Context): GoogleDriv
             }
             if (googleApiClient?.isConnected == true) {
                 val appFolder = Drive.DriveApi.getAppFolder(googleApiClient)
-                val queryResult = async(CommonPool) { appFolder.queryChildren(googleApiClient, Query.Builder()
-                        .addFilter(Filters.eq(SearchableField.TITLE, "$id.png"))
-                        .build()).await()}.await().metadataBuffer //To prohibit error when cast in UI CoroutineContext
+                val queryResult = async(CommonPool) {
+                    appFolder.queryChildren(googleApiClient, Query.Builder()
+                            .addFilter(Filters.eq(SearchableField.TITLE, "$id.png"))
+                            .build()).await()
+                }.await().metadataBuffer //To prohibit error when cast in UI CoroutineContext
                 if (queryResult.count == 1) {
                     async(CommonPool) {
                         queryResult[0].driveId.asDriveFile().delete(googleApiClient)

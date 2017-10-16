@@ -50,6 +50,16 @@
     <string name="update_dialog_cancel">Cancel</string>
     <string name="update_download_title">Paiman Update</string>
     <string name="update_download_description">Downloading new Paiman Version</string>
+    <string name="error_image_load">Failed to get image\n%1$s</string>
+    <string name="error_painting_save">Failed to save painting\n%1$s</string>
+    <string name="error_selling_painting">Failed to sell painting\n%1$s</string>
+    <string name="error_adding_wip">Failed to add WIP\n%1$s</string>
+    <string name="error_removing_wip">Failed to remove WIP\n%1$s</string>
+    <string name="error_adding_ref">Failed to add reference\n%1$s</string>
+    <string name="error_removing_ref">Failed to remove reference\n%1$s</string>
+    <string name="error_adding_tag">Failed to add tag\n%1$s</string>
+    <string name="error_removing_tag">Failed to remove tag\n%1$s</string>
+    <string name="error_removing_painting">Failed to remove painting\n%1$s</string>
 
     <string name="dummyText" translatable="false">[dummy]</string>
     <string name="main_menu_update">Update</string>

@@ -24,16 +24,12 @@ import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
-import de.x4fyr.paiman.app.ApplyingDialogFragment
 import de.x4fyr.paiman.app.BaseActivity
 import de.x4fyr.paiman.app.errorDialog
 import de.x4fyr.paiman.app.getInputStreamFromUrl
 import de.x4fyr.paiman.lib.provider.AndroidPictureProvider
 import de.x4fyr.paiman.lib.provider.AndroidServiceProvider
-import de.x4fyr.paiman.lib.services.DesignService
-import de.x4fyr.paiman.lib.services.PaintingService
-import de.x4fyr.paiman.lib.services.QueryService
-import de.x4fyr.paiman.lib.services.UpdateService
+import de.x4fyr.paiman.lib.services.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.coroutines.experimental.CommonPool
@@ -43,7 +39,6 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.displayMetrics
 import org.jetbrains.anko.image
-import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.support.v4.onRefresh
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
@@ -74,8 +69,6 @@ class MainActivity: BaseActivity(), HasActivityInjector {
     /** [UpdateService] instance */
     @Inject lateinit var updateService: UpdateService
 
-    private var activeDialogFragment: ApplyingDialogFragment? = null
-
     private lateinit var gridAdapter: GridAdapter
     private var models: MutableList<Model> = mutableListOf()
     private var modelsLock = ReentrantLock()
@@ -91,7 +84,13 @@ class MainActivity: BaseActivity(), HasActivityInjector {
             when {
                 menuItem.itemId == R.id.main_selection_delete -> {
                     launch(CommonPool) {
-                        selectedPositions.forEach { paintingService.delete(models[it].id) }
+                        selectedPositions.forEach {
+                            try {
+                                paintingService.delete(models[it].id)
+                            } catch (e: ServiceException) {
+                                errorDialog(R.string.error_removing_painting, e)
+                            }
+                        }
                         launch(UI) {
                             mode.finish()
                             Snackbar.make(main_layout, R.string.main_delete_notification, Snackbar.LENGTH_SHORT).show()
@@ -216,7 +215,12 @@ class MainActivity: BaseActivity(), HasActivityInjector {
                         else -> launch(CommonPool) {
                             val inputStream = getInputStreamFromUrl(model.imageUrl!!)
                             if (inputStream != null) {
-                                paintingService.composeNewPainting(title = model.title!!, mainPicture = inputStream).id
+                                try {
+                                    paintingService.composeNewPainting(title = model.title!!,
+                                            mainPicture = inputStream).id
+                                } catch (e: ServiceException) {
+                                    this@MainActivity.errorDialog(R.string.error_painting_save, e)
+                                }
                                 dialog.dismiss()
                             } else {
                                 errorDialog(R.string.add_painting_warning_no_id)
@@ -242,7 +246,12 @@ class MainActivity: BaseActivity(), HasActivityInjector {
                     val newModels = if (it.rows != null) {
                         paintingService.getFromQueryResult(it.rows!!).map {
                             Model(id = it.id, mainImage = async(CommonPool) {
-                                designService.getOrLoadThumbnailBitmap(it.mainPicture)
+                                try {
+                                    designService.getOrLoadThumbnailBitmap(it.mainPicture)
+                                } catch (e: ServiceException) {
+                                    this@MainActivity.errorDialog(R.string.error_image_load, e)
+                                    null
+                                }
                             }, title = it.title, mainImageId = it.mainPicture.id)
                         }
                     } else listOf()
@@ -296,7 +305,14 @@ class MainActivity: BaseActivity(), HasActivityInjector {
         async(UI) {
             val newModels = paintingService.getFromQueryResult(queryService.allPaintingsQuery.run()).map {
                 Model(id = it.id, title = it.title, mainImageId = it.mainPicture.id,
-                        mainImage = async(CommonPool) { designService.getOrLoadThumbnailBitmap(it.mainPicture) })
+                        mainImage = async(CommonPool) {
+                            try {
+                                designService.getOrLoadThumbnailBitmap(it.mainPicture)
+                            } catch (e: ServiceException) {
+                                this@MainActivity.errorDialog(R.string.error_image_load, e)
+                                null
+                            }
+                        })
             }
             modelsLock.withLock {
                 models.clear()
@@ -311,15 +327,6 @@ class MainActivity: BaseActivity(), HasActivityInjector {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
-    }
-
-    /** The apply action on the current active dialog fragment */
-    fun onApply(menuItem: MenuItem) {
-    }
-
-    /** Button action on the current active dialog fragment */
-    fun onDialogButton(view: View) {
-        activeDialogFragment?.onDialogButton(view)
     }
 
     /** Handler for menu clicks */
@@ -393,5 +400,5 @@ private class GridAdapter(val models: MutableList<Model>, val selectedPositions:
 }
 
 
-private data class Model(val id: String, val mainImage: Deferred<Bitmap>, val title: String, val mainImageId:
+private data class Model(val id: String, val mainImage: Deferred<Bitmap?>, val title: String, val mainImageId:
 String)

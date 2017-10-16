@@ -10,6 +10,8 @@ import android.util.Log
 import android.util.LruCache
 import android.view.MenuItem
 import android.view.View
+import android.widget.EditText
+import android.widget.TextView
 import de.x4fyr.paiman.R
 import de.x4fyr.paiman.lib.adapter.AndroidGoogleDriveStorageAdapter
 import kotlinx.coroutines.experimental.android.UI
@@ -113,6 +115,23 @@ fun Activity.errorDialog(msg: Int) {
         }
     }
 }
+
+/** Error [AlertDialog] with exception message field*/
+fun Activity.errorDialog(msg: Int, throwable: Throwable) {
+    launch(UI) {
+        try {
+            val view = layoutInflater.inflate(R.layout.dialog_error, null, false)
+            view.findViewById<TextView>(R.id.message).text = getString(msg)
+            view.findViewById<EditText>(R.id.exception).setText(throwable.message!!)
+            AlertDialog.Builder(this@errorDialog)
+                    .setView(view)
+                    .create()
+                    .show()
+        } catch (e: RuntimeException) {
+        }
+    }
+}
+
 
 /**
  * [LruCache] specified for [Bitmap] with the maxKbSize in kb as limit

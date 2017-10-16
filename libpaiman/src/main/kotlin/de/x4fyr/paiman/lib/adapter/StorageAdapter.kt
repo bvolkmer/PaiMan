@@ -20,7 +20,7 @@ interface StorageAdapter {
     suspend fun deleteImage(id: String)
 
     /** Exceptions thrown in [StorageAdapter] */
-    class StorageException: RuntimeException {
+    class StorageException: Exception {
         constructor(msg: String): super(msg)
         constructor(msg: String, cause: Throwable): super(msg, cause)
         constructor(): super()

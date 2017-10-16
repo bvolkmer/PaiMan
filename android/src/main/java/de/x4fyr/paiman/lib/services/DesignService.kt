@@ -33,6 +33,7 @@ class DesignService @Inject constructor(context: Context, private var paintingSe
     }
 
     /** Get [Bitmap] of [Picture] from cache or load it if missing  */
+    @Throws(ServiceException::class)
     suspend fun getOrLoadFullSizeBitmap(picture: Picture): Bitmap {
         // access
         Log.d("${this::class.simpleName}::getFullSize", "Getting ${picture.id}")
@@ -53,7 +54,8 @@ class DesignService @Inject constructor(context: Context, private var paintingSe
     }
 
     /** Get thumbnail scaled [Bitmap] of [Picture] from cache or load it if missing  */
-    suspend fun getOrLoadThumbnailBitmap(picture: Picture): Bitmap {
+    @Throws(ServiceException::class)
+    suspend fun getOrLoadThumbnailBitmap(picture: Picture) : Bitmap {
         Log.d("${this::class.simpleName}::getThumbnail", "Getting ${picture.id}")
         return thumbnailLock.withLock {
             Log.d("${this::class.simpleName}::getThumbnail", "Acquired lock for ${picture.id}")
