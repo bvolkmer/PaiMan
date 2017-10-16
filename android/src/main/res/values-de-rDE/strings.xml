@@ -50,4 +50,14 @@
     <string name="add_painting_warning_name_missing">Der Titel darf nicht fehlen.</string>
     <string name="add_painting_title">Gemälde hinzufügen.</string>
     <string name="painting_name">Gemälde Name</string>
+    <string name="error_image_load">Konnte Bild nicht laden</string>
+    <string name="error_painting_save">Konnte Gemälde nicht speichern</string>
+    <string name="error_selling_painting">Konnte Gemälde nicht verkaufen</string>
+    <string name="error_adding_wip">Konnte Fortschritt nicht hinzufügen</string>
+    <string name="error_removing_wip">Konnte Fortschirtt nicht entfernen</string>
+    <string name="error_adding_ref">Konnte Referenz nicht hinzufügen</string>
+    <string name="error_removing_ref">Konnte Referenz nicht entfernen</string>
+    <string name="error_adding_tag">Konnte Tag nicht hinzufügen</string>
+    <string name="error_removing_tag">Konnte Tag nicht entfernen</string>
+    <string name="error_removing_painting">Konnte Gemälde nicht entfernen</string>
 </resources>
