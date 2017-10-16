@@ -2,10 +2,10 @@
 <resources>
     <string name="painting_detail_sold">Es wurde an %1$s am %2$s zu einem Preis von %3$.2f verkauft.</string>
     <string name="action_settings">Einstellungen</string>
-    <string name="initial_loading_message">Läd...</string>
+    <string name="initial_loading_message">Lädt…</string>
     <string name="main_card_missing_title">[Fehlender Titel]</string>
     <string name="main_menu_update">Update</string>
-    <string name="update_download_description">Läd herunter</string>
+    <string name="update_download_description">Lädt herunter</string>
     <string name="update_download_title">Paiman Update</string>
     <string name="update_dialog_cancel">Abbrechen</string>
     <string name="update_dialog_do_update">Update starten</string>
