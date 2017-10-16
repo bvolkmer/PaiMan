@@ -42,9 +42,14 @@ class UpdateService @Inject constructor(private val context: Context) {
     }.also { Log.d(this::class.simpleName, "Current version name: $it") }
 
     /** Latest upstream version as GitHub Release */
-    val latestVersion: Deferred<SemanticVersion>
+    val latestVersion: Deferred<SemanticVersion?>
         get() = async(CommonPool) {
-            SemanticVersion.of(getNewestReleaseJSON().getString("name").removePrefix("v"))
+            val stringVersion = getNewestReleaseJSON()?.getString("name")?.removePrefix("v")
+            if (stringVersion != null) {
+                SemanticVersion.of(stringVersion)
+            } else {
+                null
+            }
         }
 
     private val lock = ReentrantLock()
@@ -53,10 +58,10 @@ class UpdateService @Inject constructor(private val context: Context) {
     private val downloadManager = this@UpdateService.context.getSystemService(
             Context.DOWNLOAD_SERVICE) as DownloadManager
 
-    private suspend fun getNewestReleaseJSON(): JSONObject {
+    private suspend fun getNewestReleaseJSON(): JSONObject? {
         lock.withLock {
             val cache = responseCache
-            if (cache != null && cache.first == LocalDate.now()) return cache.second
+            return if (cache != null && cache.first == LocalDate.now()) return cache.second
             else {
                 val queue = Volley.newRequestQueue(this@UpdateService.context)
                 val baseUrl = "https://api.github.com"
@@ -66,12 +71,12 @@ class UpdateService @Inject constructor(private val context: Context) {
                         future)
                 queue.add(request)
                 try {
-                    return future.get().getJSONObject(0).also {
+                    future.get().getJSONObject(0).also {
                         responseCache = Pair(LocalDate.now(), it)
                     }
                 } catch (e: Exception) {
-                    Log.e(this@UpdateService::class.simpleName, "Error getting latestVersion")
-                    throw e
+                    Log.w(this@UpdateService::class.simpleName, "Error getting latestVersion", e)
+                    cache?.second
                 }
             }
         }
@@ -143,33 +148,46 @@ class UpdateService @Inject constructor(private val context: Context) {
     }
 
     /** If this app is at the newest version */
-    suspend fun isNewestVersion(): Boolean = currentVersion >= latestVersion.await()
+    suspend fun isNewestVersion(): Boolean? {
+        val latestVersion = latestVersion.await()
+        return if (latestVersion != null) currentVersion >= latestVersion
+        else null
+    }
 
     /** Start the update action */
     fun requestUpdate() {
         launch(UI) {
-            val updateDir = File(this@UpdateService.context.externalCacheDir, "update").apply { mkdirs() }
-            val updateFile = File(updateDir, "update.apk").also {
-                if (it.exists()) it.delete()
+            if (isNewestVersion() == true) {
+                val updateDir = File(this@UpdateService.context.externalCacheDir, "update").apply { mkdirs() }
+                val updateFile = File(updateDir, "update.apk").also {
+                    if (it.exists()) it.delete()
+                }
+                val releaseJSON = getNewestReleaseJSON()
+                if (releaseJSON != null) {
+                    try {
+                        val array = releaseJSON.getJSONArray("assets")
+                        var url: String? = null
+                        (0 until array.length()).map { array.getJSONObject(it) }
+                                .filter { it.getString("content_type") == "application/vnd.android.package-archive" }
+                                .forEach { url = it.getString("browser_download_url") }
+                        val downloadRequest = DownloadManager.Request(Uri.parse(url!!)).apply {
+                            setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
+                            setVisibleInDownloadsUi(false)
+                            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                            setVisibleInDownloadsUi(false)
+                            setTitle(this@UpdateService.context.getString(R.string.update_download_title))
+                            setDescription(this@UpdateService.context.getString(R.string.update_download_description))
+                            setDestinationUri(Uri.fromFile(updateFile))
+                            setMimeType("application/vnd.android.package-archive")
+                        }
+                        this@UpdateService.context.registerReceiver(downloadComplete,
+                                IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+                        downloadManager.enqueue(downloadRequest)
+                    } catch (e: Exception) {
+                        Log.w("${this@UpdateService}::requestUpdate", "Update failed: ", e)
+                    }
+                }
             }
-            val array = getNewestReleaseJSON().getJSONArray("assets")
-            var url: String? = null
-            (0 until array.length()).map { array.getJSONObject(it) }
-                    .filter { it.getString("content_type") == "application/vnd.android.package-archive" }
-                    .forEach { url = it.getString("browser_download_url") }
-            val downloadRequest = DownloadManager.Request(Uri.parse(url!!)).apply {
-                setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
-                setVisibleInDownloadsUi(false)
-                setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-                setVisibleInDownloadsUi(false)
-                setTitle(this@UpdateService.context.getString(R.string.update_download_title))
-                setDescription(this@UpdateService.context.getString(R.string.update_download_description))
-                setDestinationUri(Uri.fromFile(updateFile))
-                setMimeType("application/vnd.android.package-archive")
-            }
-            this@UpdateService.context.registerReceiver(downloadComplete,
-                    IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-            downloadManager.enqueue(downloadRequest)
         }
     }
 

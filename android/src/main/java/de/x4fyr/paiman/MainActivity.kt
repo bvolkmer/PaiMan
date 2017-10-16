@@ -163,15 +163,17 @@ class MainActivity: BaseActivity(), HasActivityInjector {
                     text = getString(R.string.update_dialog_upstream_version,
                             getString(R.string.update_dialog_upstream_version_pending))
                     launch(UI) {
-                        text = getString(R.string.update_dialog_upstream_version,
-                                updateService.latestVersion.await())
+                        val latestVersion = updateService.latestVersion.await()
+                        if (latestVersion != null) {
+                            text = getString(R.string.update_dialog_upstream_version, latestVersion)
+                        }
                     }
                 }
                 view.findViewById<Button>(R.id.update_dialog_update_button).apply {
                     isEnabled = false
                     setOnClickListener { updateService.requestUpdate() }
                     launch(UI) {
-                        isEnabled = !updateService.isNewestVersion()
+                        isEnabled = !(updateService.isNewestVersion()?: true)
                     }
                 }
                 setView(view)
@@ -230,7 +232,7 @@ class MainActivity: BaseActivity(), HasActivityInjector {
         }
         swipeRefreshLayout.onRefresh { reloadContent(completionHandler = { swipeRefreshLayout.isRefreshing = false }) }
         launch(UI) {
-            if (!updateService.isNewestVersion()) {
+            if (updateService.isNewestVersion() == false) {
                 updateDialogBuilder().create().show()
             }
         }
