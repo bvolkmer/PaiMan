@@ -43,7 +43,7 @@
     <string name="edit_painting_apply">Anwenden</string>
     <string name="edit_painting_title">Gemälde bearbeiten</string>
     <string name="add_painting_image_button_description">Schaltfläche um das Hauptbild zu ändern/hinzuzufügen</string>
-    <string name="add_painting_apply">Anwenden</string>
+    <string name="add_painting_apply">Hinzufügen</string>
     <string name="add_painting_warning_no_id">Das Gemälde konnte nicht gespeichert werden.</string>
     <string name="error_image_not_readable">Das Bild konnte nicht verarbeitet werden.</string>
     <string name="add_painting_warning_image_missing">Das Bild darf nicht leer sein.</string>

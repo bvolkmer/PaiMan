@@ -12,6 +12,8 @@ import android.view.MenuItem
 import android.view.View
 import de.x4fyr.paiman.R
 import de.x4fyr.paiman.lib.adapter.AndroidGoogleDriveStorageAdapter
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import java.io.File
 import java.io.InputStream
 import javax.inject.Inject
@@ -101,20 +103,23 @@ suspend fun Activity.getInputStreamFromUrl(url: String): InputStream? {
 
 /** Error [AlertDialog] */
 fun Activity.errorDialog(msg: Int) {
-    //launch(UI) {
-    //    AlertDialog.Builder(this@errorDialog)
-    //            .setMessage(msg)
-    //            .create()
-    //            .show()
-    //}
+    launch(UI) {
+        try {
+            AlertDialog.Builder(this@errorDialog)
+                    .setMessage(msg)
+                    .create()
+                    .show()
+        } catch (e: RuntimeException) {
+        }
+    }
 }
 
 /**
  * [LruCache] specified for [Bitmap] with the maxKbSize in kb as limit
  */
-class BitmapCache<K>(maxKbSize: Int) : LruCache<K, Bitmap>(maxKbSize) {
+class BitmapCache<K>(maxKbSize: Int): LruCache<K, Bitmap>(maxKbSize) {
 
     override fun sizeOf(key: K, value: Bitmap): Int {
-        return value.byteCount / 1024
+        return value.byteCount/1024
     }
 }
