@@ -12,8 +12,6 @@ import android.view.MenuItem
 import android.view.View
 import de.x4fyr.paiman.R
 import de.x4fyr.paiman.lib.adapter.AndroidGoogleDriveStorageAdapter
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
 import java.io.File
 import java.io.InputStream
 import javax.inject.Inject
@@ -103,12 +101,12 @@ suspend fun Activity.getInputStreamFromUrl(url: String): InputStream? {
 
 /** Error [AlertDialog] */
 fun Activity.errorDialog(msg: Int) {
-    launch(UI) {
-        AlertDialog.Builder(this@errorDialog)
-                .setMessage(msg)
-                .create()
-                .show()
-    }
+    //launch(UI) {
+    //    AlertDialog.Builder(this@errorDialog)
+    //            .setMessage(msg)
+    //            .create()
+    //            .show()
+    //}
 }
 
 /**
