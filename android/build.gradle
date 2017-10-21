@@ -101,6 +101,7 @@ dependencies {
     kapt 'com.google.dagger:dagger-compiler:2.11'
     provided 'org.glassfish:javax.annotation:10.0-b28'
     kapt 'com.google.dagger:dagger-android-processor:2.11'
+    compile 'com.jakewharton:disklrucache:2.0.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -8,6 +8,7 @@ import de.x4fyr.paiman.lib.adapter.couchbase.QueryAdapter
 import de.x4fyr.paiman.lib.domain.*
 import org.threeten.bp.LocalDate
 import java.io.InputStream
+import java.util.concurrent.Future
 import java.util.logging.Logger
 
 /**
@@ -48,14 +49,14 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
                         "painting")
         LOG.info("Saving mainPicture to DB")
         val mainPictureID = try {
-            storageAdapter.saveImage(mainPicture)
+            storageAdapter.saveImage(mainPicture, null)
         } catch (e: StorageAdapter.StorageException) {
             throw ServiceException("Failed to save main image", e)
         }
         LOG.info("Saving wips to DB")
         val wipIDs: List<String> = wip.map {
             try {
-                storageAdapter.saveImage(it)
+                storageAdapter.saveImage(it, null)
             } catch (e: StorageAdapter.StorageException) {
                 throw ServiceException("Failed to save wip images", e)
             }
@@ -63,7 +64,7 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
         LOG.info("Saving refs to DB")
         val refIDs = reference.map {
             try {
-                storageAdapter.saveImage(it)
+                storageAdapter.saveImage(it, null)
             } catch (e: StorageAdapter.StorageException) {
                 throw ServiceException("Failed to save reference images", e)
             }
@@ -82,7 +83,7 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
                                             newPicture: InputStream,
                                             moveOldToWip: Boolean): SavedPainting {
         val mainPictureID = try {
-            storageAdapter.saveImage(newPicture)
+            storageAdapter.saveImage(newPicture, null)
         } catch (e: StorageAdapter.StorageException) {
             throw ServiceException("Failed to save main image", e)
         }
@@ -108,7 +109,7 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
     override suspend fun addWipPicture(painting: SavedPainting, images: Set<InputStream>): SavedPainting {
         val wipIDs = images.map {
             try {
-                storageAdapter.saveImage(it)
+                storageAdapter.saveImage(it, null)
             } catch (e: StorageAdapter.StorageException) {
                 throw ServiceException("Failed to save wip images", e)
             }
@@ -129,7 +130,7 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
     override suspend fun addReferences(painting: SavedPainting, references: Set<InputStream>): SavedPainting {
         val refIDs = references.map {
             try {
-                storageAdapter.saveImage(it)
+                storageAdapter.saveImage(it, null)
             } catch (e: StorageAdapter.StorageException) {
                 throw ServiceException("Failed to save reference images", e)
             }
@@ -156,7 +157,7 @@ internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdap
             paintingCRUDAdapter.update(painting.copy(tags = painting.tags - tags))
                     ?: throw ServiceException("Could not remove tags")
 
-    override suspend fun getPictureStream(picture: Picture): InputStream =
+    override suspend fun getPictureStream(picture: Picture): Future<InputStream> =
             try {
                 storageAdapter.getImage(picture.id)
             } catch (e: StorageAdapter.StorageException) {

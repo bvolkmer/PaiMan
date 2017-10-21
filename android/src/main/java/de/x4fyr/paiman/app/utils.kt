@@ -10,14 +10,16 @@ import android.util.Log
 import android.util.LruCache
 import android.view.MenuItem
 import android.view.View
-import android.widget.EditText
 import android.widget.TextView
 import de.x4fyr.paiman.R
 import de.x4fyr.paiman.lib.adapter.AndroidGoogleDriveStorageAdapter
+import de.x4fyr.paiman.lib.adapter.StorageAdapter
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
+import org.jetbrains.anko.getStackTraceString
 import java.io.File
 import java.io.InputStream
+import java.io.OutputStream
 import javax.inject.Inject
 
 /** An dialog Fragment that has an apply action.
@@ -57,26 +59,6 @@ abstract class BaseActivity: AppCompatActivity() {
         for ((_, handler) in resultHandlerMap) {
             handler.invoke(requestCode, resultCode, data)
         }
-    }
-
-    override fun onStart() {
-        storageAdapter.connect(this)
-        super.onStart()
-    }
-
-    override fun onResume() {
-        storageAdapter.connect(this)
-        super.onResume()
-    }
-
-    override fun onPause() {
-        storageAdapter.disconnect()
-        super.onPause()
-    }
-
-    override fun onStop() {
-        storageAdapter.disconnect()
-        super.onStop()
     }
 
 }
@@ -122,7 +104,8 @@ fun Activity.errorDialog(msg: Int, throwable: Throwable) {
         try {
             val view = layoutInflater.inflate(R.layout.dialog_error, null, false)
             view.findViewById<TextView>(R.id.message).text = getString(msg)
-            view.findViewById<EditText>(R.id.exception).setText(throwable.message!!)
+            view.findViewById<TextView>(
+                    R.id.exception).text = throwable.message!! + '\n' + throwable.getStackTraceString()
             AlertDialog.Builder(this@errorDialog)
                     .setView(view)
                     .create()
@@ -140,5 +123,32 @@ class BitmapCache<K>(maxKbSize: Int): LruCache<K, Bitmap>(maxKbSize) {
 
     override fun sizeOf(key: K, value: Bitmap): Int {
         return value.byteCount/1024
+    }
+}
+
+/** Create [StorageAdapter.StorageException.General] with logging the error */
+fun StorageAdapter.error(msg: String): StorageAdapter.StorageException.General {
+    Log.e(this::class.simpleName, msg)
+    return StorageAdapter.StorageException.General(msg)
+}
+
+/** Create [StorageAdapter.StorageException.General] including `cause` with logging the error */
+fun StorageAdapter.error(msg: String, cause: Throwable): StorageAdapter.StorageException.General {
+    Log.e(this::class.simpleName, msg, cause)
+    return StorageAdapter.StorageException.General(msg, cause)
+}
+
+/** Writes an InputStream to an OutputStream */
+fun InputStream.writeTo(outputStream: OutputStream) {
+    this.use { inputStream ->
+        outputStream.use { outputStream ->
+            val buffer = ByteArray(1024)
+            var bytesRead = inputStream.read(buffer)
+            while (bytesRead != -1) {
+                outputStream.write(buffer)
+                bytesRead = inputStream.read(buffer)
+            }
+            outputStream.flush()
+        }
     }
 }

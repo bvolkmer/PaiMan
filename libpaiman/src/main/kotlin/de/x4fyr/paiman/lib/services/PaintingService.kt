@@ -7,6 +7,7 @@ import de.x4fyr.paiman.lib.domain.SavedPainting
 import de.x4fyr.paiman.lib.domain.SellingInformation
 import org.threeten.bp.LocalDate
 import java.io.InputStream
+import java.util.concurrent.Future
 
 /**
  * Service for querying, creating, removing and manipulating paintings, including the needed persistence actions
@@ -85,5 +86,5 @@ interface PaintingService {
 
     /** Get a InputStream of a picture belonging to a given painting */
     @Throws(ServiceException::class)
-    suspend fun getPictureStream(picture: Picture): InputStream
+    suspend fun getPictureStream(picture: Picture): Future<InputStream>
 }

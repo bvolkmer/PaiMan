@@ -3,10 +3,11 @@ package de.x4fyr.paiman.lib.services
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import de.x4fyr.paiman.R
 import de.x4fyr.paiman.app.BitmapCache
+import de.x4fyr.paiman.lib.adapter.StorageAdapter
 import de.x4fyr.paiman.lib.domain.Picture
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,9 +17,7 @@ import kotlin.concurrent.withLock
  * Service serving design information and actions
  */
 @Singleton
-class DesignService @Inject constructor(context: Context, private var paintingService: PaintingService) {
-    /** Whether this device should be considered large, i.e. a tablet */
-    val isLargeDevice: Boolean = context.resources.getBoolean(R.bool.large_layout)
+class DesignService @Inject constructor(private val context: Context, private var paintingService: PaintingService) {
 
     private val fullSizeCache: BitmapCache<String>
     private val thumbnailCache: BitmapCache<String>
@@ -34,41 +33,34 @@ class DesignService @Inject constructor(context: Context, private var paintingSe
 
     /** Get [Bitmap] of [Picture] from cache or load it if missing  */
     @Throws(ServiceException::class)
-    suspend fun getOrLoadFullSizeBitmap(picture: Picture): Bitmap {
-        // access
-        Log.d("${this::class.simpleName}::getFullSize", "Getting ${picture.id}")
-        return fullSizeLock.withLock {
-            Log.d("${this::class.simpleName}::getFullSize", "Acquired lock for ${picture.id}")
-            val cached = fullSizeCache[picture.id]
-            (if (cached != null) cached
-            else {
-                val stream = paintingService.getPictureStream(picture)
-                BitmapFactory.decodeStream(stream).also {
-                    stream.close()
-                    fullSizeCache.put(picture.id, it)
+    suspend fun getOrLoadFullSizeBitmap(picture: Picture): Bitmap =
+            fullSizeLock.withLock {
+                fullSizeCache[picture.id] ?: try {
+                    val result = paintingService.getPictureStream(picture).get()
+                    result.use {
+                        BitmapFactory.decodeStream(it)!!.also {
+                            fullSizeCache.put(picture.id, it)
+                        }
+                    }
+                } catch (e: ExecutionException) {
+                    if (e.cause is StorageAdapter.StorageException.EntityDoesNotExist) {
+                        BitmapFactory.decodeResource(context.resources, R.drawable.ic_broken_image_black_24dp)
+                    } else throw e.cause ?: e
                 }
-            }).also {
-                Log.d("${this::class.simpleName}::getFullSize", "Got ${picture.id}")
             }
-        }
-    }
 
     /** Get thumbnail scaled [Bitmap] of [Picture] from cache or load it if missing  */
     @Throws(ServiceException::class)
-    suspend fun getOrLoadThumbnailBitmap(picture: Picture) : Bitmap {
-        Log.d("${this::class.simpleName}::getThumbnail", "Getting ${picture.id}")
-        return thumbnailLock.withLock {
-            Log.d("${this::class.simpleName}::getThumbnail", "Acquired lock for ${picture.id}")
-            val cached = thumbnailCache[picture.id]
-            (if (cached != null) cached
-            else {
-                val fullSize = getOrLoadFullSizeBitmap(picture = picture)
-                Bitmap.createScaledBitmap(fullSize, 100, 100, false)
-            }).also {
-                Log.d("${this::class.simpleName}::getThumbnail", "Got ${picture.id}")
+    suspend fun getOrLoadThumbnailBitmap(picture: Picture): Bitmap =
+            thumbnailLock.withLock {
+                thumbnailCache[picture.id] ?: run {
+                    val fullSizeBitmap = getOrLoadFullSizeBitmap(picture)
+                    if (fullSizeBitmap.width > 100 || fullSizeBitmap.height > 100) {
+                        Bitmap.createScaledBitmap(
+                                getOrLoadFullSizeBitmap(picture = picture), 100, 100, false).also {
+                            thumbnailCache.put(picture.id, it)
+                        }
+                    } else fullSizeBitmap
+                }
             }
-        }
-
-    }
-
 }

@@ -2,7 +2,7 @@ package de.x4fyr.paiman.lib.provider
 
 import android.content.Context
 import com.couchbase.lite.android.AndroidContext
-import de.x4fyr.paiman.lib.adapter.AndroidGoogleDriveStorageAdapter
+import de.x4fyr.paiman.lib.adapter.GoogleDriveStorageAdapter
 import de.x4fyr.paiman.lib.services.DesignService
 import javax.inject.Singleton
 
@@ -12,5 +12,5 @@ import javax.inject.Singleton
  * It also provides the platform depended [DesignService]
  */
 @Singleton
-class AndroidServiceProvider(context: Context, storageAdapter: AndroidGoogleDriveStorageAdapter): ServiceProvider(
+class AndroidServiceProvider(context: Context, storageAdapter: GoogleDriveStorageAdapter): ServiceProvider(
         AndroidContext(context), storageAdapter)

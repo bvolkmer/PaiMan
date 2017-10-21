@@ -9,6 +9,7 @@ import dagger.android.ContributesAndroidInjector
 import dagger.android.DaggerApplication
 import dagger.android.support.AndroidSupportInjectionModule
 import de.x4fyr.paiman.lib.adapter.AndroidGoogleDriveStorageAdapter
+import de.x4fyr.paiman.lib.adapter.CachedGoogleDriveStorageAdapter
 import de.x4fyr.paiman.lib.provider.AndroidServiceProvider
 import de.x4fyr.paiman.lib.provider.ServiceProvider
 import de.x4fyr.paiman.lib.services.PaintingService
@@ -85,10 +86,11 @@ class ServicesModule {
         storageAdapter
     }
 
+
     @Provides
     @Singleton
     fun provideAndroidServiceProvider(context: android.app.Application,
-                                      storageAdapter: AndroidGoogleDriveStorageAdapter): AndroidServiceProvider = try {
+                                      storageAdapter: CachedGoogleDriveStorageAdapter): AndroidServiceProvider = try {
         provider
     } catch (e: UninitializedPropertyAccessException) {
         provider = AndroidServiceProvider(context, storageAdapter)
