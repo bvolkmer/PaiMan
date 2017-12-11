@@ -16,7 +16,7 @@ import java.util.logging.Logger
  * @author de.x4fyr
  * Created on 3/1/17.
  */
-internal class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdapter,
+class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdapter,
                                queryAdapter: QueryAdapter,
                                private val storageAdapter: GoogleDriveStorageAdapter):
         PaintingService,

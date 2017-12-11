@@ -9,6 +9,7 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
 import de.x4fyr.paiman.app.BaseActivity
+import de.x4fyr.paiman.lib.services.PictureService
 import java.io.File
 
 
@@ -16,7 +17,7 @@ import java.io.File
  * Created by x4fyr on 3/22/17.
  * Taken an modified from https://gist.github.com/Mariovc/f06e70ebe8ca52fbbbe2
  */
-class AndroidPictureProvider(private var owningActivity: BaseActivity) : PictureProvider {
+class AndroidPictureProvider(private var owningActivity: BaseActivity) : PictureService {
 
     companion object {
         private const val TAG = "ImagePicker"

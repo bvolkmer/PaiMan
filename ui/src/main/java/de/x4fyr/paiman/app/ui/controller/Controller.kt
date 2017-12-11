@@ -6,5 +6,5 @@ import de.x4fyr.paiman.app.ui.view.View
 interface Controller {
 
     /** Prepare and load corresponding [View] */
-    fun loadView()
+    suspend fun loadView()
 }

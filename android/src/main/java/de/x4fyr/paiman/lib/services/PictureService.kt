@@ -1,10 +1,10 @@
-package de.x4fyr.paiman.lib.provider
+package de.x4fyr.paiman.lib.services
 
 
 /**
  * Interface for picture providing actions
  */
-interface PictureProvider {
+interface PictureService {
     /**
      * Actions that picks a picture
      *

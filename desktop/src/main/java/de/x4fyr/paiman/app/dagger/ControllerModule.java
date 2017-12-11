@@ -7,16 +7,20 @@ import de.x4fyr.paiman.app.ui.controller.EntryViewController;
 import de.x4fyr.paiman.app.ui.controller.MainViewController;
 import de.x4fyr.paiman.app.ui.view.EntryView;
 import de.x4fyr.paiman.app.ui.view.MainView;
+import de.x4fyr.paiman.lib.services.PaintingService;
+import de.x4fyr.paiman.lib.services.QueryService;
 
 import javax.inject.Singleton;
 
 @Module
-public class ControllerModule {
+enum ControllerModule {
+    ;
 
     @Provides
     @Singleton
-    static MainViewController provideMainViewController(WebViewService webViewService, MainView mainView) {
-        return new MainViewController(webViewService, mainView);
+    static MainViewController provideMainViewController(WebViewService webViewService, MainView mainView,
+                                                        PaintingService paintingService, QueryService queryService) {
+        return new MainViewController(webViewService, mainView, paintingService, queryService);
     }
 
     @Provides

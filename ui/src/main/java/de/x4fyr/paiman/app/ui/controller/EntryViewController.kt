@@ -2,13 +2,15 @@ package de.x4fyr.paiman.app.ui.controller
 
 import de.x4fyr.paiman.app.services.WebViewService
 import de.x4fyr.paiman.app.ui.view.EntryView
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.launch
 
 /** Controller for [EntryView] */
 class EntryViewController constructor(private val webViewService: WebViewService,
                                       private val mainUIController: MainViewController,
                                       private val view: EntryView): Controller {
 
-    override fun loadView() {
+    override suspend fun loadView() {
         val sb = StringBuilder()
         view.appendTo(sb)
         webViewService.loadUI(sb)
@@ -21,6 +23,8 @@ class EntryViewController constructor(private val webViewService: WebViewService
      */
     @Suppress("unused")
     fun openNext() {
-        mainUIController.loadView()
+        launch(CommonPool) {
+            mainUIController.loadView()
+        }
     }
 }

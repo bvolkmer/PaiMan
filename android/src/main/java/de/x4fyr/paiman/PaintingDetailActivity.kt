@@ -1,7 +1,6 @@
 package de.x4fyr.paiman
 
 import android.app.Activity
-import android.app.Service
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -27,9 +26,9 @@ import de.x4fyr.paiman.app.getInputStreamFromUrl
 import de.x4fyr.paiman.lib.domain.Purchaser
 import de.x4fyr.paiman.lib.domain.SavedPainting
 import de.x4fyr.paiman.lib.provider.AndroidPictureProvider
-import de.x4fyr.paiman.lib.provider.PictureProvider
 import de.x4fyr.paiman.lib.services.DesignService
 import de.x4fyr.paiman.lib.services.PaintingService
+import de.x4fyr.paiman.lib.services.PictureService
 import de.x4fyr.paiman.lib.services.ServiceException
 import kotlinx.android.synthetic.main.activity_painting_detail.*
 import kotlinx.android.synthetic.main.content_painting_detail.*
@@ -65,7 +64,7 @@ class PaintingDetailActivity: BaseActivity(), HasActivityInjector, HasSupportFra
     @Inject lateinit var paintingService: PaintingService
     /** Injected */
     @Inject lateinit var designService: DesignService
-    private lateinit var pictureProvider: PictureProvider
+    private lateinit var pictureProvider: PictureService
 
     companion object {
         /** ID identifier string for intents */

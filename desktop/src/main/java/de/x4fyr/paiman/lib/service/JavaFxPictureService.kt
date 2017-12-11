@@ -1,4 +1,4 @@
-package de.x4fyr.paiman.lib.provider
+package de.x4fyr.paiman.lib.service
 
 import javafx.stage.FileChooser
 import javafx.stage.Stage
@@ -6,9 +6,10 @@ import javafx.stage.Stage
 /**
  * PictureProvider implementation for desktop opening the default file selection dialog to let the user pick an image
  */
-class DesktopPictureProvider(val stage: Stage): PictureProvider {
+class JavaFxPictureService(val stage: Stage) {
 
-    override fun pickPicture(onReturn: (url: String?) -> Unit) {
+    /** Pick a picture using [FileChooser] */
+    fun pickPicture(onReturn: (url: String?) -> Unit) {
         FileChooser().apply {
             title = "Open picture"
             onReturn(showOpenDialog(stage)?.path)

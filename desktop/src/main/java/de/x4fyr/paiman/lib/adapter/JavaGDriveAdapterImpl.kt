@@ -1,19 +1,15 @@
-package de.x4fyr.paiman.lib.provider
+package de.x4fyr.paiman.lib.adapter
 
-import com.couchbase.lite.JavaContext
-import de.x4fyr.paiman.lib.adapter.GoogleDriveStorageAdapter
 import java.io.InputStream
 import java.util.concurrent.Future
 
-/**
- * ServiceProvider implementation for desktop platform
+/** Java implementation of [GoogleDriveStorageAdapter] using Drive API Client Library for Java
+ *
+ * TODO: This is a stub
  */
-class DesktopServiceProvider : ServiceProvider(JavaContext(), StubStorageAdapter())
-
-/** Stub Implementation for old desktop client */
-class StubStorageAdapter: GoogleDriveStorageAdapter {
+class JavaGDriveAdapterImpl: GoogleDriveStorageAdapter {
     /** Get image as [InputStream] from storage */
-    override suspend fun getImage(id: String): Future<InputStream> {
+    suspend override fun getImage(id: String): Future<InputStream> {
         TODO("not implemented") //TODO: not implemented
     }
 
@@ -26,5 +22,4 @@ class StubStorageAdapter: GoogleDriveStorageAdapter {
     suspend override fun deleteImage(id: String) {
         TODO("not implemented") //TODO: not implemented
     }
-
 }

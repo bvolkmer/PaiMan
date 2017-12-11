@@ -7,7 +7,7 @@ import de.x4fyr.paiman.app.ui.controller.EntryViewController;
 import javax.inject.Singleton;
 
 @Singleton
-@Component(modules = {ServiceModule.class, UIModule.class, ControllerModule.class})
+@Component(modules = {ServiceModule.class, UIModule.class, ControllerModule.class, AdapterModule.class})
 public interface MainComponent{
     WebViewServiceImpl webViewServiceImpl();
     EntryViewController entryUIController();

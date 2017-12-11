@@ -6,7 +6,8 @@ import de.x4fyr.paiman.app.ui.view.EntryView;
 import de.x4fyr.paiman.app.ui.view.MainView;
 
 @Module
-public class UIModule {
+enum UIModule {
+    ;
 
     @Provides
     static MainView provideMainView() {

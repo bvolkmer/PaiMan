@@ -5,4 +5,4 @@ import de.x4fyr.paiman.lib.services.QueryService
 /**
  * An adapter to couchbase queries
  */
-internal interface QueryAdapter: QueryService
+interface QueryAdapter: QueryService
