@@ -4,3 +4,6 @@
 [submodule "external/tornadofx"]
 	path = external/tornadofx
 	url = https://github.com/bvolkmer/tornadofx
+[submodule "libs/kotlinx.html"]
+	path = libs/kotlinx.html
+	url = git@github.com:Kotlin/kotlinx.html.git
