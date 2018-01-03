@@ -6,7 +6,7 @@ import de.x4fyr.paiman.lib.services.PaintingService
 import de.x4fyr.paiman.lib.services.QueryService
 
 /** Controller for [MainView] */
-class MainViewController constructor(private val webViewService: WebViewService,
+open class MainViewController constructor(private val webViewService: WebViewService,
                                      private val view: MainView,
                                      private val paintingService: PaintingService,
                                      private val queryService: QueryService): Controller {
@@ -22,4 +22,6 @@ class MainViewController constructor(private val webViewService: WebViewService,
 }
 
 /** Model for painting previews */
-data class MainViewPaintingModel(val title: String)
+data class MainViewPaintingModel(
+        /** title of painting */
+        val title: String)

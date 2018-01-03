@@ -1,30 +1,25 @@
 package de.x4fyr.paiman.app.ui.view
 
+import de.x4fyr.paiman.app.adapter.WebResourceAdapter
 import de.x4fyr.paiman.app.ui.view.html.onsen.ONS_PAGE
 import de.x4fyr.paiman.app.ui.view.html.onsen.ONS_TOOLBAR
 import de.x4fyr.paiman.app.ui.view.html.onsen.onsPage
 import de.x4fyr.paiman.app.ui.view.html.onsen.onsToolbar
 import kotlinx.html.*
 
-private object Resources {
-    /** [Class.getResource] for use in lambdas */
-    fun getResource(name: String): String = this::class.java.getResource(name).toExternalForm()
-}
-
-
 /** Default head for use in Views */
-fun HTML.defaultHead(block: HEAD.() -> Unit = {}) {
+fun HTML.defaultHead(resourceAdapter: WebResourceAdapter, block: HEAD.() -> Unit = {}) {
     head {
-        onsenHead()
+        onsenHead(resourceAdapter)
         block()
     }
 }
 
 /** Head block including css, js and config for onsenui */
-fun HEAD.onsenHead() {
-    styleLink(Resources.getResource("/css/onsenui.css"))
-    styleLink(Resources.getResource("/css/onsen-css-components.min.css"))
-    script(type = ScriptType.textJavaScript, src = Resources.getResource("/js/onsenui.min.js")) {}
+fun HEAD.onsenHead(resourceAdapter: WebResourceAdapter) {
+    style { unsafe { +resourceAdapter.getResourceText("/css/onsenui.css") } }
+    style { unsafe { +resourceAdapter.getResourceText("/css/onsen-css-components.min.css") } }
+    script(type = ScriptType.textJavaScript) { unsafe { +resourceAdapter.getResourceText("/js/onsenui.min.js") } }
     script { unsafe { +"ons.platform.select('android')" } }
 }
 

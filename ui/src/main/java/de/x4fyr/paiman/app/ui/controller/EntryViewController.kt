@@ -6,8 +6,8 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 
 /** Controller for [EntryView] */
-class EntryViewController constructor(private val webViewService: WebViewService,
-                                      private val mainUIController: MainViewController,
+open class EntryViewController constructor(private val webViewService: WebViewService,
+                                      private val mainViewController: MainViewController,
                                       private val view: EntryView): Controller {
 
     override suspend fun loadView() {
@@ -20,11 +20,12 @@ class EntryViewController constructor(private val webViewService: WebViewService
     /** Callback: Open next view
      *
      * unused because only used in ui via js
+     * open to allow adding annotations that be might be use on some platforms for javascript injection
      */
     @Suppress("unused")
-    fun openNext() {
+    open fun openNext() {
         launch(CommonPool) {
-            mainUIController.loadView()
+            mainViewController.loadView()
         }
     }
 }

@@ -1,8 +1,9 @@
 package de.x4fyr.paiman.app.dagger;
 
+import android.content.Context;
 import dagger.Module;
 import dagger.Provides;
-import de.x4fyr.paiman.app.services.JavaFxWebViewService;
+import de.x4fyr.paiman.app.service.AndroidWebViewService;
 import de.x4fyr.paiman.app.services.WebViewService;
 import de.x4fyr.paiman.lib.adapter.GoogleDriveStorageAdapter;
 import de.x4fyr.paiman.lib.adapter.PaintingCRUDAdapter;
@@ -19,14 +20,14 @@ enum ServiceModule {
 
     @Provides
     @Singleton
-    static WebViewService provideWebViewService(JavaFxWebViewService javaFxWebViewService) {
-        return javaFxWebViewService;
+    static WebViewService provideWebViewService(AndroidWebViewService webViewService) {
+        return webViewService;
     }
 
     @Provides
     @Singleton
-    static JavaFxWebViewService provideJavaFxWebViewService() {
-        return new JavaFxWebViewService();
+    static AndroidWebViewService provideWebViewServiceImpl(Context context) {
+        return new AndroidWebViewService(context);
     }
 
     @Provides

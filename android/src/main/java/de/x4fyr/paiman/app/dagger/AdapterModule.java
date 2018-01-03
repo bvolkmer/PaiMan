@@ -1,12 +1,13 @@
 package de.x4fyr.paiman.app.dagger;
 
-import com.couchbase.lite.JavaContext;
+import android.content.Context;
+import com.couchbase.lite.android.AndroidContext;
 import dagger.Module;
 import dagger.Provides;
 import de.x4fyr.paiman.app.adapter.JavaResourceAdapter;
 import de.x4fyr.paiman.app.adapter.WebResourceAdapter;
+import de.x4fyr.paiman.lib.adapter.AndroidGoogleDriveStorageAdapter;
 import de.x4fyr.paiman.lib.adapter.GoogleDriveStorageAdapter;
-import de.x4fyr.paiman.lib.adapter.JavaGoogleDriveStorageAdapter;
 import de.x4fyr.paiman.lib.adapter.PaintingCRUDAdapter;
 import de.x4fyr.paiman.lib.adapter.couchbase.CouchbaseAdapterImpl;
 import de.x4fyr.paiman.lib.adapter.couchbase.QueryAdapter;
@@ -31,18 +32,18 @@ enum AdapterModule {
 
     @Provides
     @Singleton
-    static CouchbaseAdapterImpl provideCouchbaseAdapterImpl() {
-        return new CouchbaseAdapterImpl(new JavaContext());
+    static CouchbaseAdapterImpl provideCouchbaseAdapterImpl(Context context) {
+        return new CouchbaseAdapterImpl(new AndroidContext(context));
     }
 
     @Provides
     @Singleton
     static GoogleDriveStorageAdapter provideGoogleDriveStorageAdapter() {
-        return new JavaGoogleDriveStorageAdapter();
+        return new AndroidGoogleDriveStorageAdapter();
     }
 
     @Provides
-    static WebResourceAdapter provideResourceAdapter() {
+    static WebResourceAdapter resourceAdapter() {
         return new JavaResourceAdapter();
     }
 }

@@ -10,4 +10,9 @@ interface WebViewService {
 
     /** Set Controller for callbacks in ui */
     fun setCallbackController(controller: Controller)
+
+    companion object {
+        /** controller interface name used in javascript/ui */
+        const val javascriptModuleName = "controller"
+    }
 }

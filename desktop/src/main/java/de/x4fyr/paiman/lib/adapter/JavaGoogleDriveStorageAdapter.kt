@@ -3,8 +3,11 @@ package de.x4fyr.paiman.lib.adapter
 import java.io.InputStream
 import java.util.concurrent.Future
 
-/** Android implementation of [GoogleDriveStorageAdapter] using PlayServices*/
-class AndroidGoogleDriveStorageAdapter: GoogleDriveStorageAdapter {
+/** Java implementation of [GoogleDriveStorageAdapter] using Drive API Client Library for Java
+ *
+ * TODO: This is a stub
+ */
+class JavaGoogleDriveStorageAdapter: GoogleDriveStorageAdapter {
     /** Get image as [InputStream] from storage */
     suspend override fun getImage(id: String): Future<InputStream> {
         TODO("not implemented") //TODO: not implemented
