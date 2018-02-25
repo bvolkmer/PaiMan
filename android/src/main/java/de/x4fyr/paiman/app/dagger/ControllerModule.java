@@ -3,12 +3,12 @@ package de.x4fyr.paiman.app.dagger;
 import dagger.Module;
 import dagger.Provides;
 import de.x4fyr.paiman.app.services.WebViewService;
-import de.x4fyr.paiman.app.ui.controller.EntryViewController;
 import de.x4fyr.paiman.app.ui.controller.EntryViewControllerAndroidAdapter;
-import de.x4fyr.paiman.app.ui.controller.MainViewController;
 import de.x4fyr.paiman.app.ui.controller.MainViewControllerAndroidAdapter;
-import de.x4fyr.paiman.app.ui.view.EntryView;
-import de.x4fyr.paiman.app.ui.view.MainView;
+import de.x4fyr.paiman.app.ui.views.entry.EntryController;
+import de.x4fyr.paiman.app.ui.views.entry.EntryView;
+import de.x4fyr.paiman.app.ui.views.overview.OverviewController;
+import de.x4fyr.paiman.app.ui.views.overview.OverviewView;
 import de.x4fyr.paiman.lib.services.PaintingService;
 import de.x4fyr.paiman.lib.services.QueryService;
 
@@ -20,15 +20,15 @@ enum ControllerModule {
 
     @Provides
     @Singleton
-    static MainViewController provideMainViewController(WebViewService webViewService, MainView mainView,
+    static OverviewController provideMainViewController(WebViewService webViewService, OverviewView overviewView,
                                                         PaintingService paintingService, QueryService queryService) {
-        return new MainViewControllerAndroidAdapter(webViewService, mainView, paintingService, queryService);
+        return new MainViewControllerAndroidAdapter(webViewService, overviewView, paintingService, queryService);
     }
 
     @Provides
     @Singleton
-    static EntryViewController provideEntryViewController(WebViewService webViewService, EntryView entryView,
-                                                          MainViewController mainViewController) {
-        return new EntryViewControllerAndroidAdapter(webViewService, mainViewController, entryView);
+    static EntryController provideEntryViewController(WebViewService webViewService, EntryView entryView,
+                                                      OverviewController overviewController) {
+        return new EntryViewControllerAndroidAdapter(webViewService, overviewController, entryView);
     }
 }

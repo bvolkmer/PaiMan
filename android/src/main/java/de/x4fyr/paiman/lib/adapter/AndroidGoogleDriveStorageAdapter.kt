@@ -11,7 +11,7 @@ class AndroidGoogleDriveStorageAdapter: GoogleDriveStorageAdapter {
     }
 
     /** Save image from [InputStream] to Storage */
-    suspend override fun saveImage(image: InputStream, id: String?): String {
+    suspend override fun saveImage(image: InputStream): String {
         TODO("not implemented") //TODO: not implemented
     }
 

@@ -5,7 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.webkit.WebView
 import de.x4fyr.paiman.app.services.WebViewService
-import de.x4fyr.paiman.app.ui.controller.Controller
+import de.x4fyr.paiman.app.ui.Controller
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 

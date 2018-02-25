@@ -1,20 +1,20 @@
 package de.x4fyr.paiman.lib.adapter
 
+import com.couchbase.lite.Context
 import java.io.InputStream
-import java.util.concurrent.Future
 
 /**
  * General storage service for storing images
  */
-interface StorageAdapter {
+interface StorageAdapter : Context {
 
     /** Get image as [InputStream] from storage */
     @Throws(StorageException::class)
-    suspend fun getImage(id: String): Future<InputStream>
+    suspend fun getImage(id: String): InputStream
 
-    /** Save image from [InputStream] to Storage */
+    /** Save/Update image from [InputStream] to Storage */
     @Throws(StorageException::class)
-    suspend fun saveImage(image: InputStream, id: String? = null): String
+    suspend fun saveImage(image: InputStream): String
 
     /** Delete image from storage */
     @Throws(StorageException::class)
@@ -34,6 +34,5 @@ interface StorageAdapter {
         /** Exception thrown if queried an storage entity does not exist*/
         class EntityDoesNotExist(msg: String): StorageException(msg)
     }
-
 
 }

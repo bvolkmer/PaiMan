@@ -1,8 +1,10 @@
 package de.x4fyr.paiman.app
 
-import de.x4fyr.paiman.app.dagger.MainComponent
 import de.x4fyr.paiman.app.services.JavaFxWebViewService
-import de.x4fyr.paiman.app.ui.controller.EntryViewController
+import de.x4fyr.paiman.app.ui.views.entry.EntryController
+import de.x4fyr.paiman.dagger.DaggerMainComponent
+import de.x4fyr.paiman.dagger.DesktopServiceModule
+import de.x4fyr.paiman.dagger.MainComponent
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.layout.StackPane
@@ -14,16 +16,18 @@ import kotlinx.coroutines.experimental.launch
 class App: Application() {
 
     private lateinit var webViewService: JavaFxWebViewService
-    private lateinit var entryViewController: EntryViewController
+    private lateinit var entryController: EntryController
 
     /** See [Application.start] */
     override fun start(primaryStage: Stage) {
-        val component: MainComponent = DaggerMainComponent.create()
+        val component: MainComponent = DaggerMainComponent.builder()
+                .desktopServiceModule(DesktopServiceModule(primaryStage))
+                .build()
         webViewService = component.webViewServiceImpl()
-        entryViewController = component.entryUIController()
+        entryController = component.entryController()
 
         launch(JavaFx) {
-            entryViewController.loadView()
+            entryController.loadView()
             val stackPane = StackPane(webViewService.webView)
             val scene = Scene(stackPane)
             primaryStage.scene = scene

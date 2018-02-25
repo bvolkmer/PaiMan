@@ -4,10 +4,9 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.webkit.WebView
 import de.x4fyr.paiman.app.dagger.AndroidModule
-import de.x4fyr.paiman.app.dagger.DaggerMainComponent
 import de.x4fyr.paiman.app.dagger.MainComponent
 import de.x4fyr.paiman.app.service.AndroidWebViewService
-import de.x4fyr.paiman.app.ui.controller.EntryViewController
+import de.x4fyr.paiman.app.ui.views.entry.EntryController
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 
@@ -15,7 +14,7 @@ import kotlinx.coroutines.experimental.launch
 class WebViewWrapperActivity: AppCompatActivity() {
 
     private lateinit var webViewService: AndroidWebViewService
-    private lateinit var entryViewController: EntryViewController
+    private lateinit var entryViewController: EntryController
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
