@@ -6,7 +6,7 @@ import java.io.InputStream
 /**
  * General storage service for storing images
  */
-interface StorageAdapter : Context {
+interface StorageAdapter: Context {
 
     /** Get image as [InputStream] from storage */
     @Throws(StorageException::class)
@@ -20,13 +20,16 @@ interface StorageAdapter : Context {
     @Throws(StorageException::class)
     suspend fun deleteImage(id: String)
 
+    /** Get thumbnail of image with [id] */
+    suspend fun getThumbnail(id: String): InputStream
+
     /** Exceptions thrown in [StorageAdapter] */
     sealed class StorageException: Exception {
         constructor(msg: String): super(msg)
         constructor(msg: String, cause: Throwable): super(msg, cause)
 
         /** Unspecific Storage Exception */
-        class General: StorageException{
+        class General: StorageException {
             constructor(msg: String): super(msg)
             constructor(msg: String, cause: Throwable): super(msg, cause)
         }

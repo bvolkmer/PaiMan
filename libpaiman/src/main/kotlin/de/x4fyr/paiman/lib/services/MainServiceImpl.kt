@@ -15,11 +15,10 @@ import java.util.logging.Logger
  * Created on 3/1/17.
  */
 class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdapter,
-                               queryAdapter: QueryAdapter,
-                               private val storageAdapter: StorageAdapter):
+                      queryAdapter: QueryAdapter,
+                      private val storageAdapter: StorageAdapter):
         PaintingService,
         QueryService by queryAdapter {
-
     private var LOG = Logger.getLogger(this::class.simpleName)
 
     private val dummyPicture = Picture("dummy")
@@ -155,12 +154,11 @@ class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdapter,
             paintingCRUDAdapter.update(painting.copy(tags = painting.tags - tags))
                     ?: throw ServiceException("Could not remove tags")
 
-    override suspend fun getPictureStream(picture: Picture): InputStream =
-            try {
-                storageAdapter.getImage(picture.id)
-            } catch (e: StorageAdapter.StorageException) {
-                throw ServiceException("Failed to get picture stream", e)
-            }
+    override suspend fun getPictureStream(picture: Picture): InputStream = try {
+        storageAdapter.getImage(picture.id)
+    } catch (e: StorageAdapter.StorageException) {
+        throw ServiceException("Failed to get picture stream", e)
+    }
 
     override suspend fun getFromQueryResult(queryEnumerator: QueryEnumerator): Set<SavedPainting> = getAll(
             queryEnumerator.map { it.key.toString() }.toSet())
@@ -173,8 +171,15 @@ class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdapter,
         paintingCRUDAdapter.delete(id = painting.id)
     }
 
-    @Synchronized
     override suspend fun delete(paintingId: String) {
         paintingCRUDAdapter.delete(id = paintingId)
     }
+
+    /** Get a InputStream of a thumbnail of a picture */
+    suspend override fun getPictureThumbnailStream(picture: Picture): InputStream = try {
+        storageAdapter.getThumbnail(picture.id)
+    } catch (e: StorageAdapter.StorageException) {
+        throw ServiceException("Failed to get picture stream", e)
+    }
+
 }

@@ -86,4 +86,8 @@ interface PaintingService {
     /** Get a InputStream of a picture belonging to a given painting */
     @Throws(ServiceException::class)
     suspend fun getPictureStream(picture: Picture): InputStream
+
+    /** Get a InputStream of a thumbnail of a picture */
+    @Throws(ServiceException::class)
+    suspend fun getPictureThumbnailStream(picture: Picture): InputStream
 }

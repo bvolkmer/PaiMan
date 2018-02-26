@@ -50,8 +50,8 @@ class OverviewModel(private val paintingService: PaintingService,
 
     private suspend fun makePreviewFromPainting(painting: SavedPainting): Preview = Preview(id = painting.id,
             title = painting.title,
-            bas64Image = Base64.getEncoder() //TODO: Downscale first
-                    .encodeToString(paintingService
-                            .getPictureStream(painting.mainPicture)
+            bas64Image = Base64.getEncoder()
+                    .encodeToString( paintingService
+                            .getPictureThumbnailStream(painting.mainPicture)
                             .readBytes()))
 }

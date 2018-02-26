@@ -6,7 +6,7 @@ import org.w3c.dom.NodeList
 import org.w3c.dom.ls.DOMImplementationLS
 import javax.xml.parsers.DocumentBuilderFactory
 
-internal fun NodeList.forEach(consumer: (Node) -> Unit) {
+fun NodeList.forEach(consumer: (Node) -> Unit) {
     for (i in 0 until this.length) {
         consumer(this.item(i))
     }
@@ -21,7 +21,7 @@ internal fun Element.forEachTagWithId(tagName: String, id: String, block: (Eleme
 internal fun buildHTMLDocument() = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         .parse(("<!DOCTYPE " + "html><html></html>").toByteArray().inputStream())!!
 
-internal fun Node.produceString(): String = (this.ownerDocument.implementation.getFeature("LS",
+fun Node.produceString(): String = (this.ownerDocument.implementation.getFeature("LS",
         "3.0") as DOMImplementationLS).createLSSerializer().apply {
     domConfig.setParameter("xml-declaration", false)
 }.writeToString(this)
