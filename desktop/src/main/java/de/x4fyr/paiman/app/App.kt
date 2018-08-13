@@ -3,7 +3,7 @@ package de.x4fyr.paiman.app
 import de.x4fyr.paiman.app.services.JavaFxWebViewService
 import de.x4fyr.paiman.app.ui.views.entry.EntryController
 import de.x4fyr.paiman.dagger.DaggerMainComponent
-import de.x4fyr.paiman.dagger.DesktopServiceModule
+import de.x4fyr.paiman.dagger.desktop.DesktopServiceModule
 import de.x4fyr.paiman.dagger.MainComponent
 import javafx.application.Application
 import javafx.scene.Scene

@@ -1,4 +1,4 @@
-package de.x4fyr.paiman.dagger;
+package de.x4fyr.paiman.dagger.desktop;
 
 import dagger.Module;
 import dagger.Provides;
@@ -10,7 +10,7 @@ import de.x4fyr.paiman.lib.adapter.StorageAdapter;
 import javax.inject.Singleton;
 
 @Module
-enum DesktopAdapterModule {
+public enum DesktopAdapterModule {
     ;
 
     @Provides

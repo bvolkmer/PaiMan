@@ -1,15 +1,15 @@
-package de.x4fyr.paiman.app.dagger;
+package de.x4fyr.paiman.dagger.android;
 
 import android.content.Context;
 import dagger.Module;
 import dagger.Provides;
 
 @Module
-public class AndroidModule {
+public class PlatformModule {
 
-    private Context context;
+    private final Context context;
 
-    public AndroidModule(Context context) {
+    public PlatformModule(Context context) {
         this.context = context;
     }
 

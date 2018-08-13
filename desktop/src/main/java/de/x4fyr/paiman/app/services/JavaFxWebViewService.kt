@@ -17,8 +17,6 @@ import javax.inject.Singleton
 /** JavaFx implementation of [WebViewService] */
 @Singleton
 class JavaFxWebViewService: WebViewService {
-    /** Invoke javascript on webview */
-    override fun invoke(command: String) = webView.engine.executeScript(command) as JSObject?
 
     /** [WebView] instance */
     val webView: WebView = WebView()

@@ -1,21 +1,20 @@
-package de.x4fyr.paiman.dagger;
+package de.x4fyr.paiman.dagger.ui;
 
-import dagger.Module;
 import dagger.Provides;
+import dagger.Module;
 import de.x4fyr.paiman.app.services.WebViewService;
 import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingFactory;
+import de.x4fyr.paiman.app.ui.views.entry.EntryController;
+import de.x4fyr.paiman.app.ui.views.entry.EntryView;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewController;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewModel;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewView;
-import de.x4fyr.paiman.lib.services.PaintingService;
-import de.x4fyr.paiman.lib.services.QueryService;
 
 import javax.inject.Singleton;
 
 @Module
-enum OverviewModule {
+public enum ControllerModule {
     ;
-
 
     @Provides
     @Singleton
@@ -25,12 +24,9 @@ enum OverviewModule {
     }
 
     @Provides
-    static OverviewView provideOverviewView(OverviewModel overviewModel) {
-        return new OverviewView(overviewModel);
-    }
-
-    @Provides
-    static OverviewModel provideOverviewModel(PaintingService paintingService, QueryService queryService) {
-        return new OverviewModel(paintingService, queryService);
+    @Singleton
+    static EntryController provideEntryController(WebViewService webViewService, EntryView entryView,
+                                                  OverviewController overviewController) {
+        return new EntryController(webViewService, overviewController, entryView);
     }
 }

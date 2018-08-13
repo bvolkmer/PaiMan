@@ -1,4 +1,4 @@
-package de.x4fyr.paiman.dagger;
+package de.x4fyr.paiman.dagger.desktop;
 
 import dagger.Module;
 import dagger.Provides;
@@ -13,7 +13,7 @@ import javax.inject.Singleton;
 @Module
 public class DesktopServiceModule {
 
-    private Stage stage;
+    private final Stage stage;
 
     public DesktopServiceModule(Stage stage) {
         this.stage = stage;
