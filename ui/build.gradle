@@ -1,0 +1,22 @@
+apply plugin: 'java'
+apply plugin: 'kotlin'
+version = parent.version
+
+sourceCompatibility = 1.7
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.6"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.6"
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compile "org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.8"
+    runtime 'javax.inject:javax.inject:1'
+    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '0.19.3'
+    compile 'com.google.dagger:dagger:2.11'
+    kapt 'com.google.dagger:dagger-compiler:2.11'
+    compile project(path: ':libpaiman')
+}
+
