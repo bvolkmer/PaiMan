@@ -12,14 +12,17 @@ import kotlinx.html.*
 import kotlinx.html.dom.append
 import kotlinx.html.dom.create
 import kotlinx.html.dom.document
-import java.util.Observable
-import java.util.Observer
+import java.util.*
 
 /** View for AddPainting MVC */
-class AddPaintingView(private val model: AddPaintingModel): View, Observer {
+class AddPaintingView(val model: AddPaintingModel): View, Observer {
 
     /** Controller to control this view */
     lateinit var controller: AddPaintingController
+
+    init {
+        model.addObserver(this)
+    }
 
     /** Update view on model changes
      * See [Observer.update] */

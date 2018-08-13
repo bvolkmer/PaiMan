@@ -1,9 +1,12 @@
 package de.x4fyr.paiman.dagger.ui;
 
-import dagger.Provides;
 import dagger.Module;
+import dagger.Provides;
+import de.x4fyr.paiman.app.services.PictureSelectorService;
 import de.x4fyr.paiman.app.services.WebViewService;
+import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingController;
 import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingFactory;
+import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingView;
 import de.x4fyr.paiman.app.ui.views.entry.EntryController;
 import de.x4fyr.paiman.app.ui.views.entry.EntryView;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewController;
@@ -28,5 +31,10 @@ public enum ControllerModule {
     static EntryController provideEntryController(WebViewService webViewService, EntryView entryView,
                                                   OverviewController overviewController) {
         return new EntryController(webViewService, overviewController, entryView);
+    }
+
+    @Provides
+    static AddPaintingController provideAddPaintingController(AddPaintingView view, WebViewService webViewService, PictureSelectorService pictureSelectorService) {
+        return new AddPaintingController(view, webViewService, pictureSelectorService);
     }
 }

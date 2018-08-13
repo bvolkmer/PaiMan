@@ -8,10 +8,15 @@ import kotlinx.coroutines.experimental.launch
 
 /** Controller for AddPainting MVC */
 open class AddPaintingController(private val addPaintingView: AddPaintingView,
-                                 private val model: AddPaintingModel,
-                                 private val returnController: Controller,
                                  private val webViewService: WebViewService,
                                  private val pictureSelectorService: PictureSelectorService): Controller {
+
+    private val model = addPaintingView.model
+    var returnController: Controller? = null
+
+    init {
+        addPaintingView.controller = this
+    }
 
     suspend override fun loadView() {
         reload()
@@ -27,7 +32,7 @@ open class AddPaintingController(private val addPaintingView: AddPaintingView,
     open fun cancel() {
         println("Callback: cancel()")
         launch(CommonPool) {
-            returnController.loadView()
+            returnController!!.loadView()
         }
     }
 
@@ -48,7 +53,7 @@ open class AddPaintingController(private val addPaintingView: AddPaintingView,
     open fun save() {
         model.save(onSuccess = {
             launch(CommonPool) {
-                returnController.loadView()
+                returnController!!.loadView()
             }
         }, onFailure = {
             /*TODO: Add error handling*/

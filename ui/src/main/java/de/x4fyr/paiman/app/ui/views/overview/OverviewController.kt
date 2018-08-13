@@ -10,7 +10,7 @@ import kotlinx.coroutines.experimental.launch
 open class OverviewController (private val webViewService: WebViewService,
                                private val view: OverviewView,
                                private val addPaintingFactory: AddPaintingFactory,
-                               private val model: OverviewModel): Controller {
+                               private val model: OverviewModel ): Controller {
 
     /** See [Controller.loadView] */
     override suspend fun loadView() {
