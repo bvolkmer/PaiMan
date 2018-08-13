@@ -10,8 +10,7 @@ import de.x4fyr.paiman.lib.adapter.couchbase.QueryAdapter;
 import javax.inject.Singleton;
 
 @Module
-enum AdapterModule {
-    ;
+class AdapterModule {
 
     @Provides
     @Singleton

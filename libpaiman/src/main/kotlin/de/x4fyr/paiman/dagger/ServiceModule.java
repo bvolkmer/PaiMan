@@ -12,8 +12,7 @@ import de.x4fyr.paiman.lib.services.QueryService;
 import javax.inject.Singleton;
 
 @Module
-enum ServiceModule {
-    ;
+class ServiceModule {
 
     @Provides
     @Singleton

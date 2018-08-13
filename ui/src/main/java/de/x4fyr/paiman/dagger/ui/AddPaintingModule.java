@@ -1,4 +1,4 @@
-package de.x4fyr.paiman.dagger;
+package de.x4fyr.paiman.dagger.ui;
 
 import dagger.Module;
 import dagger.Provides;
@@ -11,7 +11,7 @@ import javax.inject.Singleton;
 
 
 @Module
-enum AddPaintingModule {
+public enum AddPaintingModule {
     ;
 
     @Provides

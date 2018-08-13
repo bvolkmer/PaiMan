@@ -7,7 +7,7 @@ import de.x4fyr.paiman.app.ui.views.entry.EntryController;
 import javax.inject.Singleton;
 
 @Singleton
-@Component(modules = {DesktopServiceModule.class, DesktopAdapterModule.class, LibPaimanModule.class, UIModule.class})
+@Component(modules = {DesktopModule.class, LibPaimanModule.class, UIModule.class})
 public interface MainComponent {
     JavaFxWebViewService webViewServiceImpl();
 

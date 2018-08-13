@@ -2,7 +2,8 @@ group 'de.de.x4fyr'
 version '0.2'
 
 buildscript {
-    ext.kotlin_version = '1.1.60'
+    ext.kotlin_version = '1.2.60'
+    ext.dagger_version = '2.13'
     repositories {
         mavenCentral()
         jcenter()
@@ -14,7 +15,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.1.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.gms:google-services:3.1.1'
         classpath 'com.google.firebase:firebase-plugins:1.1.1'
@@ -24,7 +25,7 @@ buildscript {
 
 ext.gitVersioner = [
         defaultBranch           : "master",  // default "master"
-        stableBranches          : [], // default [], the feature branch postfix (-dm4(6)) will not be appended
+        stableBranches          : ["next"], // default [], the feature branch postfix (-dm4(6)) will not be appended
         // on stable branches, all commits are included into the version number calculation
         yearFactor              : 1000,       // default "1000", increasing every 8.57h
         snapshotEnabled         : hasProperty('snapshot') ? snapshot.toBoolean() : true,      // default true, the
