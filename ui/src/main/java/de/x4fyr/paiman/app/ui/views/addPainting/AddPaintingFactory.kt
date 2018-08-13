@@ -9,6 +9,6 @@ class AddPaintingFactory(private val addPaintingControllerProvider: Provider<Add
 
     /** Create ready to use AddPainting MVC with the [AddPaintingController] as starting point */
     fun createAddPaintingController(returnController: Controller): AddPaintingController {
-        return addPaintingControllerProvider.get()
+        return addPaintingControllerProvider.get().also { it.returnController = returnController }
     }
 }
