@@ -13,20 +13,20 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-kapt {
+/*kapt {
     generateStubs = true
-}
+}*/
 
 dependencies {
     compile 'com.couchbase.lite:couchbase-lite-java:1.4.0'
     compile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.0'
     compile project(":libpaiman")
     compile project(":ui")
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     runtime "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-javafx:0.20"
-    compile 'com.google.dagger:dagger:2.11'
-    kapt 'com.google.dagger:dagger-compiler:2.11'
+    compile "com.google.dagger:dagger:$dagger_version"
+    kapt "com.google.dagger:dagger-compiler:$dagger_version"
     runtime 'org.glassfish:javax.annotation:10.0-b28'
     compile 'net.coobird:thumbnailator:0.4.8'
 }

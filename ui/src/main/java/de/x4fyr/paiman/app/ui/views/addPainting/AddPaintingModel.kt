@@ -1,6 +1,5 @@
 package de.x4fyr.paiman.app.ui.views.addPainting
 
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream
 import de.x4fyr.paiman.lib.domain.SavedPainting
 import de.x4fyr.paiman.lib.services.PaintingService
 import de.x4fyr.paiman.lib.services.ServiceException
@@ -31,7 +30,7 @@ class AddPaintingModel(private val paintingService: PaintingService): Observable
 
     /** Set picture */
     fun setPicture(inputStream: InputStream) {
-        if (inputStream is ByteInputStream) {
+        if (inputStream is ByteArrayInputStream) {
             picture = inputStream
             base64Picture = base64Encoder.encodeToString(picture.readBytes())
             picture.reset()
