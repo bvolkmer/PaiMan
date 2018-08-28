@@ -1,10 +1,9 @@
 package de.x4fyr.paiman.app.ui
 
-import de.x4fyr.paiman.app.ui.html.onsen.ONS_PAGE
-import de.x4fyr.paiman.app.ui.html.onsen.ONS_TOOLBAR
-import de.x4fyr.paiman.app.ui.html.onsen.onsPage
-import de.x4fyr.paiman.app.ui.html.onsen.onsToolbar
+import de.x4fyr.paiman.app.ui.html.onsen.*
 import kotlinx.html.*
+import java.io.InputStream
+import java.util.*
 
 /** Default head for use in Views */
 fun HTML.defaultHead(block: HEAD.() -> Unit = {}) {
@@ -19,6 +18,7 @@ fun HEAD.onsenHead() {
     link(href = "./css/onsenui-core.min.css", rel = "stylesheet")
     link(href = "./css/onsen-css-components.min.css", rel = "stylesheet")
     link(href = "./css/fontawesome-all.css", rel = "stylesheet")
+    link(href = "./css/main.css", rel = "stylesheet")
     script(type = ScriptType.textJavaScript, src = "./js/onsenui.min.js") {}
     unsafe { raw("<script>ons.platform.select('android')</script>") }
 }
@@ -33,6 +33,23 @@ fun HTML.defaultBody(toolbarContent: ONS_TOOLBAR.() -> Unit, block: ONS_PAGE.() 
     }
 }
 
+fun HTML.splitterBody(side: String, sideId: String? = null, toolbarContent: ONS_TOOLBAR.() -> Unit, sideContent: ONS_PAGE.() -> Unit, content: ONS_PAGE.() -> Unit) {
+    body {
+        onsSplitter {
+            onsSplitterSide(side = side, attributes = mapOf("collapse" to "", "swipeable" to "")) {
+                if (sideId != null) id = sideId
+                onsPage(sideContent)
+            }
+            onsSplitterContent {
+                onsPage {
+                    onsToolbar(toolbarContent)
+                    content()
+                }
+            }
+        }
+    }
+}
+
 /** Default body without toolbar */
 fun HTML.defaultBodyWithoutToolbar(block: ONS_PAGE.() -> Unit) {
     body {
@@ -44,3 +61,5 @@ fun HTML.defaultBodyWithoutToolbar(block: ONS_PAGE.() -> Unit) {
 }
 
 internal fun jpegDataString(base64Image: String) = "data:image/jpeg;base64,$base64Image"
+
+internal fun jpegDataString(stream: InputStream) = jpegDataString(Base64.getEncoder().encodeToString(stream.readAllBytes()))

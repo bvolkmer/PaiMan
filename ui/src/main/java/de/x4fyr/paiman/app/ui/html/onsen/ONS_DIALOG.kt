@@ -2,19 +2,20 @@ package de.x4fyr.paiman.app.ui.html.onsen
 
 import kotlinx.html.*
 
-/** ons-row */
-class ONS_ROW(consumer: TagConsumer<*>): HTMLTag(tagName = tagName,
+/** ons-dialog */
+class ONS_DIALOG(consumer: TagConsumer<*>): HTMLTag(tagName = tagName,
         consumer = consumer, initialAttributes = emptyMap(), inlineTag = false,
         emptyTag = false), HtmlBlockTag {
     companion object {
         /** HTML tag name */
-        val tagName = "ons-row"
+        const val tagName = "ons-dialog"
     }
 }
 
-/** ons-row */
-fun FlowContent.onsRow(block: ONS_ROW.() -> Unit) = ONS_ROW(
+/** ons-dialog */
+fun FlowContent.onsDialog(block: ONS_DIALOG.() -> Unit) = ONS_DIALOG(
         consumer).visit(block)
 
-fun <T, C: TagConsumer<T>> C.onsRow(block: ONS_ROW.() -> Unit) = ONS_ROW(
+/** ons-dialog */
+fun <T, C: TagConsumer<T>> C.onsDialog(block: ONS_DIALOG.() -> Unit) = ONS_DIALOG(
         consumer = this).visit(block)

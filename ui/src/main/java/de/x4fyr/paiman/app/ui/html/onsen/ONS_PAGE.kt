@@ -11,3 +11,10 @@ class ONS_PAGE(consumer: TagConsumer<*>): HTMLTag(tagName = "ons-page",
 fun BODY.onsPage(block: ONS_PAGE.() -> Unit) = ONS_PAGE(
         consumer).visit(block)
 
+/** ons-page **/
+fun ONS_SPLITTER_CONTENT.onsPage(block: ONS_PAGE.() -> Unit) = ONS_PAGE(
+        consumer).visit(block)
+
+/** ons-page **/
+fun ONS_SPLITTER_SIDE.onsPage(block: ONS_PAGE.() -> Unit) = ONS_PAGE(
+        consumer).visit(block)

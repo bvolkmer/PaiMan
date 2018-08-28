@@ -15,18 +15,18 @@ import kotlinx.html.dom.document
 import java.util.*
 
 /** View for AddPainting MVC */
-class AddPaintingView(val model: AddPaintingModel): View, Observer {
+class AddPaintingView(val model: AddPaintingModel): View {
 
     /** Controller to control this view */
     lateinit var controller: AddPaintingController
 
     init {
-        model.addObserver(this)
+        model.view = this
     }
 
     /** Update view on model changes
      * See [Observer.update] */
-    override fun update(o: Observable?, arg: Any?) {
+    fun update() {
         launch(CommonPool) {
             val updateImage = async {
                 val picture = model.base64Picture

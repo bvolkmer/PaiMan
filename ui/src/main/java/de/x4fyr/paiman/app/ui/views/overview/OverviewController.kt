@@ -3,14 +3,18 @@ package de.x4fyr.paiman.app.ui.views.overview
 import de.x4fyr.paiman.app.services.WebViewService
 import de.x4fyr.paiman.app.ui.Controller
 import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingFactory
+import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailFactory
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
+import kotlin.coroutines.experimental.CoroutineContext
 
 /** Controller for [OverviewView] */
 open class OverviewController (private val webViewService: WebViewService,
                                private val view: OverviewView,
                                private val addPaintingFactory: AddPaintingFactory,
-                               private val model: OverviewModel ): Controller {
+                               private val model: OverviewModel,
+                               private val paintingDetailFactory: PaintingDetailFactory): Controller {
 
     /** See [Controller.loadView] */
     override suspend fun loadView() {
@@ -43,6 +47,8 @@ open class OverviewController (private val webViewService: WebViewService,
     /** Callback: Open detail view of given painting by [id] */
     open fun openPainting(id: String) {
         println("Callback: openPainting($id)")
-        //TODO: Open painting detail view
+        launch (CommonPool) {
+            paintingDetailFactory.createPaintingDetailController(id, this@OverviewController).loadView()
+        }
     }
 }

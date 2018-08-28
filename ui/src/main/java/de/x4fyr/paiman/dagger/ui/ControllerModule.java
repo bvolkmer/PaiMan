@@ -12,6 +12,10 @@ import de.x4fyr.paiman.app.ui.views.entry.EntryView;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewController;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewModel;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewView;
+import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailController;
+import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailFactory;
+import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailModel;
+import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailView;
 
 import javax.inject.Singleton;
 
@@ -22,8 +26,8 @@ public enum ControllerModule {
     @Provides
     @Singleton
     static OverviewController provideOverviewController(WebViewService webViewService, OverviewView overviewView,
-                                                        AddPaintingFactory addPaintingFactory, OverviewModel overviewModel) {
-        return new OverviewController(webViewService, overviewView, addPaintingFactory, overviewModel);
+                                                        AddPaintingFactory addPaintingFactory, OverviewModel overviewModel, PaintingDetailFactory paintingDetailFactory) {
+        return new OverviewController(webViewService, overviewView, addPaintingFactory, overviewModel, paintingDetailFactory);
     }
 
     @Provides

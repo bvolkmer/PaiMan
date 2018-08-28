@@ -7,6 +7,8 @@ import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingView;
 import de.x4fyr.paiman.app.ui.views.entry.EntryView;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewModel;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewView;
+import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailModel;
+import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailView;
 
 @Module
 public enum ViewModule {

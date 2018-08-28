@@ -8,12 +8,22 @@ import kotlinx.coroutines.experimental.launch
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.util.Base64
-import java.util.Observable
 import kotlin.properties.Delegates
 
 /** Model for AddPainting MVC */
-class AddPaintingModel(private val paintingService: PaintingService): Observable() {
+class AddPaintingModel(private val paintingService: PaintingService) {
 
+    /**
+     * AddPaintingView this model belongs to. Set by view in ctor
+     */
+    var view: AddPaintingView? = null
+
+    private var changed: Boolean by Delegates.observable(false) { _, _, new ->
+        if (new) {
+            view?.update()
+            changed = false
+        }
+    }
 
     private lateinit var picture: ByteArrayInputStream
     /** picture in base64 encoding */
@@ -23,8 +33,7 @@ class AddPaintingModel(private val paintingService: PaintingService): Observable
     /** Title of painting */
     var title: String by Delegates.observable("") { _, oldValue, newValue ->
         if (oldValue != newValue) {
-            setChanged()
-            notifyObservers()
+            changed = true
         }
     }
 
@@ -39,8 +48,7 @@ class AddPaintingModel(private val paintingService: PaintingService): Observable
             picture = ByteArrayInputStream(byteArray)
             base64Picture = base64Encoder.encodeToString(byteArray)
         }
-        setChanged()
-        notifyObservers()
+        changed = true
     }
 
     /** Save painting to persistence */

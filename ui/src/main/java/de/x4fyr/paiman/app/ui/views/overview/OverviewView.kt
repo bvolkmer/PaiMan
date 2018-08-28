@@ -76,7 +76,7 @@ class OverviewView(private val model: OverviewModel): View, Observer {
                         onClick = "${WebViewService.javascriptModuleName}.openPainting('$paintingId')"
                         onsCard(title = { +title }) {
                             id = "painting-$paintingId"
-                            img(src = jpegDataString(image)) {
+                            img(src = image) {
                                 style = "max-width: 100px; max-height: 100px"
                             }
                         }

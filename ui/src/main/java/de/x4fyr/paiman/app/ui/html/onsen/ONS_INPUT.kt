@@ -3,9 +3,13 @@ package de.x4fyr.paiman.app.ui.html.onsen
 import kotlinx.html.*
 
 /** ons-card */
-class ONS_INPUT(attributes: Map<String, String> = emptyMap(), consumer: TagConsumer<*>): HTMLTag(tagName = "ons-input",
+class ONS_INPUT(attributes: Map<String, String> = emptyMap(), consumer: TagConsumer<*>) : HTMLTag(tagName = "ons-input",
         consumer = consumer, initialAttributes = attributes, inlineTag = true,
-        emptyTag = false) , CommonAttributeGroupFacade{
+        emptyTag = false), CommonAttributeGroupFacade {
+
+    var value: String
+        get() = attributes.getOrDefault("value", "")
+        set(value) = attributes.set("value", value)
 }
 
 /** ons-card */

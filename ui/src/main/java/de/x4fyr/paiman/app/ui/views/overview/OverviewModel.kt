@@ -1,5 +1,6 @@
 package de.x4fyr.paiman.app.ui.views.overview
 
+import de.x4fyr.paiman.app.ui.jpegDataString
 import de.x4fyr.paiman.lib.domain.SavedPainting
 import de.x4fyr.paiman.lib.services.PaintingService
 import de.x4fyr.paiman.lib.services.QueryService
@@ -7,8 +8,7 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
-import java.util.Base64
-import java.util.Observable
+import java.util.*
 
 /** Model in overview MVC */
 class OverviewModel(private val paintingService: PaintingService,
@@ -50,8 +50,5 @@ class OverviewModel(private val paintingService: PaintingService,
 
     private suspend fun makePreviewFromPainting(painting: SavedPainting): Preview = Preview(id = painting.id,
             title = painting.title,
-            bas64Image = Base64.getEncoder()
-                    .encodeToString( paintingService
-                            .getPictureThumbnailStream(painting.mainPicture)
-                            .readBytes()))
+            bas64Image = jpegDataString(paintingService .getPictureThumbnailStream(painting.mainPicture)))
 }
