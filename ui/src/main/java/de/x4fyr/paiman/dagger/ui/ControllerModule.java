@@ -8,14 +8,9 @@ import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingController;
 import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingFactory;
 import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingView;
 import de.x4fyr.paiman.app.ui.views.entry.EntryController;
-import de.x4fyr.paiman.app.ui.views.entry.EntryView;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewController;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewModel;
-import de.x4fyr.paiman.app.ui.views.overview.OverviewView;
-import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailController;
 import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailFactory;
-import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailModel;
-import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailView;
 
 import javax.inject.Singleton;
 
@@ -25,16 +20,15 @@ public enum ControllerModule {
 
     @Provides
     @Singleton
-    static OverviewController provideOverviewController(WebViewService webViewService, OverviewView overviewView,
-                                                        AddPaintingFactory addPaintingFactory, OverviewModel overviewModel, PaintingDetailFactory paintingDetailFactory) {
-        return new OverviewController(webViewService, overviewView, addPaintingFactory, overviewModel, paintingDetailFactory);
+    static OverviewController provideOverviewController(WebViewService webViewService, AddPaintingFactory addPaintingFactory, OverviewModel overviewModel, PaintingDetailFactory paintingDetailFactory) {
+        return new OverviewController(webViewService, addPaintingFactory, overviewModel, paintingDetailFactory);
     }
 
     @Provides
     @Singleton
-    static EntryController provideEntryController(WebViewService webViewService, EntryView entryView,
+    static EntryController provideEntryController(WebViewService webViewService,
                                                   OverviewController overviewController) {
-        return new EntryController(webViewService, overviewController, entryView);
+        return new EntryController(webViewService, overviewController);
     }
 
     @Provides

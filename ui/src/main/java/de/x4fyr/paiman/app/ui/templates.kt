@@ -15,11 +15,11 @@ fun HTML.defaultHead(block: HEAD.() -> Unit = {}) {
 
 /** Head block including css, js and config for onsenui */
 fun HEAD.onsenHead() {
-    link(href = "./css/onsenui-core.min.css", rel = "stylesheet")
-    link(href = "./css/onsen-css-components.min.css", rel = "stylesheet")
-    link(href = "./css/fontawesome-all.css", rel = "stylesheet")
-    link(href = "./css/main.css", rel = "stylesheet")
-    script(type = ScriptType.textJavaScript, src = "./js/onsenui.min.js") {}
+    link(href = "view/css/onsenui-core.min.css", rel = "stylesheet")
+    link(href = "view/css/onsen-css-components.min.css", rel = "stylesheet")
+    link(href = "view/css/fontawesome-all.css", rel = "stylesheet")
+    link(href = "view/css/main.css", rel = "stylesheet")
+    script(type = ScriptType.textJavaScript, src = "view/js/onsenui.min.js") {}
     unsafe { raw("<script>ons.platform.select('android')</script>") }
 }
 
@@ -62,4 +62,4 @@ fun HTML.defaultBodyWithoutToolbar(block: ONS_PAGE.() -> Unit) {
 
 internal fun jpegDataString(base64Image: String) = "data:image/jpeg;base64,$base64Image"
 
-internal fun jpegDataString(stream: InputStream) = jpegDataString(Base64.getEncoder().encodeToString(stream.readAllBytes()))
+internal fun jpegDataString(stream: InputStream) = jpegDataString(Base64.getEncoder().encodeToString(stream.readBytes()))

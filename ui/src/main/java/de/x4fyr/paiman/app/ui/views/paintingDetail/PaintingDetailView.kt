@@ -12,8 +12,6 @@ import kotlinx.html.dom.append
 import kotlinx.html.dom.create
 import kotlinx.html.dom.document
 import org.threeten.bp.LocalDate
-import org.threeten.bp.Month
-import org.threeten.bp.Year
 import org.w3c.dom.Element
 
 class PaintingDetailView(val model: PaintingDetailModel) : View {
@@ -83,7 +81,6 @@ class PaintingDetailView(val model: PaintingDetailModel) : View {
                         }
                     }
                 }
-                else -> _element = null
             }
             controller?.loadView()
             //TODO: Fix update, that is not happening. Most probably because Deferred.await() creates a copy that is modified here
@@ -122,14 +119,14 @@ class PaintingDetailView(val model: PaintingDetailModel) : View {
                                     |var submitAddTagDialog = function() {
                                     |var dialog = document.getElementById('addTagDialog');
                                     |var input = document.getElementById('addTagInput');
-                                    ${WebViewService.javascriptModuleName}.addTag(input.value);
+                                    ${WebViewService.javascriptControllerModuleName}.addTag(input.value);
                                     |hideDialog('addTagDialog');
                                     |};
                                     |var submitFinishingDialog = function() {
                                     |var dialog = document.getElementById('finishDialog');
                                     |var year = document.getElementById('finishingYear');
                                     |var month = document.getElementById('finishingMonth');
-                                    ${WebViewService.javascriptModuleName}.finishing(year.value, month.value);
+                                    ${WebViewService.javascriptControllerModuleName}.finishing(year.value, month.value);
                                     |hideDialog('finishingDialog');
                                     |};
                                     |var openSide = function() {
@@ -148,7 +145,7 @@ class PaintingDetailView(val model: PaintingDetailModel) : View {
                             toolbarContent = {
                                 div(classes = "left") {
                                     onsButton(modifier = ONS_BUTTON.Modifier.QUIET,
-                                            onClick = "${WebViewService.javascriptModuleName}.back()") {
+                                            onClick = "${WebViewService.javascriptControllerModuleName}.back()") {
                                         onsIcon("fa-arrow-left")
                                     }
                                 }
@@ -308,7 +305,7 @@ class PaintingDetailView(val model: PaintingDetailModel) : View {
         div {
             classes += "detailPictureListItemContainer"
             //style = "display: flex; align-items: center"
-            onsButton("${WebViewService.javascriptModuleName}.$addOnClick") {
+            onsButton("${WebViewService.javascriptControllerModuleName}.$addOnClick") {
                 style = "margin:auto;"
                 onsIcon("fa-plus")
             }
@@ -328,7 +325,7 @@ class PaintingDetailView(val model: PaintingDetailModel) : View {
         div {
             classes += "detailPictureListItemContainer"
             //style = "display: flex; align-items: center"
-            onsButton("${WebViewService.javascriptModuleName}.$addOnClick") {
+            onsButton("${WebViewService.javascriptControllerModuleName}.$addOnClick") {
                 style = "margin:auto;"
                 onsIcon("fa-plus")
             }

@@ -1,7 +1,7 @@
 package de.x4fyr.paiman.app.services
 
 import de.x4fyr.paiman.app.ui.Controller
-import de.x4fyr.paiman.app.ui.forEach
+import de.x4fyr.paiman.app.ui.Model
 import de.x4fyr.paiman.app.ui.produceString
 import javafx.concurrent.Worker
 import javafx.scene.web.WebView
@@ -10,24 +10,16 @@ import kotlinx.coroutines.experimental.launch
 import netscape.javascript.JSException
 import netscape.javascript.JSObject
 import org.w3c.dom.Element
-import java.nio.file.Files
-import java.nio.file.Path
 import javax.inject.Singleton
 
 /** JavaFx implementation of [WebViewService] */
 @Singleton
-class JavaFxWebViewService: WebViewService {
+class JavaFxWebViewService : WebViewService {
 
     /** [WebView] instance */
     val webView: WebView = WebView()
 
-    private val debugPath = Files.createTempDirectory("paiman_webview_debug_")
-    private val debugCssPath = Files.createDirectory(debugPath.resolve("css"))
-    private val debugJsPath = Files.createDirectory(debugPath.resolve("js"))
-    private val debugIndex: Path = debugPath.resolve("index.html")
-
     init {
-        println("Writing debug html to ${debugIndex.toAbsolutePath()}")
         //Hide scrollbars
         webView.engine.loadWorker.stateProperty().addListener { _, _, newState ->
             if (newState == Worker.State.SUCCEEDED) {
@@ -37,55 +29,49 @@ class JavaFxWebViewService: WebViewService {
                 }
             }
         }
+        webView.engine.documentProperty().addListener { _, _, _ ->
+            webView.engine.executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', 'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
+            (webView.engine.executeScript("window") as JSObject).setMember("javaDebug", Debug())
+        }
     }
 
 
     override fun loadUI(htmlElement: Element) {
         launch(JavaFx) {
-            Files.write(debugIndex, htmlElement.produceString().toByteArray())
-            //Replace css references
-            htmlElement.getElementsByTagName("link").forEach {
-                if (it is Element) {
-                    if (it.getAttribute("rel") == "stylesheet") {
-                        var resourceStr = it.getAttribute("href")
-                        if (resourceStr.startsWith("./")) {
-                            resourceStr = resourceStr.drop(".".length)
-                            it.setAttribute("href", this.javaClass.getResource(resourceStr)?.toExternalForm() ?: throw
-                            RuntimeException("Resource $resourceStr not found"))
-                            Files.write(debugCssPath.resolve(resourceStr.drop("/css/".length)),
-                                    this.javaClass.getResourceAsStream(resourceStr).readBytes())
-                        }
-                    }
-                }
-            }
-            //Replace js references
-            htmlElement.getElementsByTagName("script").forEach {
-                if (it is Element) {
-                    if (it.hasAttribute("src")) {
-                        var resourceStr = it.getAttribute("src")
-                        if (resourceStr.startsWith("./")) {
-                            resourceStr = resourceStr.drop(".".length)
-                            it.setAttribute("src", this.javaClass.getResource(resourceStr)?.toExternalForm() ?: throw
-                            RuntimeException("Resource $resourceStr not found"))
-                            Files.write(debugJsPath.resolve(resourceStr.drop("/js/".length)),
-                                    this.javaClass.getResourceAsStream(resourceStr).readBytes())
-                        }
-                    }
-                }
-            }
             webView.engine.loadContent(htmlElement.produceString())
         }
     }
 
-    override fun setCallbackController(controller: Controller) {
+    override fun loadHtml(html: String, controller: Controller, model: Model?) {
+        launch(JavaFx) {
+            val url = this.javaClass.getResource("/view/$html")
+            webView.engine.load(url.toExternalForm())
+            //TODO: Reload only when visible
+            setControllerAndModel(controller, model)
+        }
+    }
+
+    override fun setControllerAndModel(controller: Controller, model: Model?) {
         launch(JavaFx) {
             webView.engine.loadWorker.stateProperty().addListener { _, _, newValue ->
                 if (newValue == Worker.State.SUCCEEDED) {
                     (webView.engine.executeScript("window") as JSObject)
-                            .removeMember(WebViewService.javascriptModuleName)
+                            .removeMember(WebViewService.javascriptControllerModuleName)
                     (webView.engine.executeScript("window") as JSObject)
-                            .setMember(WebViewService.javascriptModuleName, controller)
+                            .setMember(WebViewService.javascriptControllerModuleName, controller)
+                    (webView.engine.executeScript("window") as JSObject)
+                            .removeMember(WebViewService.javascriptModelModuleName)
+                    if (model != null) (webView.engine.executeScript("window") as JSObject)
+                            .setMember(WebViewService.javascriptModelModuleName, model)
                 }
+            }
+        }
+    }
+
+    open class Debug {
+        open fun log(text: String){
+            text.lines().forEach {
+                println("Javascript log: $it")
             }
         }
     }

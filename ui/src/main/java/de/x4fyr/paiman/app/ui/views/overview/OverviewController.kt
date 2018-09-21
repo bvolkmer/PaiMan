@@ -6,27 +6,26 @@ import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingFactory
 import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailFactory
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
-import kotlin.coroutines.experimental.CoroutineContext
 
-/** Controller for [OverviewView] */
+/** Overview Controller */
 open class OverviewController (private val webViewService: WebViewService,
-                               private val view: OverviewView,
                                private val addPaintingFactory: AddPaintingFactory,
                                private val model: OverviewModel,
                                private val paintingDetailFactory: PaintingDetailFactory): Controller {
 
+    companion object {
+        private const val html = "html/overview.html"
+    }
+
     /** See [Controller.loadView] */
     override suspend fun loadView() {
-        view.controller = this
         reload()
     }
 
     /** Reload view */
     suspend fun reload() {
         //TODO: Reload only when visible
-        webViewService.loadUI(view.element.await())
-        webViewService.setCallbackController(this)
+        webViewService.loadHtml(html, this, model)
     }
 
     /** Callback: Open add painting dialog */
@@ -40,8 +39,7 @@ open class OverviewController (private val webViewService: WebViewService,
     /** Callback: Refresh previews */
     open fun refresh() {
         println("Callback: refresh()")
-        //TODO: Replace forced view update
-        view.update(model, null)
+        //TODO
     }
 
     /** Callback: Open detail view of given painting by [id] */

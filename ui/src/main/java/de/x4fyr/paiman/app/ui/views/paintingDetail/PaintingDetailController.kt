@@ -23,7 +23,7 @@ open class PaintingDetailController(
     /** Prepare and load corresponding [View] */
     override suspend fun loadView() {
         webViewService.loadUI(view.element.await())
-        webViewService.setCallbackController(this)
+        webViewService.setControllerAndModel(this)
     }
 
     /** Callback: return to [returnController] */

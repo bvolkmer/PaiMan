@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <link href="../css/onsenui.css" rel="stylesheet">
+    <link href="../css/onsen-css-components.min.css" rel="stylesheet">
+    <script type="text/javascript" src="../js/onsenui.min.js"></script>
+    <link href="../css/fontawesome-all.css" rel="stylesheet">
+    <link href="../css/main.css" rel="stylesheet">
+    <script> ons.platform.select('android')</script>
+    <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
+
+    <script>
+        function refreshPreviews() {
+            var row = document.getElementById("previewRow");
+            var template = document.querySelector("#preview");
+            var previews = JSON.parse(model.getPreviews());
+            var idx;
+            for (idx in previews) {
+                javaDebug.log(JSON.stringify(idx));
+                var preview = previews[idx];
+                var clone = document.importNode(template.content, true);
+                var title = clone.querySelector("#title");
+                title.id = preview.id + "-title";
+                title.textContent = preview.title;
+                var button = clone.querySelector("#button");
+                button.id = preview.id + "-button";
+                button.addEventListener("click", function (ev) {
+                    controller.openPainting(preview.id);
+                }, false);
+                var image = clone.querySelector("#image");
+                image.id = preview.id + "-image";
+                image.src = preview.base64Image;
+                row.appendChild(clone);
+            }
+
+        }
+
+        window.onload = function (ev) {
+            refreshPreviews()
+        };
+    </script>
+</head>
+<body>
+<ons-page>
+    <ons-toolbar>
+        <div class="center">
+            Paiman
+        </div>
+        <div class="right">
+            <ons-button modifier="quiet" onClick="refreshPreviews()">
+                <ons-icon icon="fa-sync"></ons-icon>
+            </ons-button>
+        </div>
+    </ons-toolbar>
+    <ons-row id="previewRow">
+
+    </ons-row>
+    <ons-fab ripple position="bottom right" onClick="controller.openAddPainting()">
+        <ons-icon icon="fa-plus"></ons-icon>
+    </ons-fab>
+</ons-page>
+
+</body>
+
+<template id="preview">
+    <ons-button id="button" modifier="light" ripple onClick="controller.openPainting()">
+        <ons-card>
+            <div id="title" class="title"></div>
+            <div class="content">
+                <img id="image" class="previewImage" style="max-width: 100px; max-height: 100px"/>
+            </div>
+        </ons-card>
+    </ons-button>
+</template>
+
+</html>

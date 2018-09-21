@@ -41,8 +41,8 @@ class AndroidWebViewService(context: Context): WebViewService {
     @SuppressLint("JavascriptInterface")
     override fun setCallbackController(controller: Controller) {
         launch(UI) {
-            webView.removeJavascriptInterface(WebViewService.javascriptModuleName)
-            webView.addJavascriptInterface(controller, WebViewService.javascriptModuleName)
+            webView.removeJavascriptInterface(WebViewService.javascriptControllerModuleName)
+            webView.addJavascriptInterface(controller, WebViewService.javascriptControllerModuleName)
         }
     }
 

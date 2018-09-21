@@ -6,14 +6,12 @@ import de.x4fyr.paiman.app.ui.views.overview.OverviewController
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 
-/** Controller for [EntryView] */
+/** Entry Controller */
 open class EntryController(private val webViewService: WebViewService,
-                           private val mainViewController: OverviewController,
-                           private val view: EntryView): Controller {
+                           private val mainViewController: OverviewController): Controller {
 
     override suspend fun loadView() {
-        webViewService.loadUI(view.element.await())
-        webViewService.setCallbackController(this)
+        webViewService.loadHtml(html, this)
     }
 
     /** Callback: Open next view
@@ -27,5 +25,9 @@ open class EntryController(private val webViewService: WebViewService,
         launch(CommonPool) {
             mainViewController.loadView()
         }
+    }
+
+    companion object {
+        private const val html = "index.html"
     }
 }

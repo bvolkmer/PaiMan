@@ -25,7 +25,7 @@ open class AddPaintingController(private val addPaintingView: AddPaintingView,
     /** Reload [addPaintingView] with [webViewService] */
     suspend fun reload() {
         webViewService.loadUI(addPaintingView.element.await())
-        webViewService.setCallbackController(this)
+        webViewService.setControllerAndModel(this)
     }
 
     /** Callback: cancel adding and return to [returnController] */

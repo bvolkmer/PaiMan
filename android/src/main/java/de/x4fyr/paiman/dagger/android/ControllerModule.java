@@ -7,12 +7,8 @@ import de.x4fyr.paiman.app.ui.controller.EntryViewControllerAndroidAdapter;
 import de.x4fyr.paiman.app.ui.controller.MainViewControllerAndroidAdapter;
 import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingFactory;
 import de.x4fyr.paiman.app.ui.views.entry.EntryController;
-import de.x4fyr.paiman.app.ui.views.entry.EntryView;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewController;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewModel;
-import de.x4fyr.paiman.app.ui.views.overview.OverviewView;
-import de.x4fyr.paiman.lib.services.PaintingService;
-import de.x4fyr.paiman.lib.services.QueryService;
 
 import javax.inject.Singleton;
 
@@ -22,15 +18,15 @@ public enum ControllerModule {
 
     @Provides
     @Singleton
-    static OverviewController provideMainViewController(WebViewService webViewService, OverviewView overviewView,
+    static OverviewController provideMainViewController(WebViewService webViewService,
                                                         OverviewModel model, AddPaintingFactory addPaintingFactory) {
-        return new MainViewControllerAndroidAdapter(webViewService, overviewView, model, addPaintingFactory);
+        return new MainViewControllerAndroidAdapter(webViewService, model, addPaintingFactory);
     }
 
     @Provides
     @Singleton
-    static EntryController provideEntryViewController(WebViewService webViewService, EntryView entryView,
+    static EntryController provideEntryViewController(WebViewService webViewService,
                                                       OverviewController overviewController) {
-        return new EntryViewControllerAndroidAdapter(webViewService, overviewController, entryView);
+        return new EntryViewControllerAndroidAdapter(webViewService, overviewController);
     }
 }

@@ -59,13 +59,13 @@ class AddPaintingView(val model: AddPaintingModel): View {
                 defaultBody({
                     div(classes = "left") {
                         onsButton(modifier = ONS_BUTTON.Modifier.QUIET,
-                                onClick = "${WebViewService.javascriptModuleName}.cancel()") {
+                                onClick = "${WebViewService.javascriptControllerModuleName}.cancel()") {
                             onsIcon("fa-times")
                         }
                     }
                     div(classes = "right") {
                         onsButton(modifier = ONS_BUTTON.Modifier.QUIET,
-                                onClick = "${WebViewService.javascriptModuleName}.save()") {
+                                onClick = "${WebViewService.javascriptControllerModuleName}.save()") {
                             onsIcon("fa-check")
                         }
                     }
@@ -75,9 +75,9 @@ class AddPaintingView(val model: AddPaintingModel): View {
                         id = "titleInput"
                         title = "Title"
                         placeholder = "Title"
-                        onChange = "${WebViewService.javascriptModuleName}.setTitle(this.value)"
+                        onChange = "${WebViewService.javascriptControllerModuleName}.setTitle(this.value)"
                     }
-                    onsButton("${WebViewService.javascriptModuleName}.addPicture()", ONS_BUTTON.Modifier.LARGE) {
+                    onsButton("${WebViewService.javascriptControllerModuleName}.addPicture()", ONS_BUTTON.Modifier.LARGE) {
                         +"Add Photo"
                     }
                     div {
