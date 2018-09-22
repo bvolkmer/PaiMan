@@ -15,11 +15,11 @@ releaseKeystoreProperties.load(new FileInputStream(releaseKeystorePropertiesFile
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "27.0.3"
+    buildToolsVersion "28.0.2"
 
     defaultConfig {
         applicationId "de.x4fyr.paiman"
-        minSdkVersion 19
+        minSdkVersion 24
         targetSdkVersion 26
         versionCode gitVersion.version * 10000 + gitVersion.branchVersion
         versionName version
