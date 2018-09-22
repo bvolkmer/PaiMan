@@ -39,7 +39,7 @@ ext.gitVersioner = [
             // can be used for CI `System.getenv("BUILD_NUMBER")`
 
             // i.e. use short sha1
-            return gitVersion.branchName // .commit.subSequence(0, 7)
+            return gitVersion.branchName.replace("/", "-") // .commit.subSequence(0, 7)
         }
 ]
 apply from: './versioner.gradle'
