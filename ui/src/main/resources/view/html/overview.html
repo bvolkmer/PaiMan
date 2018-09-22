@@ -8,8 +8,8 @@
     <script type="text/javascript" src="../js/onsenui.min.js"></script>
     <link href="../css/fontawesome-all.css" rel="stylesheet">
     <link href="../css/main.css" rel="stylesheet">
+    <script type="text/javascript" src="../js/main.js"></script>
     <script> ons.platform.select('android')</script>
-    <script type='text/javascript' src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
 
     <script>
         function refreshPreviews() {
@@ -18,7 +18,6 @@
             var previews = JSON.parse(model.getPreviews());
             var idx;
             for (idx in previews) {
-                javaDebug.log(JSON.stringify(idx));
                 var preview = previews[idx];
                 var clone = document.importNode(template.content, true);
                 var title = clone.querySelector("#title");
@@ -36,6 +35,49 @@
             }
 
         }
+
+        function addDialogShow() {
+            var dialog = document.getElementById("addDialog");
+
+            if (dialog) {
+                dialog.show()
+            } else {
+                ons.createElement('addDialogTemplate', {append: true})
+                    .then(function (dialog) {
+                        dialog.show();
+                    });
+            }
+        }
+
+        function addDialogHide() {
+            var dialog = document.getElementById("addDialog");
+            if (dialog) {
+                dialog.hide();
+            }
+        }
+
+        function addDialogAdd() {
+            var titleInput = document.getElementById("addDialogTitle");
+            if (titleInput) {
+                if (controller.addPainting(titleInput.value)) {
+                    addDialogHide()
+                } else {
+                    //TODO: Add error handling/hinting
+                }
+            }
+        }
+
+        function addDialogSetPicture(picture) {
+            var image = document.getElementById("addDialogImage");
+            if (image) {
+                image.src = picture;
+            }
+        }
+
+        function showError(message) {
+            ons.notification.toast(message, {timeout: 3000});
+        }
+
 
         window.onload = function (ev) {
             refreshPreviews()
@@ -57,7 +99,7 @@
     <ons-row id="previewRow">
 
     </ons-row>
-    <ons-fab ripple position="bottom right" onClick="controller.openAddPainting()">
+    <ons-fab ripple position="bottom right" onClick="addDialogShow()">
         <ons-icon icon="fa-plus"></ons-icon>
     </ons-fab>
 </ons-page>
@@ -73,6 +115,27 @@
             </div>
         </ons-card>
     </ons-button>
+</template>
+
+<template id="addDialogTemplate">
+    <ons-dialog id="addDialog" cancelable>
+        <div class="paddedDialog">
+            <ons-row>
+                <ons-input id="addDialogTitle" modifiers="underbar" placeholder="Title"></ons-input>
+            </ons-row>
+            <ons-row>
+                <ons-button onClick="controller.selectImage()" modifier="quiet">Set image</ons-button>
+            </ons-row>
+            <ons-row>
+                <img id="addDialogImage" style="max-width: 100%"/>
+            </ons-row>
+            <ons-row>
+                <ons-button id="addDialogAdd" onClick="addDialogAdd()">
+                    Add
+                </ons-button>
+            </ons-row>
+        </div>
+    </ons-dialog>
 </template>
 
 </html>

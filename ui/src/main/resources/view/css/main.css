@@ -12,3 +12,8 @@
 .fa.ons-icon {
     line-height: inherit;
 }
+
+.paddedDialog ons-row {
+    margin: 1em;
+    text-align: center;
+}

@@ -68,8 +68,12 @@ class JavaFxWebViewService : WebViewService {
         }
     }
 
+    override fun executeJS(script: String) {
+        webView.engine.executeScript(script)
+    }
+
     open class Debug {
-        open fun log(text: String){
+        open fun log(text: String) {
             text.lines().forEach {
                 println("Javascript log: $it")
             }

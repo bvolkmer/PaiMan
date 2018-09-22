@@ -20,8 +20,8 @@ public enum ControllerModule {
 
     @Provides
     @Singleton
-    static OverviewController provideOverviewController(WebViewService webViewService, AddPaintingFactory addPaintingFactory, OverviewModel overviewModel, PaintingDetailFactory paintingDetailFactory) {
-        return new OverviewController(webViewService, addPaintingFactory, overviewModel, paintingDetailFactory);
+    static OverviewController provideOverviewController(WebViewService webViewService, AddPaintingFactory addPaintingFactory, OverviewModel overviewModel, PaintingDetailFactory paintingDetailFactory, PictureSelectorService pictureSelectorService) {
+        return new OverviewController(webViewService, addPaintingFactory, overviewModel, paintingDetailFactory, pictureSelectorService);
     }
 
     @Provides
