@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta charset="UTF-8">
     <link href="../css/onsenui.css" rel="stylesheet">
     <link href="../css/onsen-css-components.min.css" rel="stylesheet">
     <script type="text/javascript" src="../js/onsenui.min.js"></script>
@@ -13,27 +12,29 @@
 
     <script>
         function refreshPreviews() {
-            var row = document.getElementById("previewRow");
-            var template = document.querySelector("#preview");
             var previews = JSON.parse(model.getPreviews());
             var idx;
             for (idx in previews) {
-                var preview = previews[idx];
-                var clone = document.importNode(template.content, true);
-                var title = clone.querySelector("#title");
-                title.id = preview.id + "-title";
-                title.textContent = preview.title;
-                var button = clone.querySelector("#button");
-                button.id = preview.id + "-button";
-                button.addEventListener("click", function (ev) {
-                    controller.openPainting(preview.id);
-                }, false);
-                var image = clone.querySelector("#image");
-                image.id = preview.id + "-image";
-                image.src = preview.base64Image;
-                row.appendChild(clone);
+                addPreview(previews[idx]);
             }
+        }
 
+        function addPreview(preview) {
+            var template = document.querySelector("#preview");
+            var row = document.getElementById("previewRow");
+            var clone = document.importNode(template.content, true);
+            var title = clone.querySelector("#title");
+            title.id = preview.id + "-title";
+            title.textContent = preview.title;
+            var button = clone.querySelector("#button");
+            button.id = preview.id + "-button";
+            button.addEventListener("click", function (ev) {
+                controller.openPainting(preview.id);
+            }, false);
+            var image = clone.querySelector("#image");
+            image.id = preview.id + "-image";
+            image.src = preview.base64Image;
+            row.appendChild(clone);
         }
 
         function addDialogShow() {
@@ -121,7 +122,10 @@
     <ons-dialog id="addDialog" cancelable>
         <div class="paddedDialog">
             <ons-row>
-                <ons-input id="addDialogTitle" modifiers="underbar" placeholder="Title"></ons-input>
+                <h2>Add Painting</h2>
+            </ons-row>
+            <ons-row>
+                <ons-input id="addDialogTitle" modifiers="underbar" placeholder="Title" float></ons-input>
             </ons-row>
             <ons-row>
                 <ons-button onClick="controller.selectImage()" modifier="quiet">Set image</ons-button>
