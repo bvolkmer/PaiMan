@@ -45,7 +45,7 @@ class JavaFxWebViewService : WebViewService {
     override fun loadHtml(html: String, controller: Controller, model: Model?) {
         launch(JavaFx) {
             val url = this.javaClass.getResource("/view/$html")
-            webView.engine.load(url.toExternalForm())
+            webView.engine.load(url!!.toExternalForm())
             //TODO: Reload only when visible
             setControllerAndModel(controller, model)
         }
@@ -63,13 +63,22 @@ class JavaFxWebViewService : WebViewService {
                             .removeMember(WebViewService.javascriptModelModuleName)
                     if (model != null) (webView.engine.executeScript("window") as JSObject)
                             .setMember(WebViewService.javascriptModelModuleName, model)
+                    try {
+                        webView.engine.executeScript("onControllerLoad()")
+                    } catch (e: JSException) {}
                 }
             }
         }
     }
 
+    override fun executeJS(script: String) {
+        launch(JavaFx) {
+            webView.engine.executeScript(script)
+        }
+    }
+
     open class Debug {
-        open fun log(text: String){
+        open fun log(text: String) {
             text.lines().forEach {
                 println("Javascript log: $it")
             }

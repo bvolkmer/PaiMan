@@ -5,7 +5,6 @@ import dagger.Provides;
 import de.x4fyr.paiman.app.services.WebViewService;
 import de.x4fyr.paiman.app.ui.controller.EntryViewControllerAndroidAdapter;
 import de.x4fyr.paiman.app.ui.controller.MainViewControllerAndroidAdapter;
-import de.x4fyr.paiman.app.ui.views.addPainting.AddPaintingFactory;
 import de.x4fyr.paiman.app.ui.views.entry.EntryController;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewController;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewModel;
@@ -19,8 +18,8 @@ public enum ControllerModule {
     @Provides
     @Singleton
     static OverviewController provideMainViewController(WebViewService webViewService,
-                                                        OverviewModel model, AddPaintingFactory addPaintingFactory) {
-        return new MainViewControllerAndroidAdapter(webViewService, model, addPaintingFactory);
+                                                        OverviewModel model) {
+        return new MainViewControllerAndroidAdapter(webViewService, model);
     }
 
     @Provides

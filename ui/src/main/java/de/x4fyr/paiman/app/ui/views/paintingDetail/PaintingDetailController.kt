@@ -10,25 +10,20 @@ import org.threeten.bp.LocalDate
 
 open class PaintingDetailController(
         private val webViewService: WebViewService,
-        private val view: PaintingDetailView,
+        private val model: PaintingDetailModel,
         private val returnController: Controller,
         private val pictureSelectorService: PictureSelectorService
 ) :
         Controller {
 
-    init {
-        view.controller = this
-    }
-
     /** Prepare and load corresponding [View] */
     override suspend fun loadView() {
-        webViewService.loadUI(view.element.await())
-        webViewService.setControllerAndModel(this)
+        webViewService.loadHtml("html/detail.html", this, model)
     }
 
     /** Callback: return to [returnController] */
     open fun back() {
-        println("Callback: cancel()")
+        println("Callback: back()")
         launch(CommonPool) {
             returnController.loadView()
         }
@@ -38,10 +33,11 @@ open class PaintingDetailController(
     open fun addTag(tag: String) {
         println("Callback: addTag(\"$tag\")")
         launch {
-            if (tag.isNotBlank())
-                view.model.addTag(tag)
+            if (tag.isNotBlank()) {
+                model.addTag(tag)
+                webViewService.executeJS("refreshModel()")
+            }
         }
-        //TODO
     }
 
     /** Callback: add wip */
@@ -49,19 +45,23 @@ open class PaintingDetailController(
         println("Callback: addWip()")
         pictureSelectorService.pickPicture {
             launch {
-                if (it != null)
-                    view.model.addWip(it)
+                if (it != null) {
+                    model.addWip(it)
+                    webViewService.executeJS("refreshModel()")
+                }
             }
         }
     }
 
-    /** Callback: add tag */
+    /** Callback: add ref */
     open fun addRef() {
         println("Callback: addRef()")
         pictureSelectorService.pickPicture {
             launch {
-                if (it != null)
-                    view.model.addRef(it)
+                if (it != null) {
+                    model.addRef(it)
+                    webViewService.executeJS("refreshModel()")
+                }
             }
         }
     }
@@ -71,7 +71,8 @@ open class PaintingDetailController(
         println("Callback: finishing()")
         launch(CommonPool) {
             val date = LocalDate.of(year, month, 1)
-            view.model.finishing(date)
+            model.finishing(date)
+            //TODO: Update view
         }
     }
 }

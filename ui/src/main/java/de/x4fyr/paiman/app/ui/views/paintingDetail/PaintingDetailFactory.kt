@@ -13,7 +13,6 @@ class PaintingDetailFactory(
 
     fun createPaintingDetailController(id: String, returnController: Controller): PaintingDetailController {
         val model = PaintingDetailModel(paintingService, id)
-        val view = PaintingDetailView(model)
-        return PaintingDetailController(webViewService, view, returnController, pictureSelectorService)
+        return PaintingDetailController(webViewService, model, returnController, pictureSelectorService)
     }
 }
