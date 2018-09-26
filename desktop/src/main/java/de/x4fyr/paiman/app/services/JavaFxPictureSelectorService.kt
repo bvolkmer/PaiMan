@@ -1,6 +1,5 @@
 package de.x4fyr.paiman.app.services
 
-import de.x4fyr.paiman.app.transform
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import kotlinx.coroutines.experimental.javafx.JavaFx
@@ -23,7 +22,7 @@ class JavaFxPictureSelectorService(private val stage: Stage): PictureSelectorSer
                         FileChooser.ExtensionFilter("all", "*.*"),
                         FileChooser.ExtensionFilter("jpeg (*.jpg,*.jpeg)", "*.jpg", "*.jpeg"))
                 this.selectedExtensionFilter = this.extensionFilters[1]
-            }.showOpenDialog(stage)?.path?.transform { Paths.get(it) }?.transform { Files.newInputStream(it) })
+            }.showOpenDialog(stage)?.path?.let { Paths.get(it) }?.let { Files.newInputStream(it) })
         }
 
     }

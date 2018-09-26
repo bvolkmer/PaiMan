@@ -18,8 +18,8 @@ compileTestKotlin {
 }*/
 
 dependencies {
-    compile 'com.couchbase.lite:couchbase-lite-java:1.4.0'
-    compile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.0'
+    compile 'com.couchbase.lite:couchbase-lite-java:1.4.1'
+    compile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.1'
     compile project(":libpaiman")
     compile project(":ui")
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"

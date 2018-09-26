@@ -27,7 +27,10 @@ interface WebViewService {
     companion object {
         /** controller interface title used in javascript/ui */
         const val javascriptControllerModuleName = "controller"
+        /** model interface title used in javascript/ui */
         const val javascriptModelModuleName = "model"
+        /** Prefix of resource path of ui files */
+        const val viewResourcePrefix: String = "/assets/de/x4fyr/paiman/ui/"
     }
 
 }

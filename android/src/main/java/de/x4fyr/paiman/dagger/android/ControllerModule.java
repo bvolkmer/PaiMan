@@ -2,12 +2,14 @@ package de.x4fyr.paiman.dagger.android;
 
 import dagger.Module;
 import dagger.Provides;
+import de.x4fyr.paiman.app.services.PictureSelectorService;
 import de.x4fyr.paiman.app.services.WebViewService;
-import de.x4fyr.paiman.app.ui.controller.EntryViewControllerAndroidAdapter;
-import de.x4fyr.paiman.app.ui.controller.MainViewControllerAndroidAdapter;
+import de.x4fyr.paiman.app.ui.EntryControllerAndroidAdapter;
+import de.x4fyr.paiman.app.ui.OverviewControllerAndroidAdapter;
 import de.x4fyr.paiman.app.ui.views.entry.EntryController;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewController;
 import de.x4fyr.paiman.app.ui.views.overview.OverviewModel;
+import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailFactory;
 
 import javax.inject.Singleton;
 
@@ -17,15 +19,14 @@ public enum ControllerModule {
 
     @Provides
     @Singleton
-    static OverviewController provideMainViewController(WebViewService webViewService,
-                                                        OverviewModel model) {
-        return new MainViewControllerAndroidAdapter(webViewService, model);
+    static OverviewController provideOverviewController(WebViewService webViewService, OverviewModel overviewModel, PaintingDetailFactory paintingDetailFactory, PictureSelectorService pictureSelectorService) {
+        return new OverviewControllerAndroidAdapter(webViewService, overviewModel, paintingDetailFactory, pictureSelectorService);
     }
 
     @Provides
     @Singleton
-    static EntryController provideEntryViewController(WebViewService webViewService,
-                                                      OverviewController overviewController) {
-        return new EntryViewControllerAndroidAdapter(webViewService, overviewController);
+    static EntryController provideEntryController(WebViewService webViewService,
+                                                  OverviewController overviewController) {
+        return new EntryControllerAndroidAdapter(webViewService, overviewController);
     }
 }

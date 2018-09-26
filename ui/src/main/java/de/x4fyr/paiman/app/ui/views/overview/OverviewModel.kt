@@ -1,8 +1,8 @@
 package de.x4fyr.paiman.app.ui.views.overview
 
 import com.google.gson.Gson
+import de.x4fyr.paiman.app.adapter.Base64Encoder
 import de.x4fyr.paiman.app.ui.Model
-import de.x4fyr.paiman.app.ui.jpegDataString
 import de.x4fyr.paiman.lib.domain.SavedPainting
 import de.x4fyr.paiman.lib.services.PaintingService
 import de.x4fyr.paiman.lib.services.QueryService
@@ -13,11 +13,12 @@ import java.util.*
 
 /** Model in overview MVC */
 open class OverviewModel(private val paintingService: PaintingService,
-                         queryService: QueryService) : Observable(), Model {
+                         queryService: QueryService,
+                         val base64Encoder: Base64Encoder) : Observable(), Model { //TODO: Remove observable
 
     private val gson = Gson()
 
-    val addPaintingModel = AddPaintingModel();
+    val addPaintingModel = AddPaintingModel(base64Encoder = base64Encoder)
 
     private val liveQuery =
             queryService.allPaintingsQuery.toLiveQuery().also {
@@ -37,7 +38,7 @@ open class OverviewModel(private val paintingService: PaintingService,
             }
 
     /** [Preview] set of all paintings*/
-    var previews: Deferred<Set<Preview>> = async(CommonPool) {
+    private var previews: Deferred<Set<Preview>> = async(CommonPool) {
         paintingService.getFromQueryResult(liveQuery.also { it.waitForRows() }.rows).map {
             makePreviewFromPainting(it)
         }.toSet()
@@ -60,19 +61,19 @@ open class OverviewModel(private val paintingService: PaintingService,
             var base64Image: String)
 
     /** Holder for "add painting" dialog */
-    data class AddPaintingModel(var title: String? = null, var image: ByteArrayInputStream? = null) {
+    data class AddPaintingModel(var title: String? = null, var image: ByteArrayInputStream? = null, private val base64Encoder: Base64Encoder) {
 
         fun setImage(inputStream: InputStream): String {
             val dataString: String
             if (inputStream is ByteArrayInputStream) {
                 val tmp = inputStream
-                dataString = jpegDataString(tmp)
+                dataString = base64Encoder.jpegDataString(tmp)
                 tmp.reset()
                 image = tmp
             } else {
                 val byteArray = inputStream.readBytes()
                 val tmp = ByteArrayInputStream(byteArray)
-                dataString = jpegDataString(tmp)
+                dataString = base64Encoder.jpegDataString(tmp)
                 tmp.reset()
                 image = tmp
             }
@@ -81,7 +82,7 @@ open class OverviewModel(private val paintingService: PaintingService,
     }
 
     /** Save new painting and return id. null if model is not complete */
-    suspend fun saveNewPainting(): String? {
+    internal suspend fun saveNewPainting(): String? {
         val title = addPaintingModel.title
         val image = addPaintingModel.image
         return if (title != null && !title.isNullOrBlank() && image != null) {
@@ -93,5 +94,5 @@ open class OverviewModel(private val paintingService: PaintingService,
 
     private suspend fun makePreviewFromPainting(painting: SavedPainting): Preview = Preview(id = painting.id,
             title = painting.title,
-            base64Image = jpegDataString(paintingService.getPictureThumbnailStream(painting.mainPicture)))
+            base64Image = base64Encoder.jpegDataString(paintingService.getPictureThumbnailStream(painting.mainPicture)))
 }

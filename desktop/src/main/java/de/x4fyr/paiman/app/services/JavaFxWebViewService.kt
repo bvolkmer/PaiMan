@@ -44,7 +44,7 @@ class JavaFxWebViewService : WebViewService {
 
     override fun loadHtml(html: String, controller: Controller, model: Model?) {
         launch(JavaFx) {
-            val url = this.javaClass.getResource("/view/$html")
+            val url = this.javaClass.getResource( WebViewService.viewResourcePrefix + html)
             webView.engine.load(url!!.toExternalForm())
             //TODO: Reload only when visible
             setControllerAndModel(controller, model)

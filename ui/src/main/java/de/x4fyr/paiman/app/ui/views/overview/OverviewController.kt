@@ -14,7 +14,7 @@ open class OverviewController(private val webViewService: WebViewService,
                               private val pictureSelectorService: PictureSelectorService) : Controller {
 
     companion object {
-        private const val html = "html/overview.html"
+        private const val html = "html/overview.htm"
     }
 
     /** See [Controller.loadView] */
@@ -23,7 +23,7 @@ open class OverviewController(private val webViewService: WebViewService,
     }
 
     /** Reload view */
-    suspend fun reload() {
+    private suspend fun reload() {
         //TODO: Reload only when visible
         webViewService.loadHtml(html, this, model)
     }

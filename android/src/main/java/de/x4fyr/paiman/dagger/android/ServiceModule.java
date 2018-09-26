@@ -3,6 +3,7 @@ package de.x4fyr.paiman.dagger.android;
 import android.content.Context;
 import dagger.Module;
 import dagger.Provides;
+import de.x4fyr.paiman.app.WebViewWrapperActivity;
 import de.x4fyr.paiman.app.service.AndroidPictureSelectorService;
 import de.x4fyr.paiman.app.service.AndroidWebViewService;
 import de.x4fyr.paiman.app.services.PictureSelectorService;
@@ -27,8 +28,8 @@ public enum ServiceModule {
     }
 
     @Provides
-    static PictureSelectorService providePictureSelectorService() {
-        return new AndroidPictureSelectorService();
+    static PictureSelectorService providePictureSelectorService(WebViewWrapperActivity activity) {
+        return new AndroidPictureSelectorService(activity);
     }
 
 }

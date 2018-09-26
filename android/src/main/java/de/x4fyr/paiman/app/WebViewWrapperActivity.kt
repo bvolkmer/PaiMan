@@ -1,6 +1,7 @@
 package de.x4fyr.paiman.app
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.webkit.WebView
 import de.x4fyr.paiman.app.service.AndroidWebViewService
@@ -12,10 +13,12 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 
 /** Activity that only wraps a [WebView] and loads ui in it. */
-class WebViewWrapperActivity: Activity() {
+class WebViewWrapperActivity : Activity() {
 
     private lateinit var webViewService: AndroidWebViewService
     private lateinit var entryViewController: EntryController
+
+    private var resultHandlerMap: MutableMap<Any, ((requestCode: Int, resultCode: Int, data: Intent?) -> Unit)> = HashMap()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,4 +33,22 @@ class WebViewWrapperActivity: Activity() {
             entryViewController.loadView()
         }
     }
+
+    /** Add a handler to be invoked on [Activity.onActivityResult] */
+    fun addActivityResultHandler(identifier: Any, handler: (requestCode: Int, resultCode: Int, data: Intent?) -> Unit) {
+        resultHandlerMap.put(identifier, handler)
+    }
+
+    /** Remove a handler not to be invoked on [Activity.onActivityResult] */
+    fun removeActivityResultHandler(identifier: Any) {
+        resultHandlerMap.remove(identifier)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        resultHandlerMap.forEach { _, handler ->
+            handler.invoke(requestCode, resultCode, data)
+        }
+    }
+
 }

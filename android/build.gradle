@@ -75,7 +75,7 @@ dependencies {
         exclude group: 'org.threeten', module: 'threetenbp'
     }
     implementation 'com.jakewharton.threetenabp:threetenabp:1.0.5'
-    implementation 'com.couchbase.lite:couchbase-lite-android:1.4.0'
+    implementation 'com.couchbase.lite:couchbase-lite-android:1.4.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.20"
