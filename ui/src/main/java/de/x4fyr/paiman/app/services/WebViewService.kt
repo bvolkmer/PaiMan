@@ -13,9 +13,6 @@ interface WebViewService {
     /** Load html file into WebView */
     fun loadHtml(html: String, controller: Controller, model: Model? = null)
 
-    /** Set Controller for callbacks in ui */
-    fun setControllerAndModel(controller: Controller, model: Model? = null)
-
     /** execute javascript in current document */
     fun executeJS(script: String)
 

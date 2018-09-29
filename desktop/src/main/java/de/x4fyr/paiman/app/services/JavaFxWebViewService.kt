@@ -51,7 +51,7 @@ class JavaFxWebViewService : WebViewService {
         }
     }
 
-    override fun setControllerAndModel(controller: Controller, model: Model?) {
+    fun setControllerAndModel(controller: Controller, model: Model?) {
         launch(JavaFx) {
             webView.engine.loadWorker.stateProperty().addListener { _, _, newValue ->
                 if (newValue == Worker.State.SUCCEEDED) {
@@ -63,9 +63,6 @@ class JavaFxWebViewService : WebViewService {
                             .removeMember(WebViewService.javascriptModelModuleName)
                     if (model != null) (webView.engine.executeScript("window") as JSObject)
                             .setMember(WebViewService.javascriptModelModuleName, model)
-                    try {
-                        webView.engine.executeScript("onControllerLoad()")
-                    } catch (e: JSException) {}
                 }
             }
         }
