@@ -2,8 +2,6 @@ package de.x4fyr.paiman.dagger.desktop;
 
 import dagger.Module;
 import dagger.Provides;
-import de.x4fyr.paiman.app.adapter.JavaResourceAdapter;
-import de.x4fyr.paiman.app.adapter.WebResourceAdapter;
 import de.x4fyr.paiman.lib.adapter.DesktopStorageAdapter;
 import de.x4fyr.paiman.lib.adapter.StorageAdapter;
 
@@ -25,8 +23,4 @@ public enum DesktopAdapterModule {
         return storageAdapter;
     }
 
-    @Provides
-    static WebResourceAdapter provideResourceAdapter() {
-        return new JavaResourceAdapter();
-    }
 }

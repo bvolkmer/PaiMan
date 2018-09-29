@@ -2,8 +2,6 @@ package de.x4fyr.paiman.app.ui
 
 import de.x4fyr.paiman.app.ui.html.onsen.*
 import kotlinx.html.*
-import java.io.InputStream
-import java.util.*
 
 /** Default head for use in Views */
 fun HTML.defaultHead(block: HEAD.() -> Unit = {}) {
@@ -60,6 +58,3 @@ fun HTML.defaultBodyWithoutToolbar(block: ONS_PAGE.() -> Unit) {
 
 }
 
-internal fun jpegDataString(base64Image: String) = "data:image/jpeg;base64,$base64Image"
-
-internal fun jpegDataString(stream: InputStream) = jpegDataString(Base64.getEncoder().encodeToString(stream.readBytes()))

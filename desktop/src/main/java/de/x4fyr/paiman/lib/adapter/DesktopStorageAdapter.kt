@@ -1,8 +1,7 @@
 package de.x4fyr.paiman.lib.adapter
 
 import com.couchbase.lite.JavaContext
-import de.x4fyr.paiman.app.LRUCacheMap
-import de.x4fyr.paiman.app.transform
+import de.x4fyr.paiman.util.LRUCacheMap
 import net.coobird.thumbnailator.Thumbnails
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -11,7 +10,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import java.util.UUID
+import java.util.*
 
 /** Desktop implementation of [StorageAdapter] */
 class DesktopStorageAdapter: StorageAdapter, JavaContext() {
@@ -93,7 +92,7 @@ class DesktopStorageAdapter: StorageAdapter, JavaContext() {
     } else {
         val fileByteArray = (imagesPath.resolve(id)
                 .takeIf { Files.exists(it) }
-                ?.transform { Files.newInputStream(it) }
+                ?.let { Files.newInputStream(it) }
                 ?: throw StorageAdapter.StorageException.EntityDoesNotExist(id)).readBytes()
         imageCache.put(id, fileByteArray)
         fileByteArray.inputStream()

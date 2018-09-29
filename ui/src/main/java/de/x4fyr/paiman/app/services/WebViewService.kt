@@ -13,9 +13,6 @@ interface WebViewService {
     /** Load html file into WebView */
     fun loadHtml(html: String, controller: Controller, model: Model? = null)
 
-    /** Set Controller for callbacks in ui */
-    fun setControllerAndModel(controller: Controller, model: Model? = null)
-
     /** execute javascript in current document */
     fun executeJS(script: String)
 
@@ -27,7 +24,10 @@ interface WebViewService {
     companion object {
         /** controller interface title used in javascript/ui */
         const val javascriptControllerModuleName = "controller"
+        /** model interface title used in javascript/ui */
         const val javascriptModelModuleName = "model"
+        /** Prefix of resource path of ui files */
+        const val viewResourcePrefix: String = "/assets/de/x4fyr/paiman/ui/"
     }
 
 }

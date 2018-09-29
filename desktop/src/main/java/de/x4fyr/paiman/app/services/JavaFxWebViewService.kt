@@ -44,14 +44,14 @@ class JavaFxWebViewService : WebViewService {
 
     override fun loadHtml(html: String, controller: Controller, model: Model?) {
         launch(JavaFx) {
-            val url = this.javaClass.getResource("/view/$html")
+            val url = this.javaClass.getResource( WebViewService.viewResourcePrefix + html)
             webView.engine.load(url!!.toExternalForm())
             //TODO: Reload only when visible
             setControllerAndModel(controller, model)
         }
     }
 
-    override fun setControllerAndModel(controller: Controller, model: Model?) {
+    fun setControllerAndModel(controller: Controller, model: Model?) {
         launch(JavaFx) {
             webView.engine.loadWorker.stateProperty().addListener { _, _, newValue ->
                 if (newValue == Worker.State.SUCCEEDED) {
@@ -63,9 +63,6 @@ class JavaFxWebViewService : WebViewService {
                             .removeMember(WebViewService.javascriptModelModuleName)
                     if (model != null) (webView.engine.executeScript("window") as JSObject)
                             .setMember(WebViewService.javascriptModelModuleName, model)
-                    try {
-                        webView.engine.executeScript("onControllerLoad()")
-                    } catch (e: JSException) {}
                 }
             }
         }
