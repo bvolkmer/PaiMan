@@ -3,6 +3,16 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'application'
 version = parent.version
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
+    }
+}
+apply plugin: 'edu.sc.seis.launch4j'
+
 mainClassName = 'de.x4fyr.paiman.app.AppKt'
 
 sourceCompatibility = 1.8
@@ -13,9 +23,9 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-/*kapt {
-    generateStubs = true
-}*/
+launch4j {
+    mainClassName = 'de.x4fyr.paiman.app.App'
+}
 
 dependencies {
     compile 'com.couchbase.lite:couchbase-lite-java:1.4.1'
