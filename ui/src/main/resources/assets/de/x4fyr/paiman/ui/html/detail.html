@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="../css/onsenui.css" rel="stylesheet">
+    <link href="../css/onsen-css-components.min.css" rel="stylesheet">
+    <script type="text/javascript" src="../js/onsenui.min.js"></script>
+    <link href="../css/fontawesome-all.css" rel="stylesheet">
+    <link href="../css/main.css" rel="stylesheet">
+    <script type="text/javascript" src="../js/main.js"></script>
+    <script> ons.platform.select('android')</script>
+
+    <title>Detail</title>
+
+    <script>
+
+        var painting;
+
+        function showDialog(id) {
+            var dialog = document.getElementById(id);
+
+            if (dialog) {
+                dialog.show();
+                closeSide();
+            } else {
+                ons.createElement(id + 'Template', {append: true})
+                    .then(function (dialog) {
+                        dialog.show();
+                        closeSide();
+                    })
+            }
+        }
+
+        function hideDialog(id) {
+            var dialog = document.getElementById(id);
+            dialog.hidden = true;
+            dialog.hide();
+        }
+
+        function submitAddTagDialog() {
+            var dialog = document.getElementById('addTagDialog');
+            var input = document.getElementById('addTagInput');
+            controller.addTag(input.value);
+            hideDialog('addTagDialog');
+            input.value = "";
+        }
+
+        function openSide() {
+            var side = document.getElementById("sideMenu");
+            side.open();
+        }
+
+        function closeSide() {
+            var side = document.getElementById("sideMenu");
+            side.close();
+        }
+
+        function refreshModel() {
+            document.getElementById("loadModal").show();
+
+            painting = JSON.parse(model.getHolder());
+
+            document.getElementById("title").textContent = painting.title;
+            document.getElementById("mainImage").src = painting.mainImage;
+
+            var tagsP = document.getElementById("tags");
+            tagsP.childNodes.forEach(function (value) {
+                if (value.nodeName === "A" || value.nodeName === "SPAN")
+                    tagsP.removeChild(value)
+            });
+            painting.tags.forEach(function (tag) {
+                a = document.createElement("a");
+                a.textContent = tag;
+                span = document.createElement("span");
+                span.textContent = '\t';
+                tagsP.prepend(span);
+                tagsP.prepend(a);
+            });
+            var wipsRow = document.getElementById("wips");
+            while (wipsRow.hasChildNodes()) {
+                wipsRow.removeChild(wipsRow.firstChild)
+            }
+            painting.wips.forEach(function (imageStr) {
+                ons.createElement("previewTemplate").then(function (container) {
+                    var img = container.querySelector("#image");
+                    img.removeAttribute("id");
+                    img.src = imageStr;
+                    wipsRow.appendChild(container);
+                });
+            });
+            ons.createElement("previewAddTemplate").then(function (container) {
+                var button = container.querySelector("#button");
+                button.removeAttribute("id");
+                button.addEventListener('click', function (ev) {
+                   controller.addWIP()
+                });
+                wipsRow.appendChild(container);
+            });
+            var refsRow = document.getElementById("refs");
+            while (refsRow.hasChildNodes()) {
+                refsRow.removeChild(refsRow.firstChild)
+            }
+            painting.refs.forEach(function (imageStr) {
+                ons.createElement("previewTemplate").then(function (container) {
+                    var img = container.querySelector("#image");
+                    img.removeAttribute("id");
+                    img.src = imageStr;
+                    refsRow.appendChild(container);
+                });
+            });
+            ons.createElement("previewAddTemplate").then(function (container) {
+                var button = container.querySelector("#button");
+                button.removeAttribute("id");
+                button.addEventListener('click', function (ev) {
+                    controller.addRef()
+                });
+                refsRow.appendChild(container);
+            });
+
+            document.getElementById("loadModal").hide()
+        }
+
+        document.onload = function (ev) {
+            refreshModel();
+        };
+    </script>
+</head>
+<body>
+
+<ons-splitter>
+    <ons-splitter-side id="sideMenu" side="right" collapse swipable>
+        <ons-page>
+            <ons-list>
+                <ons-list-item><!--TODO: onClick="showDialog('finishDialog')"--> Finish</ons-list-item>
+                <ons-list-item><!--TODO: onClick--> Sell</ons-list-item>
+                <ons-list-item onClick="refreshModel()">
+                    <ons-icon icon="fa-sync"></ons-icon>
+                </ons-list-item>
+            </ons-list>
+        </ons-page>
+    </ons-splitter-side>
+    <ons-splitter-content>
+        <ons-page>
+            <ons-toolbar>
+                <div class="left">
+                    <ons-toolbar-button onClick="controller.back()">
+                        <ons-icon icon="fa-arrow-left"></ons-icon>
+                    </ons-toolbar-button>
+                    <span id="title"></span>
+                </div>
+                <div class="right">
+                    <ons-toolbar-button onClick="openSide()">
+                        <ons-icon icon="fa-bars"></ons-icon>
+                    </ons-toolbar-button>
+                </div>
+            </ons-toolbar>
+            <div class="content">
+                <ons-row>
+                    <img id="mainImage" style="max-width: 100%; width: auto; height: auto;"/>
+                </ons-row>
+                <ons-row>
+                    <p id="tags">
+                        <ons-button onClick="showDialog('addTagDialog')">
+                            <ons-icon icon="fa-plus"></ons-icon>
+                        </ons-button>
+                    </p>
+                </ons-row>
+                <ons-row>
+                    <div id="finished"></div>
+                </ons-row>
+                <ons-row>
+                    <div id="sellingInformation"></div>
+                </ons-row>
+                <ons-row>
+                    <h2>WIP</h2>
+                    <ons-row id="wips"></ons-row>
+                </ons-row>
+                <ons-row>
+                    <h2>References</h2>
+                    <ons-row id="refs"></ons-row>
+                </ons-row>
+            </div>
+        </ons-page>
+
+    </ons-splitter-content>
+</ons-splitter>
+
+<ons-modal id="loadModal">
+    <div style="text-align: center">
+        <p>
+            <ons-icon icon="fa-sync" size="28px" spin></ons-icon>
+        </p>
+    </div>
+</ons-modal>
+
+<template id="addTagDialogTemplate">
+    <ons-dialog id="addTagDialog" cancelable>
+        <div class="paddedDialog">
+            <ons-row>
+                <h2>Enter tag</h2>
+            </ons-row>
+            <ons-row>
+                <ons-input type="text" id="addTagInput" placeholder="New Tag" modifiers="underbar" float></ons-input>
+            </ons-row>
+            <ons-row>
+                <ons-button onClick="submitAddTagDialog()">Add</ons-button>
+            </ons-row>
+        </div>
+    </ons-dialog>
+</template>
+
+<template id="previewTemplate">
+    <div class="detailPictureListItemContainer">
+        <img id="image" class="detailPictureListItem"/>
+    </div>
+</template>
+<template id="previewAddTemplate">
+    <div class="detailPictureListItemContainer">
+        <ons-button style="margin:auto" id="button">
+            <ons-icon icon="fa-plus"></ons-icon>
+        </ons-button>
+    </div>
+</template>
+
+
+</body>
+</html>

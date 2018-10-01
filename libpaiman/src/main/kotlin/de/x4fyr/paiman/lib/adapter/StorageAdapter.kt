@@ -1,24 +1,27 @@
 package de.x4fyr.paiman.lib.adapter
 
+import com.couchbase.lite.Context
 import java.io.InputStream
-import java.util.concurrent.Future
 
 /**
  * General storage service for storing images
  */
-interface StorageAdapter {
+interface StorageAdapter: Context {
 
     /** Get image as [InputStream] from storage */
     @Throws(StorageException::class)
-    suspend fun getImage(id: String): Future<InputStream>
+    suspend fun getImage(id: String): InputStream
 
-    /** Save image from [InputStream] to Storage */
+    /** Save/Update image from [InputStream] to Storage */
     @Throws(StorageException::class)
-    suspend fun saveImage(image: InputStream, id: String? = null): String
+    suspend fun saveImage(image: InputStream): String
 
     /** Delete image from storage */
     @Throws(StorageException::class)
     suspend fun deleteImage(id: String)
+
+    /** Get thumbnail of image with [id] */
+    suspend fun getThumbnail(id: String): InputStream
 
     /** Exceptions thrown in [StorageAdapter] */
     sealed class StorageException: Exception {
@@ -26,7 +29,7 @@ interface StorageAdapter {
         constructor(msg: String, cause: Throwable): super(msg, cause)
 
         /** Unspecific Storage Exception */
-        class General: StorageException{
+        class General: StorageException {
             constructor(msg: String): super(msg)
             constructor(msg: String, cause: Throwable): super(msg, cause)
         }
@@ -34,6 +37,5 @@ interface StorageAdapter {
         /** Exception thrown if queried an storage entity does not exist*/
         class EntityDoesNotExist(msg: String): StorageException(msg)
     }
-
 
 }

@@ -1,46 +1,31 @@
 group 'de.de.x4fyr'
-version '0.2'
+
+ext.major_version = 0
+ext.minor_version = 3
+ext.revision_number = 1
+version "$major_version.$minor_version.$revision_number"
+println("version: $version")
 
 buildscript {
-    ext.kotlin_version = '1.1.2'
+    ext.kotlin_version = '1.2.60'
+    ext.dagger_version = '2.13'
     repositories {
         mavenCentral()
         jcenter()
         maven {
             url 'https://maven.google.com'
         }
+        maven {
+            url 'http://dl.bintray.com/kotlin/kotlin-eap/'
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.1.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.gms:google-services:3.1.1'
         classpath 'com.google.firebase:firebase-plugins:1.1.1'
     }
 }
-
-
-ext.gitVersioner = [
-        defaultBranch           : "master",  // default "master"
-        stableBranches          : [], // default [], the feature branch postfix (-dm4(6)) will not be appended
-        // on stable branches, all commits are included into the version number calculation
-        yearFactor              : 1000,       // default "1000", increasing every 8.57h
-        snapshotEnabled         : hasProperty('snapshot') ? snapshot.toBoolean() : true,      // default true, the
-        // "-SNAPSHOT"
-        // postfix
-        localChangesCountEnabled: false,       // default true, the (<commitCount>) before -SNAPSHOT
-        currentBranch           : hasProperty('branch') ? branch : null,
-        shortName               : { gitVersion ->            // optional closure to build a short name
-            // allows you to add your own short name logic
-            // All properties from gitVersion are available
-            // can be used for CI `System.getenv("BUILD_NUMBER")`
-
-            // i.e. use short sha1
-            return gitVersion.branchName // .commit.subSequence(0, 7)
-        }
-]
-apply from: './versioner.gradle'
-project.version += ".$gitVersionName"
-println("version: $project.version")
 
 apply plugin: 'idea'
 
@@ -70,6 +55,12 @@ allprojects {
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url 'https://maven.google.com'
+        }
+        maven {
+            url 'http://dl.bintray.com/kotlin/kotlin-eap/'
+        }
         flatDir {
             dirs 'libs'
         }

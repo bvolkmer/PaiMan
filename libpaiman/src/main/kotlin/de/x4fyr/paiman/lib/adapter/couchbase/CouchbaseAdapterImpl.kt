@@ -10,7 +10,7 @@ import java.util.logging.Logger
 /**
  * Couchbase Adapter for [PaintingCRUDAdapter] and [QueryAdapter]
  */
-internal class CouchbaseAdapterImpl(context: Context) : PaintingCRUDAdapter, QueryAdapter {
+ class CouchbaseAdapterImpl(context: Context) : PaintingCRUDAdapter, QueryAdapter {
 
     private val LOG = Logger.getLogger(this::class.simpleName)
     private val manager: Manager = Manager(context, Manager.DEFAULT_OPTIONS)

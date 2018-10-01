@@ -7,7 +7,7 @@ import de.x4fyr.paiman.lib.domain.UnsavedPainting
  * @author de.x4fyr
  * Created on 3/4/17.
  */
-internal interface PaintingCRUDAdapter {
+interface PaintingCRUDAdapter {
 
     /** Create a painting entity */
     fun create(painting: UnsavedPainting): SavedPainting?
