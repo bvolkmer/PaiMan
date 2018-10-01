@@ -25,6 +25,7 @@ compileTestKotlin {
 
 launch4j {
     mainClassName = 'de.x4fyr.paiman.app.App'
+    outfile = "paiman-${version}.exe"
 }
 
 dependencies {

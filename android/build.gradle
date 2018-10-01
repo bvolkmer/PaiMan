@@ -21,7 +21,7 @@ android {
         applicationId "de.x4fyr.paiman"
         minSdkVersion 24
         targetSdkVersion 26
-        versionCode gitVersion.version * 10000 + gitVersion.branchVersion
+        versionCode revision_number
         versionName version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

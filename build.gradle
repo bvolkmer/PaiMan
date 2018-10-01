@@ -1,5 +1,10 @@
 group 'de.de.x4fyr'
-version '0.2'
+
+ext.major_version = 0
+ext.minor_version = 3
+ext.revision_number = 1
+version "$major_version.$minor_version.$revision_number"
+println("version: $version")
 
 buildscript {
     ext.kotlin_version = '1.2.60'
@@ -21,30 +26,6 @@ buildscript {
         classpath 'com.google.firebase:firebase-plugins:1.1.1'
     }
 }
-
-
-ext.gitVersioner = [
-        defaultBranch           : "master",  // default "master"
-        stableBranches          : ["next"], // default [], the feature branch postfix (-dm4(6)) will not be appended
-        // on stable branches, all commits are included into the version number calculation
-        yearFactor              : 1000,       // default "1000", increasing every 8.57h
-        snapshotEnabled         : hasProperty('snapshot') ? snapshot.toBoolean() : true,      // default true, the
-        // "-SNAPSHOT"
-        // postfix
-        localChangesCountEnabled: false,       // default true, the (<commitCount>) before -SNAPSHOT
-        currentBranch           : hasProperty('branch') ? branch : null,
-        shortName               : { gitVersion ->            // optional closure to build a short name
-            // allows you to add your own short name logic
-            // All properties from gitVersion are available
-            // can be used for CI `System.getenv("BUILD_NUMBER")`
-
-            // i.e. use short sha1
-            return gitVersion.branchName.replace("/", "-") // .commit.subSequence(0, 7)
-        }
-]
-apply from: './versioner.gradle'
-project.version += ".$gitVersionName"
-println("version: $project.version")
 
 apply plugin: 'idea'
 
