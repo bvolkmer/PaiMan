@@ -41,19 +41,33 @@ open class OverviewController(private val webViewService: WebViewService,
         }
     }
 
-    open fun addPainting(title: String?) {
+    open fun addPainting(title: String?, month: String?, year: String?) {
         println("Callback: addPainting($title)")
         if (title.isNullOrBlank()) {
             webViewService.showError("Title missing or invalid")
         } else if (model.addPaintingModel.image == null) {
             webViewService.showError("Image missing")
-        } else launch(CommonPool) {
-            model.addPaintingModel.title = title
-            val newId = model.saveNewPainting()
-            if (newId != null) {
-                paintingDetailFactory.createPaintingDetailController(newId, this@OverviewController).loadView()
-            } else {
-                println("Error: Tried to save unfinished painting")
+        } else if (month.isNullOrBlank()) {
+            webViewService.showError("Month invalid")
+        } else if (year.isNullOrBlank()) {
+            webViewService.showError("Year invalid")
+        } else {
+            val monthInt = month!!.toIntOrNull()
+            val yearInt = year!!.toIntOrNull()
+            if (monthInt == null || monthInt < 1 || monthInt > 12) {
+                webViewService.showError("Month invalid")
+            } else if (yearInt == null) {
+                webViewService.showError("Year invalid")
+            } else launch(CommonPool) {
+                model.addPaintingModel.title = title
+                model.addPaintingModel.month = monthInt
+                model.addPaintingModel.year = yearInt
+                val newId = model.saveNewPainting()
+                if (newId != null) {
+                    paintingDetailFactory.createPaintingDetailController(newId, this@OverviewController).loadView()
+                } else {
+                    println("Error: Tried to save unfinished painting")
+                }
             }
         }
     }

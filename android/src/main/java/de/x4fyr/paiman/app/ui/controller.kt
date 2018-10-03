@@ -54,7 +54,7 @@ class OverviewControllerAndroidAdapter(private val webViewService: WebViewServic
     override fun openPainting(id: String) = super.openPainting(id)
 
     @JavascriptInterface
-    override fun addPainting(title: String?) = super.addPainting(title)
+    override fun addPainting(title: String?, month: String?, year: String?) = super.addPainting(title, month, year)
 
     @JavascriptInterface
     override fun selectImage() = super.selectImage()
@@ -63,6 +63,4 @@ class OverviewControllerAndroidAdapter(private val webViewService: WebViewServic
 /** Adapter for [EntryController] to make functions available as javascript interface  */
 class EntryControllerAndroidAdapter(webViewService: WebViewService, mainViewController: OverviewController): EntryController(webViewService, mainViewController) {
 
-    @JavascriptInterface
-    override fun openNext() = super.openNext()
 }

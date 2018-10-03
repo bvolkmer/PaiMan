@@ -34,13 +34,14 @@ class MainServiceImpl(private var paintingCRUDAdapter: PaintingCRUDAdapter,
                                             wip: Set<InputStream>,
                                             reference: Set<InputStream>,
                                             sellingInfo: SellingInformation?,
-                                            tags: Set<String>): SavedPainting {
+                                            tags: Set<String>,
+                                            date: LocalDate): SavedPainting {
         val newPainting = UnsavedPainting(
                 title = title,
                 wip = setOf(),
                 references = setOf(),
                 sellingInfo = sellingInfo,
-                tags = tags, mainPicture = dummyPicture)
+                tags = tags, mainPicture = dummyPicture, finished = true, finishingDate = date)
         val savedPainting = paintingCRUDAdapter.create(newPainting) ?: throw ServiceException(
                 "Could not create " +
                         "painting")

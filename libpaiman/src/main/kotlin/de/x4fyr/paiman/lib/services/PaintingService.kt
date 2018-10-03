@@ -19,11 +19,12 @@ interface PaintingService {
      */
     @Throws(ServiceException::class)
     suspend fun composeNewPainting(title: String,
-                           mainPicture: InputStream,
-                           wip: Set<InputStream> = setOf(),
-                           reference: Set<InputStream> = setOf(),
-                           sellingInfo: SellingInformation? = null,
-                           tags: Set<String> = setOf()): SavedPainting
+                                   mainPicture: InputStream,
+                                   wip: Set<InputStream> = setOf(),
+                                   reference: Set<InputStream> = setOf(),
+                                   sellingInfo: SellingInformation? = null,
+                                   tags: Set<String> = setOf(),
+                                   date: LocalDate): SavedPainting
 
     /** Change a SavedPainting determined by the given id and probably changed properties */
     @Throws(ServiceException::class)
