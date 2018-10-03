@@ -62,6 +62,7 @@
 
             document.getElementById("title").textContent = painting.title;
             document.getElementById("mainImage").src = painting.mainImage;
+            document.getElementById("finishingDate").textContent = painting.year + "-" + painting.month;
 
             var tagsP = document.getElementById("tags");
             tagsP.childNodes.forEach(function (value) {
@@ -157,6 +158,9 @@
             <div class="content">
                 <ons-row>
                     <img id="mainImage" style="max-width: 100%; width: auto; height: auto;"/>
+                </ons-row>
+                <ons-row>
+                    <p id="finishingDate"></p>
                 </ons-row>
                 <ons-row>
                     <p id="tags">

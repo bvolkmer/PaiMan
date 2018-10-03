@@ -59,8 +59,10 @@
 
         function addDialogAdd() {
             var titleInput = document.getElementById("addDialogTitle");
-            if (titleInput) {
-                if (controller.addPainting(titleInput.value)) {
+            var monthInput = document.getElementById("addDialogMonth");
+            var yearInput = document.getElementById("addDialogYear");
+            if (titleInput && monthInput && yearInput) {
+                if (controller.addPainting(titleInput.value, monthInput.value, yearInput.value)) {
                     addDialogHide()
                 } else {
                     //TODO: Add error handling/hinting
@@ -122,21 +124,39 @@
     <ons-dialog id="addDialog" cancelable>
         <div class="paddedDialog">
             <ons-row>
-                <h2>Add Painting</h2>
+                <ons-col>
+                    <h2>Add Painting</h2>
+                </ons-col>
             </ons-row>
             <ons-row>
-                <ons-input id="addDialogTitle" modifiers="underbar" placeholder="Title" float></ons-input>
+                <ons-col>
+                    <ons-input id="addDialogTitle" modifiers="underbar" placeholder="Title" float></ons-input>
+                </ons-col>
             </ons-row>
             <ons-row>
-                <ons-button onClick="controller.selectImage()" modifier="quiet">Set image</ons-button>
+                <ons-col>
+                    <ons-input id="addDialogMonth" modifiers="underbar" type="number" placeholder="month" min="1"
+                               max="12" value="1" float></ons-input>
+                </ons-col>
+                <ons-col>
+                    <ons-input id="addDialogYear" modifiers="underbar" type="number" placeholder="year" min="1900"
+                               max="2100" value="2018" float></ons-input>
+                </ons-col>
             </ons-row>
             <ons-row>
-                <img id="addDialogImage" style="max-width: 100%"/>
+                <ons-col>
+                    <ons-button onClick="controller.selectImage()" modifier="quiet">Set image</ons-button>
+                </ons-col>
             </ons-row>
             <ons-row>
-                <ons-button id="addDialogAdd" onClick="addDialogAdd()">
-                    Add
-                </ons-button>
+                <ons-col>
+                    <img id="addDialogImage" style="max-width: 100%"/>
+                </ons-col>
+            </ons-row>
+            <ons-row>
+                <ons-col>
+                    <ons-button id="addDialogAdd" onClick="addDialogAdd()">Add</ons-button>
+                </ons-col>
             </ons-row>
         </div>
     </ons-dialog>

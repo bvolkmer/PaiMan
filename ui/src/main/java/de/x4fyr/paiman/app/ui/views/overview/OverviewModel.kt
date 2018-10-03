@@ -7,6 +7,7 @@ import de.x4fyr.paiman.lib.domain.SavedPainting
 import de.x4fyr.paiman.lib.services.PaintingService
 import de.x4fyr.paiman.lib.services.QueryService
 import kotlinx.coroutines.experimental.*
+import org.threeten.bp.LocalDate
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.util.*
@@ -61,7 +62,7 @@ open class OverviewModel(private val paintingService: PaintingService,
             var base64Image: String)
 
     /** Holder for "add painting" dialog */
-    data class AddPaintingModel(var title: String? = null, var image: ByteArrayInputStream? = null, private val base64Encoder: Base64Encoder) {
+    data class AddPaintingModel(var title: String? = null, var month: Int? = null, var year: Int? = null, var image: ByteArrayInputStream? = null, private val base64Encoder: Base64Encoder) {
 
         fun setImage(inputStream: InputStream): String {
             val dataString: String
@@ -85,8 +86,10 @@ open class OverviewModel(private val paintingService: PaintingService,
     internal suspend fun saveNewPainting(): String? {
         val title = addPaintingModel.title
         val image = addPaintingModel.image
-        return if (title != null && !title.isNullOrBlank() && image != null) {
-            paintingService.composeNewPainting(title, image).id
+        val month = addPaintingModel.month
+        val year = addPaintingModel.year
+        return if (title != null && !title.isNullOrBlank() && image != null && month != null && year != null) {
+            paintingService.composeNewPainting(title, image, date = LocalDate.of(year, month, 1 )).id
         } else {
             null
         }

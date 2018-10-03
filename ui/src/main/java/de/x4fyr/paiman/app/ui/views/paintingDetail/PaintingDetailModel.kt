@@ -66,14 +66,18 @@ open class PaintingDetailModel(private val paintingService: PaintingService, val
     private data class Holder(
             val title: String,
             val mainImage: String,
+            val month: Int,
+            val year: Int,
             val tags: Array<String>,
             val wips: Array<String>,
             val refs: Array<String>
     )
 
-    private suspend fun createHolder(painting: Painting): Holder = Holder(painting.title,
-            base64Encoder.jpegDataString(paintingService.getPictureStream(painting.mainPicture)),
-            painting.tags.toTypedArray().sortedArrayDescending(), //Reversed order because items are prepended
-            wips.await().toTypedArray(),
-            refs.await().toTypedArray())
+    private suspend fun createHolder(painting: Painting): Holder = Holder(title = painting.title,
+            mainImage = base64Encoder.jpegDataString(paintingService.getPictureStream(painting.mainPicture)),
+            month = painting.finishingDate!!.monthValue,
+            year = painting.finishingDate!!.year,
+            tags = painting.tags.toTypedArray().sortedArrayDescending(), //Reversed order because items are prepended
+            wips = wips.await().toTypedArray(),
+            refs = refs.await().toTypedArray())
 }
