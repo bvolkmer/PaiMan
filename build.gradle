@@ -2,7 +2,7 @@ group 'de.de.x4fyr'
 
 ext.major_version = 0
 ext.minor_version = 3
-ext.revision_number = 1
+ext.revision_number = 2
 version "$major_version.$minor_version.$revision_number"
 println("version: $version")
 
