@@ -4,8 +4,7 @@ import de.x4fyr.paiman.app.services.PictureSelectorService
 import de.x4fyr.paiman.app.services.WebViewService
 import de.x4fyr.paiman.app.ui.Controller
 import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailFactory
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.*
 
 /** Overview Controller */
 open class OverviewController(private val webViewService: WebViewService,
@@ -64,7 +63,7 @@ open class OverviewController(private val webViewService: WebViewService,
         launch(CommonPool) {
             pictureSelectorService.pickPicture {
                 if (it != null) {
-                    val jpegData =  model.addPaintingModel.setImage(it)
+                    val jpegData = model.addPaintingModel.setImage(it)
                     println("selected image")
                     webViewService.executeJS("addDialogSetPicture('$jpegData')")
                 } else {
