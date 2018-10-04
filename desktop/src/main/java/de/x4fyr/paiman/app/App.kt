@@ -3,9 +3,10 @@ package de.x4fyr.paiman.app
 import de.x4fyr.paiman.app.services.JavaFxWebViewService
 import de.x4fyr.paiman.app.ui.views.entry.EntryController
 import de.x4fyr.paiman.dagger.DaggerMainComponent
-import de.x4fyr.paiman.dagger.desktop.DesktopServiceModule
 import de.x4fyr.paiman.dagger.MainComponent
+import de.x4fyr.paiman.dagger.desktop.DesktopServiceModule
 import javafx.application.Application
+import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
@@ -32,6 +33,12 @@ class App: Application() {
             val scene = Scene(stackPane)
             primaryStage.scene = scene
             primaryStage.show()
+
+            primaryStage.onCloseRequest = javafx.event.EventHandler {
+                Platform.exit()
+                System.exit(0)
+            }
+
         }
     }
 
