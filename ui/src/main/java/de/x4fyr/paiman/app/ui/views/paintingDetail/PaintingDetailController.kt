@@ -75,4 +75,13 @@ open class PaintingDetailController(
             //TODO: Update view
         }
     }
+
+    /** Callback: delete */
+    open fun delete() {
+        println("Callback: finishing()")
+        launch(CommonPool) {
+            model.delete()
+            returnController.loadView()
+        }
+    }
 }

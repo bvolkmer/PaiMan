@@ -63,6 +63,10 @@ open class PaintingDetailModel(private val paintingService: PaintingService, val
         painting = async { resultPainting }
     }
 
+    internal suspend fun delete() {
+        paintingService.delete(id)
+    }
+
     private data class Holder(
             val title: String,
             val mainImage: String,
