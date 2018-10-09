@@ -3,16 +3,6 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'application'
 version = parent.version
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
-    }
-}
-apply plugin: 'edu.sc.seis.launch4j'
-
 mainClassName = 'de.x4fyr.paiman.app.AppKt'
 
 sourceCompatibility = 1.8
@@ -23,10 +13,16 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-launch4j {
-    mainClassName = 'de.x4fyr.paiman.app.App'
-    outfile = "paiman-${version}.exe"
+jar {
+    manifest {
+        attributes "Main-Class": "de.x4fyr.paiman.app.AppKt"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
+
 
 dependencies {
     compile 'com.couchbase.lite:couchbase-lite-java:1.4.1'
