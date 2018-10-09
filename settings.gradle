@@ -1,3 +1,5 @@
 rootProject.name = 'paiman'
-include ':libpaiman', ':desktop', ':fontAwesomeFx', ':android', ':ui'
+include ':libpaiman', ':paiman-desktop', ':fontAwesomeFx', ':android', ':ui'
+project(":paiman-desktop").projectDir = file("desktop")
+
 
