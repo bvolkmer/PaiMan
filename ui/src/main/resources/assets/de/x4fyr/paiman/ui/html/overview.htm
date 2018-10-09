@@ -13,6 +13,10 @@
     <script>
         function refreshPreviews() {
             var previews = JSON.parse(model.getPreviews());
+
+            var row = document.getElementById("previewRow");
+            clearChildren(row);
+
             var idx;
             for (idx in previews) {
                 addPreview(previews[idx]);
