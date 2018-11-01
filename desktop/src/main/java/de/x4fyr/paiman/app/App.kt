@@ -10,8 +10,10 @@ import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 
 /** Html ui wrapper application */
 class App: Application() {
@@ -27,7 +29,7 @@ class App: Application() {
         webViewService = component.webViewServiceImpl()
         entryController = component.entryController()
 
-        launch(JavaFx) {
+        GlobalScope.launch(Dispatchers.JavaFx) {
             entryController.loadView()
             val stackPane = StackPane(webViewService.webView)
             val scene = Scene(stackPane)

@@ -4,7 +4,7 @@ import de.x4fyr.paiman.app.services.PictureSelectorService
 import de.x4fyr.paiman.app.services.WebViewService
 import de.x4fyr.paiman.app.ui.Controller
 import de.x4fyr.paiman.app.ui.views.paintingDetail.PaintingDetailFactory
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.*
 
 /** Overview Controller */
 open class OverviewController(private val webViewService: WebViewService,
@@ -36,7 +36,7 @@ open class OverviewController(private val webViewService: WebViewService,
     /** Callback: Open detail view of given painting by [id] */
     open fun openPainting(id: String) {
         println("Callback: openPainting($id)")
-        launch(CommonPool) {
+        GlobalScope.launch {
             paintingDetailFactory.createPaintingDetailController(id, this@OverviewController).loadView()
         }
     }
@@ -52,13 +52,13 @@ open class OverviewController(private val webViewService: WebViewService,
         } else if (year.isNullOrBlank()) {
             webViewService.showError("Year invalid")
         } else {
-            val monthInt = month!!.toIntOrNull()
-            val yearInt = year!!.toIntOrNull()
+            val monthInt = month.toIntOrNull()
+            val yearInt = year.toIntOrNull()
             if (monthInt == null || monthInt < 1 || monthInt > 12) {
                 webViewService.showError("Month invalid")
             } else if (yearInt == null) {
                 webViewService.showError("Year invalid")
-            } else launch(CommonPool) {
+            } else GlobalScope.launch {
                 model.addPaintingModel.title = title
                 model.addPaintingModel.month = monthInt
                 model.addPaintingModel.year = yearInt
@@ -74,7 +74,7 @@ open class OverviewController(private val webViewService: WebViewService,
 
     open fun selectImage() {
         println("Callback: selectImage()")
-        launch(CommonPool) {
+        GlobalScope.launch {
             pictureSelectorService.pickPicture {
                 if (it != null) {
                     val jpegData = model.addPaintingModel.setImage(it)
