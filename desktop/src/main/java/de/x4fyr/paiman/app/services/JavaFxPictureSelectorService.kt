@@ -2,8 +2,10 @@ package de.x4fyr.paiman.app.services
 
 import javafx.stage.FileChooser
 import javafx.stage.Stage
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -15,7 +17,7 @@ class JavaFxPictureSelectorService(private val stage: Stage): PictureSelectorSer
 
     /** Pick a picture using [FileChooser] */
     override fun pickPicture(onReturn: (InputStream?) -> Unit) {
-        launch(JavaFx) {
+        GlobalScope.launch(Dispatchers.JavaFx) {
             onReturn(FileChooser().apply {
                 title = "Open picture"
                 this.extensionFilters.addAll(

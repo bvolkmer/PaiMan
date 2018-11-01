@@ -6,7 +6,7 @@ import de.x4fyr.paiman.app.ui.Model
 import de.x4fyr.paiman.lib.domain.SavedPainting
 import de.x4fyr.paiman.lib.services.PaintingService
 import de.x4fyr.paiman.lib.services.QueryService
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.*
 import org.threeten.bp.LocalDate
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -15,7 +15,7 @@ import java.util.*
 /** Model in overview MVC */
 open class OverviewModel(private val paintingService: PaintingService,
                          queryService: QueryService,
-                         val base64Encoder: Base64Encoder) : Observable(), Model { //TODO: Remove observable
+                         val base64Encoder: Base64Encoder) : Model {
 
     private val gson = Gson()
 
@@ -24,14 +24,11 @@ open class OverviewModel(private val paintingService: PaintingService,
     private val liveQuery =
             queryService.allPaintingsQuery.toLiveQuery().also {
                 it.addChangeListener {
-                    launch(CommonPool) {
+                    GlobalScope.launch {
                         previews = async {
                             paintingService.getFromQueryResult(it.rows).map {
                                 makePreviewFromPainting(it)
-                            }.toSet().also {
-                                setChanged()
-                                notifyObservers()
-                            }
+                            }.toSet()
                         }
                     }
                 }
@@ -39,7 +36,7 @@ open class OverviewModel(private val paintingService: PaintingService,
             }
 
     /** [Preview] set of all paintings*/
-    private var previews: Deferred<Set<Preview>> = async(CommonPool) {
+    private var previews: Deferred<Set<Preview>> = GlobalScope.async {
         paintingService.getFromQueryResult(liveQuery.also { it.waitForRows() }.rows).map {
             makePreviewFromPainting(it)
         }.toSet()

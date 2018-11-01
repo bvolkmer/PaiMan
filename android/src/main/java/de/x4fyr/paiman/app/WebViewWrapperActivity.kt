@@ -9,8 +9,8 @@ import de.x4fyr.paiman.app.ui.views.entry.EntryController
 import de.x4fyr.paiman.dagger.DaggerMainComponent
 import de.x4fyr.paiman.dagger.MainComponent
 import de.x4fyr.paiman.dagger.android.PlatformModule
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /** Activity that only wraps a [WebView] and loads ui in it. */
 class WebViewWrapperActivity : Activity() {
@@ -29,7 +29,7 @@ class WebViewWrapperActivity : Activity() {
         entryViewController = component.entryUIController()
         super.onCreate(savedInstanceState)
         setContentView(webViewService.webView)
-        launch(CommonPool) {
+        GlobalScope.launch {
             entryViewController.loadView()
         }
     }

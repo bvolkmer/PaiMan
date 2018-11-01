@@ -7,7 +7,7 @@ version "$major_version.$minor_version.$revision_number"
 println("version: $version")
 
 buildscript {
-    ext.kotlin_version = '1.2.60'
+    ext.kotlin_version = '1.3.0'
     ext.dagger_version = '2.13'
     repositories {
         mavenCentral()
