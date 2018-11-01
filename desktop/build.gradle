@@ -35,7 +35,7 @@ launch4j {
 
 dependencies {
     compile 'com.couchbase.lite:couchbase-lite-java:1.4.1'
-    compile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.1'
+    compile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.0' //1.4.1 does *not* contain win and osx binaries!!!
 
     compile project(":libpaiman")
     compile project(":ui")
