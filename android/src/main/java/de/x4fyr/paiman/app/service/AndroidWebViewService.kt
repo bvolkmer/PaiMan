@@ -10,8 +10,9 @@ import de.x4fyr.paiman.app.services.WebViewService
 import de.x4fyr.paiman.app.ui.Controller
 import de.x4fyr.paiman.app.ui.Model
 import de.x4fyr.paiman.app.ui.produceString
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.w3c.dom.Element
 import kotlin.properties.Delegates
 
@@ -25,7 +26,7 @@ class AndroidWebViewService(private val context: Context) : WebViewService {
     }
 
     init {
-        launch(UI) {
+        GlobalScope.launch(Main) {
             webView.settings.javaScriptEnabled = true
             WebView.setWebContentsDebuggingEnabled(true)
         }
@@ -33,7 +34,7 @@ class AndroidWebViewService(private val context: Context) : WebViewService {
 
     /** Load ui from content in [appendable] */
     override fun loadUI(htmlElement: Element) {
-        launch(UI) {
+        GlobalScope.launch(Main) {
             val html = htmlElement.produceString()
             val base64Encoded = android.util.Base64.encodeToString(html.toByteArray(), android.util.Base64.DEFAULT)
             Log.i(this@AndroidWebViewService::class.simpleName, html)
@@ -44,7 +45,7 @@ class AndroidWebViewService(private val context: Context) : WebViewService {
 
     /** Load html file into WebView */
     override fun loadHtml(html: String, controller: Controller, model: Model?) {
-        launch(UI) {
+        GlobalScope.launch(Main) {
             webView.loadUrl(viewResourcePrefix + html)
             webViewClient.runOnFinishedPage {
                 setControllerAndModel(controller, model)
@@ -56,7 +57,7 @@ class AndroidWebViewService(private val context: Context) : WebViewService {
     @SuppressLint("JavascriptInterface")
     private fun setControllerAndModel(controller: Controller, model: Model?) {
         Log.d(this@AndroidWebViewService.javaClass.simpleName, "add controller 1")
-        launch(UI) {
+        GlobalScope.launch(Main) {
             Log.d(this@AndroidWebViewService.javaClass.simpleName, "add controller 2")
             webView.removeJavascriptInterface(WebViewService.javascriptControllerModuleName)
             webView.removeJavascriptInterface(WebViewService.javascriptModelModuleName)
@@ -68,7 +69,7 @@ class AndroidWebViewService(private val context: Context) : WebViewService {
     /** execute javascript in current document */
     override fun executeJS(script: String) {
         webViewClient.runOnFinishedPage {
-            launch(UI) {
+            GlobalScope.launch(Main) {
                 webView.evaluateJavascript(script) {}
             }
         }

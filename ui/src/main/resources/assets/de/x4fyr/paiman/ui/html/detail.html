@@ -134,6 +134,7 @@
             <ons-list>
                 <ons-list-item><!--TODO: onClick="showDialog('finishDialog')"--> Finish</ons-list-item>
                 <ons-list-item><!--TODO: onClick--> Sell</ons-list-item>
+                <ons-list-item onClick="showDialog('deleteDialog')">Delete</ons-list-item>
                 <ons-list-item onClick="refreshModel()">
                     <ons-icon icon="fa-sync"></ons-icon>
                 </ons-list-item>
@@ -226,6 +227,18 @@
     </div>
 </template>
 
+<template id="deleteDialogTemplate">
+  <ons-alert-dialog id="deleteDialog" modifier="rowfooter">
+    <div class="alert-dialog-title">Alert</div>
+    <div class="alert-dialog-content">
+      Do you really want to delete the painting?
+    </div>
+    <div class="alert-dialog-footer">
+      <ons-alert-dialog-button onclick="hideDialog('deleteDialog')">Cancel</ons-alert-dialog-button>
+      <ons-alert-dialog-button onclick="controller.delete()" modifier="cta">Delete</ons-alert-dialog-button>
+    </div>
+  </ons-alert-dialog>
+</template>
 
 </body>
 </html>

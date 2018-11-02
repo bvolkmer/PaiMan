@@ -1,6 +1,6 @@
 package de.x4fyr.paiman.app.ui
 
-import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.Deferred
 import org.w3c.dom.Element
 
 /** Base interface for all views */

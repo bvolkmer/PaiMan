@@ -4,8 +4,8 @@ import de.x4fyr.paiman.app.services.PictureSelectorService
 import de.x4fyr.paiman.app.services.WebViewService
 import de.x4fyr.paiman.app.ui.Controller
 import de.x4fyr.paiman.app.ui.View
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
 
 open class PaintingDetailController(
@@ -24,7 +24,7 @@ open class PaintingDetailController(
     /** Callback: return to [returnController] */
     open fun back() {
         println("Callback: back()")
-        launch(CommonPool) {
+        GlobalScope.launch {
             returnController.loadView()
         }
     }
@@ -32,7 +32,7 @@ open class PaintingDetailController(
     /** Callback: add tag */
     open fun addTag(tag: String) {
         println("Callback: addTag(\"$tag\")")
-        launch {
+        GlobalScope.launch {
             if (tag.isNotBlank()) {
                 model.addTag(tag)
                 webViewService.executeJS("refreshModel()")
@@ -44,7 +44,7 @@ open class PaintingDetailController(
     open fun addWIP() {
         println("Callback: addWip()")
         pictureSelectorService.pickPicture {
-            launch {
+            GlobalScope.launch {
                 if (it != null) {
                     model.addWip(it)
                     webViewService.executeJS("refreshModel()")
@@ -57,7 +57,7 @@ open class PaintingDetailController(
     open fun addRef() {
         println("Callback: addRef()")
         pictureSelectorService.pickPicture {
-            launch {
+            GlobalScope.launch {
                 if (it != null) {
                     model.addRef(it)
                     webViewService.executeJS("refreshModel()")
@@ -69,10 +69,19 @@ open class PaintingDetailController(
     /** Callback: finishing */
     open fun finishing(year: Int, month: Int) {
         println("Callback: finishing()")
-        launch(CommonPool) {
+        GlobalScope.launch {
             val date = LocalDate.of(year, month, 1)
             model.finishing(date)
             //TODO: Update view
+        }
+    }
+
+    /** Callback: delete */
+    open fun delete() {
+        println("Callback: finishing()")
+        GlobalScope.launch {
+            model.delete()
+            returnController.loadView()
         }
     }
 }

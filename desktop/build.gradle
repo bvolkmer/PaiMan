@@ -1,11 +1,25 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'edu.sc.seis.gradle:launch4j:2.4.4'
+        classpath 'com.google.gradle:osdetector-gradle-plugin:1.6.0'
+    }
+}
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'application'
+apply plugin: 'com.google.osdetector'
+
 version = parent.version
+ext.platform = osdetector.os == 'osx' ? 'max' : osdetector.os == 'windows' ? 'win' : osdetector.os
 
 mainClassName = 'de.x4fyr.paiman.app.AppKt'
 
-sourceCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
@@ -26,14 +40,26 @@ jar {
 
 dependencies {
     compile 'com.couchbase.lite:couchbase-lite-java:1.4.1'
-    compile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.1'
+    compile 'com.couchbase.lite:couchbase-lite-java-sqlcipher:1.4.0' //1.4.1 does *not* contain win and osx binaries!!!
+
     compile project(":libpaiman")
     compile project(":ui")
+
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     runtime "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-javafx:0.20"
+
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.0.0'
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-javafx', version: '1.0.0'
+
+    implementation "org.openjfx:javafx-base:11:$platform"
+    implementation "org.openjfx:javafx-graphics:11:$platform"
+    implementation "org.openjfx:javafx-controls:11:$platform"
+    implementation "org.openjfx:javafx-media:11:$platform"
+    implementation "org.openjfx:javafx-web:11:$platform"
+
     compile "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
     runtime 'org.glassfish:javax.annotation:10.0-b28'
+
     compile 'net.coobird:thumbnailator:0.4.8'
 }

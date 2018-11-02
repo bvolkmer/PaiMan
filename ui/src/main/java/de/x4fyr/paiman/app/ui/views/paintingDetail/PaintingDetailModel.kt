@@ -6,9 +6,10 @@ import de.x4fyr.paiman.app.ui.Model
 import de.x4fyr.paiman.lib.domain.Painting
 import de.x4fyr.paiman.lib.domain.SavedPainting
 import de.x4fyr.paiman.lib.services.PaintingService
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import org.threeten.bp.LocalDate
 import java.io.InputStream
 
@@ -16,7 +17,7 @@ open class PaintingDetailModel(private val paintingService: PaintingService, val
 
     private val gson = Gson()
 
-    private var painting: Deferred<SavedPainting> = async {
+    private var painting: Deferred<SavedPainting> = GlobalScope.async {
         paintingService.get(id)
     }
 
@@ -25,19 +26,19 @@ open class PaintingDetailModel(private val paintingService: PaintingService, val
         return runBlocking { gson.toJson(createHolder(painting.await())) }
     }
 
-    internal val mainPicture: Deferred<String> = async {
+    internal val mainPicture: Deferred<String> = GlobalScope.async {
         base64Encoder.jpegDataString(paintingService.getPictureStream(painting.await().mainPicture))
     }
 
     private val wips: Deferred<List<String>>
-        get() = async {
+        get() = GlobalScope.async {
             painting.await().wip.map {
                 base64Encoder.jpegDataString(paintingService.getPictureThumbnailStream(it))
             }
         }
 
     private val refs: Deferred<List<String>>
-        get() = async {
+        get() = GlobalScope.async {
             painting.await().references.map {
                 base64Encoder.jpegDataString(paintingService.getPictureThumbnailStream(it))
             }
@@ -45,22 +46,26 @@ open class PaintingDetailModel(private val paintingService: PaintingService, val
 
     internal suspend fun addWip(stream: InputStream) {
         val resultPainting = paintingService.addWipPicture(painting.await(), setOf(stream))
-        painting = async { resultPainting }
+        painting = GlobalScope.async { resultPainting }
     }
 
     internal suspend fun addRef(stream: InputStream) {
         val resultPainting = paintingService.addReferences(painting.await(), setOf(stream))
-        painting = async { resultPainting }
+        painting = GlobalScope.async { resultPainting }
     }
 
     internal suspend fun addTag(tag: String) {
         val resultPainting = paintingService.addTags(painting.await(), setOf(tag))
-        painting = async { resultPainting }
+        painting = GlobalScope.async { resultPainting }
     }
 
     internal suspend fun finishing(date: LocalDate) {
         val resultPainting: SavedPainting = paintingService.changePainting(painting.await().copy(finished = true, finishingDate = date))
-        painting = async { resultPainting }
+        painting = GlobalScope.async { resultPainting }
+    }
+
+    internal suspend fun delete() {
+        paintingService.delete(id)
     }
 
     private data class Holder(

@@ -5,8 +5,10 @@ import de.x4fyr.paiman.app.ui.Model
 import de.x4fyr.paiman.app.ui.produceString
 import javafx.concurrent.Worker
 import javafx.scene.web.WebView
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import netscape.javascript.JSException
 import netscape.javascript.JSObject
 import org.w3c.dom.Element
@@ -37,13 +39,13 @@ class JavaFxWebViewService : WebViewService {
 
 
     override fun loadUI(htmlElement: Element) {
-        launch(JavaFx) {
+        GlobalScope.launch(Dispatchers.JavaFx) {
             webView.engine.loadContent(htmlElement.produceString())
         }
     }
 
     override fun loadHtml(html: String, controller: Controller, model: Model?) {
-        launch(JavaFx) {
+        GlobalScope.launch(Dispatchers.JavaFx) {
             val url = this.javaClass.getResource( WebViewService.viewResourcePrefix + html)
             webView.engine.load(url!!.toExternalForm())
             //TODO: Reload only when visible
@@ -52,7 +54,7 @@ class JavaFxWebViewService : WebViewService {
     }
 
     fun setControllerAndModel(controller: Controller, model: Model?) {
-        launch(JavaFx) {
+        GlobalScope.launch(Dispatchers.JavaFx) {
             webView.engine.loadWorker.stateProperty().addListener { _, _, newValue ->
                 if (newValue == Worker.State.SUCCEEDED) {
                     (webView.engine.executeScript("window") as JSObject)
@@ -69,7 +71,7 @@ class JavaFxWebViewService : WebViewService {
     }
 
     override fun executeJS(script: String) {
-        launch(JavaFx) {
+        GlobalScope.launch(Dispatchers.JavaFx) {
             webView.engine.executeScript(script)
         }
     }
